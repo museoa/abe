@@ -208,6 +208,14 @@ void moveCrab(LiveMonster *live_monster) {
   }
 }
 
+void moveTorch(LiveMonster *live_monster) {
+  // increment the face to display
+  live_monster->face++;
+  if(live_monster->face >= 
+	 live_monster->monster->image_count * live_monster->monster->face_mod) 
+	live_monster->face = 0;
+}
+
 void moveBear(LiveMonster *live_monster) {
   // increment the face to display
   int n = live_monster->monster->image_count / 2;
@@ -391,6 +399,13 @@ void initMonsters() {
   monsters[MONSTER_BEAR].face_mod = 8;
   monsters[MONSTER_BEAR].random_speed = 0;
 
+  // torch
+  strcpy(monsters[MONSTER_TORCH].name, "torch");
+  monsters[MONSTER_TORCH].moveMonster = moveTorch;
+  monsters[MONSTER_TORCH].start_speed_x = 1;
+  monsters[MONSTER_TORCH].start_speed_y = 1;
+  monsters[MONSTER_TORCH].face_mod = 6;
+  monsters[MONSTER_TORCH].harmless = 1;
 
   // add additional monsters here
 

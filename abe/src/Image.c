@@ -141,6 +141,8 @@ void doLoadImage(char *filename, char *name) {
 	  monster = MONSTER_BEAR;
 	} else if(!strcmp(name, "bear6")) {
 	  monster = MONSTER_BEAR;
+	} else if(!strcmp(name, "torch1") || !strcmp(name, "torch2") || !strcmp(name, "torch3")) {
+	  monster = MONSTER_TORCH;
 	}
 
 	// store the image

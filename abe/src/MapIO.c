@@ -55,6 +55,7 @@ int loadMap(int draw_map) {
   int count_read;
   char *err;
   SDL_RWops *rwop;
+  //int x, y, i;
 
   sprintf(path, "%s%s%s.dat", MAPS_DIR, PATH_SEP, map.name);
   printf("Loading map %s\n", path);  
@@ -98,6 +99,17 @@ int loadMap(int draw_map) {
   // step 2: further uncompress
   decompressMap(read_buff);
   free(read_buff);
+
+  /*
+  // clean map... delete this...
+  for(y = 0; y < map.h; y++) {
+	for(x = 0; x < map.w; x++) {
+	  i = x + (y * map.w);
+	  if(map.image_index[LEVEL_FORE][i] == 0) map.image_index[LEVEL_FORE][i] = EMPTY_MAP;
+	}
+  }
+  */
+  
 
   resetCursor();
   if(draw_map) drawMap();
