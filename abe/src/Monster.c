@@ -437,6 +437,12 @@ void removeLiveMonster(int live_monster_index) {
   fflush(stderr);
 }
 
+void removeAllLiveMonsters() {
+  while(live_monster_count > 0) {
+	removeLiveMonster(0);
+  }
+}
+
 /**
    Here rect is in pixels where 0, 0 is the screen's left top corner.
    Returns 0 for false and non-0 for true.
@@ -486,23 +492,6 @@ LiveMonster *detectMonster(Position *pos) {
   SDL_Rect monster, check;
   SDL_Surface *img;
 
-  /*
-  check.x = pos->pos_x;
-  check.y = pos->pos_y;
-  check.w = pos->w + (pos->pixel_x > 0 ? 1 : 0);
-  check.h = pos->h + (pos->pixel_y > 0 ? 1 : 0);
-  for(i = 0; i < live_monster_count; i++) {
-	img = images[live_monsters[i].monster->image_index[getLiveMonsterFace(&live_monsters[i])]]->image;
-	monster.x = live_monsters[i].pos_x;
-	monster.y = live_monsters[i].pos_y;
-	monster.w = (img->w / TILE_W) + (live_monsters[i].pixel_x > 0 ? 1 : 0);
-	monster.h = (img->h / TILE_H) + (live_monsters[i].pixel_y > 0 ? 1 : 0);
-	if(intersects(&check, &monster)) return &live_monsters[i];
-  }
-*/
-
-  
-	
   check.x = pos->pos_x * TILE_W + pos->pixel_x;
   check.y = pos->pos_y * TILE_H + pos->pixel_y;
   check.w = pos->w * TILE_W;
@@ -513,7 +502,7 @@ LiveMonster *detectMonster(Position *pos) {
 	monster.y = live_monsters[i].pos_y * TILE_H + live_monsters[i].pixel_y;
 	monster.w = img->w;
 	monster.h = img->h;
-	if(intersects(&check, &monster)) {
+	if(intersectsBy(&check, &monster, MONSTER_COLLISION_FUZZ)) {
 	  return &live_monsters[i];
 	}
   }

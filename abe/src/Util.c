@@ -1,4 +1,15 @@
 #include "Util.h"
+#include <math.h>
+
+int getSectionDiff(int a1, int a2, int b1, int b2) {
+  if(a1 <= b1 && a2 > b1) {
+	return a2 - b1;
+  } else if (a1 >= b1 && a1 < b2) {
+	return b2 - a1;
+  } else {
+	return 0;
+  }
+}
 
 int contains(SDL_Rect *a, int x, int y) {
   return (x >= a->x && x < a->x + a->w && 
@@ -12,6 +23,13 @@ int sectionIntersects(int a1, int a2, int b1, int b2) {
 int intersects(SDL_Rect *a, SDL_Rect *b) {
   return(sectionIntersects(a->x, a->x + a->w, b->x, b->x + b->w) &&
 		 sectionIntersects(a->y, a->y + a->h, b->y, b->y + b->h));
+}
+
+int intersectsBy(SDL_Rect *a, SDL_Rect *b, int value) {
+  int w, h;
+  w = getSectionDiff(a->x, a->x + a->w, b->x, b->x + b->w);
+  h = getSectionDiff(a->y, a->y + a->h, b->y, b->y + b->h);
+  return (w > value && h > value ? (w > h ? w : h) : 0);
 }
 
 /**

@@ -49,6 +49,8 @@ void gameBeforeDrawToScreen() {
   if(GOD_MODE) {
 	sprintf(s, "x %d y %d god mode %s", cursor.pos_x, cursor.pos_y, (game.god_mode ? "true" : "false"));
     drawString(screen, 5, 5 + FONT_HEIGHT, s);
+	sprintf(s, "px %d py %d", cursor.pixel_x, cursor.pixel_y);
+    drawString(screen, 5, 5 + FONT_HEIGHT * 2, s);
   }
 }
 
@@ -252,11 +254,11 @@ int detectCollision(int dir) {
   if(containsTypeWhere(&pos, &key, TYPE_DOOR)) {
 	if(game.keys > 0) {
 	  // open door
+	  //playWav("door"); FIXME: sound code is not quite ready
 	  map.image_index[LEVEL_MAIN][key.pos_x + (key.pos_y * map.w)] = EMPTY_MAP;
 	  map.image_index[LEVEL_FORE][key.pos_x + (key.pos_y * map.w)] = img_door2;
 	  game.keys--;
 	  map.redraw = 1;
-	  playWav("door");
 	  // always return 0 (block) so we don't fall into a door and get stuck there... (was a nasty bug)
 	  return 0;
 	} else {
@@ -296,11 +298,13 @@ void runMap() {
 	return;
   }
   // start outside
-  //game.player_start_x = 20;
-  //game.player_start_y = 28;
-
-  game.player_start_x = 310;
-  game.player_start_y = 8;
+  if(GOD_MODE) {
+	game.player_start_x = 310;
+	game.player_start_y = 8;
+  } else {
+	game.player_start_x = 20;
+	game.player_start_y = 28;
+  }
 
   game.lives = 5;
   game.score = 0;

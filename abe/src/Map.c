@@ -1114,11 +1114,15 @@ int initMap(char *name, int w, int h) {
 void destroyMap() {
   int i;
 
+  if(map.monsters) {
+	removeAllLiveMonsters();
+  }
   free(map.name);
   for(i = LEVEL_BACK; i < LEVEL_COUNT; i++) {
 	SDL_FreeSurface(map.level[i]);
 	free(map.image_index[i]);
   }
+  SDL_FreeSurface(map.transfer);
 }
 
 void resetCursor() {

@@ -5,7 +5,10 @@
 
 // Rectangle math functions
 int contains(SDL_Rect *a, int x, int y);
+// returns 0 if no intersection, otherwise 1
 int intersects(SDL_Rect *a, SDL_Rect *b);
+// same as above but the rectangles have to intersect at lease "value" pixels in both dimensions.
+int intersectsBy(SDL_Rect *a, SDL_Rect *b, int value);
 
 #define USE_COMPRESSION
 
