@@ -25,9 +25,40 @@ void beforeDrawToScreen() {
 */
 void editorMainLoop(SDL_Event *event) {
   switch(event->type) {
+  case SDL_MOUSEMOTION:
+	//	cursor.pos_x += event->xrel / TILE_W;
+	//	cursor.pos_y += event->yrel / TILE_H;
+	break;
   case SDL_KEYDOWN:
 	//	printf("The %s key was pressed! scan=%d\n", SDL_GetKeyName(event->key.keysym.sym), event->key.keysym.scancode);
 	switch(event->key.keysym.sym) {
+
+	case SDLK_DOWN:
+	  cursor.pos_y++;
+	  if(cursor.pos_y >= map.h) cursor.pos_y = map.h - 1;
+	  cursor.dir = DIR_NONE;
+	  map.redraw = 1;
+	  break;
+	case SDLK_UP:
+	  cursor.pos_y--;
+	  if(cursor.pos_y < 0) cursor.pos_y = 0;
+	  cursor.dir = DIR_NONE;
+	  map.redraw = 1;
+	  break;
+	case SDLK_RIGHT:
+	  cursor.pos_x++;
+	  if(cursor.pos_x >= map.w) cursor.pos_x = map.w - 1;
+	  cursor.dir = DIR_NONE;
+	  map.redraw = 1;
+	  break;
+	case SDLK_LEFT:
+	  cursor.pos_x--;
+	  if(cursor.pos_x < 0) cursor.pos_x = 0;
+	  cursor.dir = DIR_NONE;
+	  map.redraw = 1;
+	  break;
+
+	  /*
 	case SDLK_LEFT: 
 	  cursor.dir = DIR_LEFT;
 	  break;
@@ -40,6 +71,7 @@ void editorMainLoop(SDL_Event *event) {
 	case SDLK_DOWN: 
 	  cursor.dir = DIR_DOWN;
 	  break;
+	  */
 	case SDLK_PAGEDOWN:
 	  cursor.pos_y += screen->h / TILE_H;
 	  if(cursor.pos_y >= map.h) cursor.pos_y = map.h - 1;

@@ -40,7 +40,7 @@ int compress(Uint16 *buff, size_t size, FILE *fp) {
 		//		printf("\tcompressed block\n");
 		// compressed write
 		fwrite(&block_note, sizeof(Uint16), 1, fp);
-		fwrite(&t, sizeof(size_t), 1, fp);
+		fwrite(&t, sizeof(Uint16), 1, fp);
 		fwrite(block, sizeof(Uint16), 1, fp);
 		size_written += 3;
 	  } else {
@@ -59,7 +59,7 @@ int compress(Uint16 *buff, size_t size, FILE *fp) {
 	//	printf("\tcompressed block\n");
 	// compressed write
 	fwrite(&block_note, sizeof(Uint16), 1, fp);
-	fwrite(&t, sizeof(size_t), 1, fp);
+	fwrite(&t, sizeof(Uint16), 1, fp);
 	fwrite(block, sizeof(Uint16), 1, fp);
 	size_written += 3;
   } else {
