@@ -71,7 +71,7 @@ void doLoadImage(char *filename, char *name) {
 	  img_brick = image_count;
 	} else if(!strcmp(name, "rock")) {
 	  img_rock = image_count;
-	} else if(!strcmp(name, "back")) {
+	} else if(!strcmp(name, "back3d")) {
 	  img_back = image_count;
 	} else if(!strcmp(name, "door")) {
 	  img_door = image_count;

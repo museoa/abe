@@ -10,6 +10,8 @@ typedef struct _gameCollisionCheck {
 } GameCollisionCheck;
 
 
+SDL_Surface *test_back;
+
 void waitUntilPaintingStops();
 void finishDrawMap();
 int last_dir = -1;
@@ -897,11 +899,17 @@ void finishDrawMap() {
 
   // draw on screen
   for(level = LEVEL_BACK; level < LEVEL_COUNT; level++) {
-	pos.x = -(EXTRA_X * TILE_W);
-	pos.y = -(EXTRA_Y * TILE_H);
 	pos.w = map.level[level]->w;
 	pos.h = map.level[level]->h;
-	SDL_BlitSurface(map.level[level], NULL, screen, &pos);
+	if(level == LEVEL_BACK) {
+	  pos.x = -((cursor.pos_x * TILE_W + cursor.pixel_x) % (TILE_W * 4)) / 2;
+	  pos.y = -((cursor.pos_y * TILE_H + cursor.pixel_y) % (TILE_H * 4)) / 2;
+	  SDL_BlitSurface(test_back, NULL, screen, &pos);
+	} else {
+	  pos.x = -(EXTRA_X * TILE_W);
+	  pos.y = -(EXTRA_Y * TILE_H);
+	  SDL_BlitSurface(map.level[level], NULL, screen, &pos);
+	}
 	// make a callback if it exists
 	if(level == LEVEL_MAIN) {	  
 	  // draw creatures
@@ -1021,6 +1029,9 @@ int initMap(char *name, int w, int h) {
   int i;
   int hw_surface;
 
+  int x, y;
+  SDL_Rect pos;
+
   // start a new Map
   map.gravity = 0;
   map.accelerate = 0;
@@ -1062,6 +1073,19 @@ int initMap(char *name, int w, int h) {
 	  fprintf(stderr, "*** This may make the game very slow!");
 	  fflush(stderr);
 	  //	  return 0;
+	}
+
+	test_back = SDL_CreateRGBSurface(SDL_HWSURFACE, 
+									 screen->w + TILE_W * 2, screen->h + TILE_H * 2, 
+									 screen->format->BitsPerPixel, 0, 0, 0, 0);
+	for(y = 0; y < test_back->h; y += 2 * TILE_H) {
+	  for(x = 0; x < test_back->w; x += 2 * TILE_W) {
+		pos.x = x;
+		pos.y = y;
+		pos.w = 40;
+		pos.h = 40;
+		SDL_BlitSurface(images[img_back]->image, NULL, test_back, &pos);
+	  }
 	}
 
 	// set black as the transparent color key
