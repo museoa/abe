@@ -28,6 +28,7 @@ typedef struct _game {
   int keys;
   int balloons;
   int balloonTimer;
+  int god_mode;
 } Game;
 Game game;
 

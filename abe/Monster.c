@@ -21,7 +21,7 @@ void initMonsterPos(Position *pos, LiveMonster *live) {
   pos->h = images[live->monster->image_index[0]]->image->h / TILE_H + (live->pixel_y ? 1 : 0);
 }
 
-int stepMonsterLeft(LiveMonster *live) {
+int stepMonsterLeft(LiveMonster *live, int float_ok) {
   Position pos;
   int fail = 0;
   LiveMonster old;
@@ -37,7 +37,7 @@ int stepMonsterLeft(LiveMonster *live) {
   // collision detection
   if(!fail) {
 	initMonsterPos(&pos, live);
-	if(containsType(&pos, TYPE_WALL | TYPE_DOOR) || !onSolidGround(&pos)) fail = 1;
+	if(containsType(&pos, TYPE_WALL | TYPE_DOOR) || !(float_ok || onSolidGround(&pos))) fail = 1;
   }
   if(fail) {
 	memcpy(live, &old, sizeof(LiveMonster));
@@ -71,7 +71,7 @@ int stepMonsterUp(LiveMonster *live) {
   return 1;
 }
 
-int stepMonsterRight(LiveMonster *live) {
+int stepMonsterRight(LiveMonster *live, int float_ok) {
   Position pos;
   int fail = 0;
   LiveMonster old;
@@ -87,7 +87,7 @@ int stepMonsterRight(LiveMonster *live) {
   // collision detection
   if(!fail) {
 	initMonsterPos(&pos, live);
-	if(containsType(&pos, TYPE_WALL | TYPE_DOOR) || !onSolidGround(&pos)) fail = 1;
+	if(containsType(&pos, TYPE_WALL | TYPE_DOOR) || !(float_ok || onSolidGround(&pos))) fail = 1;
   }
   if(fail) {
 	memcpy(live, &old, sizeof(LiveMonster));
@@ -134,13 +134,32 @@ void moveDemon(LiveMonster *live_monster) {
 	  live_monster->face = 0;	
 
 	if(live_monster->dir == DIR_LEFT) {
-	  if(!stepMonsterLeft(live_monster)) {
+	  if(!stepMonsterLeft(live_monster, 0)) {
 		live_monster->dir = DIR_RIGHT;
 	  }
 	} else {
-	  if(!stepMonsterRight(live_monster)) {
+	  if(!stepMonsterRight(live_monster, 0)) {
 		live_monster->dir = DIR_LEFT;
 	  }
+	}
+  }
+}
+
+void movePlatform(LiveMonster *live_monster) {
+  // increment the face to display
+  live_monster->face++;
+  if(live_monster->face >= 
+	 live_monster->monster->image_count * live_monster->monster->face_mod) 
+	live_monster->face = 0;
+
+  // move sideways until you hit a wall or an edge
+  if(live_monster->dir == DIR_LEFT) {
+	if(!stepMonsterLeft(live_monster, 1)) {
+	  live_monster->dir = DIR_RIGHT;
+	}
+  } else {
+	if(!stepMonsterRight(live_monster, 1)) {
+	  live_monster->dir = DIR_LEFT;
 	}
   }
 }
@@ -154,11 +173,11 @@ void moveCrab(LiveMonster *live_monster) {
 
   // move sideways until you hit a wall or an edge
   if(live_monster->dir == DIR_LEFT) {
-	if(!stepMonsterLeft(live_monster)) {
+	if(!stepMonsterLeft(live_monster, 0)) {
 	  live_monster->dir = DIR_RIGHT;
 	}
   } else {
-	if(!stepMonsterRight(live_monster)) {
+	if(!stepMonsterRight(live_monster, 0)) {
 	  live_monster->dir = DIR_LEFT;
 	}
   }
@@ -248,6 +267,7 @@ void initMonsters() {
 	monsters[i].drawMonster = defaultDrawMonster;
 	monsters[i].face_mod = 1;
 	monsters[i].type = i;
+	monsters[MONSTER_PLATFORM].harmless = 0;
   }
 
   // crab monster
@@ -265,6 +285,7 @@ void initMonsters() {
   monsters[MONSTER_SMASHER].start_speed_x = 8;
   monsters[MONSTER_SMASHER].start_speed_y = 8;
 
+  // purple smasher
   strcpy(monsters[MONSTER_SMASHER2].name, "smasher2");
   monsters[MONSTER_SMASHER2].moveMonster = moveSmasher;
   monsters[MONSTER_SMASHER2].drawMonster = drawSmasher;
@@ -279,6 +300,12 @@ void initMonsters() {
   // animation 2x slower
   monsters[MONSTER_DEMON].face_mod = 4;
 
+  // platforms
+  strcpy(monsters[MONSTER_PLATFORM].name, "platform");
+  monsters[MONSTER_PLATFORM].moveMonster = movePlatform;
+  monsters[MONSTER_PLATFORM].start_speed_x = 4;
+  monsters[MONSTER_PLATFORM].start_speed_y = 4;
+  monsters[MONSTER_PLATFORM].harmless = 1;
 
   // add additional monsters here
 
@@ -317,8 +344,8 @@ void addLiveMonster(int monster_index, int image_index, int x, int y) {
   live_monsters[live_monster_count].face = 0;
   live_monsters[live_monster_count].monster = m;
   live_monster_count++;
-  fprintf(stderr, "Added live monster! monster=%d x=%d y=%d count=%d\n", 
-		  monster_index, x, y, live_monster_count);
+  fprintf(stderr, "Added live monster! monster=%s x=%d y=%d count=%d\n", 
+		  m->name, x, y, live_monster_count);
   fflush(stderr);
 }
 
@@ -338,8 +365,8 @@ void removeLiveMonster(int live_monster_index) {
   }
   live_monster_count--;
 
-  fprintf(stderr, "Removed live monster! monster=%d index=%d count=%d\n", 
-		  live_monsters[live_monster_index].monster->type, live_monster_index, live_monster_count);
+  fprintf(stderr, "Removed live monster! monster=%s index=%d count=%d\n", 
+		  live_monsters[live_monster_index].monster->name, live_monster_index, live_monster_count);
   fflush(stderr);
 }
 
@@ -384,10 +411,10 @@ int getLiveMonsterFace(LiveMonster *live) {
 }
 
 /**
-   Return 1 if there's a live monster at position pos,
-   0 otherwise.
+   Return live monster if there's a one at position pos,
+   NULL otherwise.
  */
-int detectMonster(Position *pos) {
+LiveMonster *detectMonster(Position *pos) {
   int i;
   SDL_Rect monster, check;
   SDL_Surface *img;
@@ -402,7 +429,7 @@ int detectMonster(Position *pos) {
 	monster.y = live_monsters[i].pos_y;
 	monster.w = (img->w / TILE_W) + (live_monsters[i].pixel_x > 0 ? 1 : 0);
 	monster.h = (img->h / TILE_H) + (live_monsters[i].pixel_y > 0 ? 1 : 0);
-	if(intersects(&check, &monster)) return 1;
+	if(intersects(&check, &monster)) return &live_monsters[i];
   }
-  return 0;
+  return NULL;
 }

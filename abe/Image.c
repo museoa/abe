@@ -103,6 +103,8 @@ void doLoadImage(char *filename, char *name) {
 	  img_smash4 = image_count;
 	} else if(!strcmp(name, "demon") || !strcmp(name, "demon2")) {
 	  monster = MONSTER_DEMON;
+	} else if(!strcmp(name, "platform")) {
+	  monster = MONSTER_PLATFORM;
 	}
 
 	// store the image

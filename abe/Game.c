@@ -46,8 +46,10 @@ void gameBeforeDrawToScreen() {
   char s[80];
   sprintf(s, "life %d score %d keys %d balloons %d", game.lives, game.score, game.keys, game.balloons);
   drawString(screen, 5, 5, s);
-  //  sprintf(s, "x %d y %d pixel %d %d", cursor.pos_x, cursor.pos_y, cursor.pixel_x, cursor.pixel_y);
-  //  drawString(screen, 5, 5 + FONT_HEIGHT, s);
+  if(GOD_MODE) {
+	sprintf(s, "x %d y %d god mode %s", cursor.pos_x, cursor.pos_y, (game.god_mode ? "true" : "false"));
+    drawString(screen, 5, 5 + FONT_HEIGHT, s);
+  }
 }
 
 /**
@@ -91,11 +93,19 @@ void gameMainLoop(SDL_Event *event) {
 		game.balloonTimer = BALLOON_RIDE_INTERVAL;
 		map.gravity = 0;
 	  }
+	  break;
 	case SDLK_s:
 	  drawMap();
 	  SDL_SaveBMP(screen, "screenshot.bmp");
 	  fprintf(stderr, "Saved screenshot.bmp.\n");
 	  fflush(stderr);
+	  break;	
+	case SDLK_g:
+	  if(GOD_MODE) {
+		game.god_mode = !(game.god_mode);
+		drawMap();
+	  }
+	  break;
 	}
 	break;	
   case SDL_KEYUP: 
@@ -151,6 +161,7 @@ void handleDeath() {
 int detectCollision(int dir) {
   int n;
   Position pos, key;
+  LiveMonster *live;
 
   pos.pos_x = cursor.pos_x;
   pos.pos_y = cursor.pos_y;
@@ -159,11 +170,21 @@ int detectCollision(int dir) {
   pos.w = tom[0]->w / TILE_W;
   pos.h = tom[0]->h / TILE_H;
 
+  live = detectMonster(&pos);
+
   // did we hit a monster?
-  if(!GOD_MODE && 
-	 (detectMonster(&pos) || containsType(&pos, TYPE_HARMFUL))) {
+  if(!game.god_mode && 
+	 ((live && !(live->monster->harmless)) || containsType(&pos, TYPE_HARMFUL))) {
 	handleDeath();
 	return 1;
+  }
+
+  // did we hit a platform?
+  if(live && live->monster->type == MONSTER_PLATFORM) {
+	cursor.platform = live;
+	return 0;
+  } else {
+	cursor.platform = NULL;
   }
 
   // did we hit an object? 
@@ -275,4 +296,5 @@ void initGame() {
   game.face = 0;
   game.dir = GAME_DIR_RIGHT;
   game.balloonTimer = 0;
+  game.god_mode = GOD_MODE;
 }

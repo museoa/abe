@@ -781,6 +781,16 @@ void moveGravity() {
   }
 }
 
+void moveWithPlatform() {
+  int old_speed;
+  if(!cursor.platform) return;
+  old_speed = cursor.speed_x;
+  cursor.speed_x = cursor.platform->speed_x;
+  if(cursor.platform->dir == DIR_LEFT) moveLeft(1);
+  else moveRight(1);
+  cursor.speed_x = old_speed;
+}
+
 /**
    The main thread loop
  */
@@ -803,6 +813,10 @@ void moveMap() {
 	  // activate gravity
 	  moveGravity();
 	}
+
+	// move with the platform
+	moveWithPlatform();	
+
 	// set unaccelerated speed
 	if(!map.accelerate) {
 	  cursor.speed_x = TILE_W;
@@ -1081,6 +1095,7 @@ void repositionCursor(int tile_x, int tile_y) {
   cursor.jump = 0;
   cursor.gravity = 0;
   cursor.stepup = 0;
+  cursor.platform = NULL;
 }
 
 void startJump() {
