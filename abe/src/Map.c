@@ -502,7 +502,7 @@ int moveLeft(int checkCollision) {
   int move, old_pixel, old_pos, old_speed;
 
   old_speed = cursor.speed_x;
-  while(1) {
+  while(cursor.speed_x > 0) {
 	move = 1;
 	old_pixel = cursor.pixel_x;
 	old_pos = cursor.pos_x;
@@ -518,9 +518,9 @@ int moveLeft(int checkCollision) {
 	if(move && (!checkCollision || map.detectCollision(DIR_LEFT))) {
 	  scrollMap(DIR_LEFT);	
 	  if(map.accelerate) {
-		if(cursor.speed_x < TILE_W) {
+		if(cursor.speed_x <  SPEED_MAX_X) {
 		  cursor.speed_x += SPEED_INC_X;
-		  if(cursor.speed_x >= TILE_W) cursor.speed_x = TILE_W;
+		  if(cursor.speed_x >= SPEED_MAX_X) cursor.speed_x = SPEED_MAX_X;
 		}
 	  }
 	  return 1;
@@ -528,7 +528,8 @@ int moveLeft(int checkCollision) {
 	cursor.pixel_x = old_pixel;
 	cursor.pos_x = old_pos;	
 	if(!cursor.pixel_x) break;
-	cursor.speed_x = cursor.pixel_x;
+	//	cursor.speed_x = cursor.pixel_x;
+	cursor.speed_x -= SPEED_INC_X;
   }
   cursor.speed_x = old_speed;
   return 0;
@@ -538,7 +539,7 @@ int moveRight(int checkCollision) {
   int move, old_pixel, old_pos, old_speed;
 
   old_speed = cursor.speed_x;
-  while(1) {
+  while(cursor.speed_x > 0) {
 	move = 1;
 	old_pixel = cursor.pixel_x;
 	old_pos = cursor.pos_x;
@@ -554,9 +555,9 @@ int moveRight(int checkCollision) {
 	if(move && (!checkCollision || map.detectCollision(DIR_RIGHT))) {
 	  scrollMap(DIR_RIGHT);	
 	  if(map.accelerate) {
-		if(cursor.speed_x < TILE_W) {
+		if(cursor.speed_x < SPEED_MAX_X) {
 		  cursor.speed_x += SPEED_INC_X;
-		  if(cursor.speed_x >= TILE_W) cursor.speed_x = TILE_W;
+		  if(cursor.speed_x >= SPEED_MAX_X) cursor.speed_x = SPEED_MAX_X;
 		}
 	  }
 	  return 1;
@@ -564,7 +565,8 @@ int moveRight(int checkCollision) {
 	cursor.pixel_x = old_pixel;
 	cursor.pos_x = old_pos;
 	if(!cursor.pixel_x) break;
-	cursor.speed_x = TILE_W - cursor.pixel_x;
+	//cursor.speed_x = TILE_W - cursor.pixel_x;
+	cursor.speed_x -= SPEED_INC_X;
   }
   cursor.speed_x = old_speed;
   return 0;
@@ -591,9 +593,9 @@ int moveUp(int checkCollision, int platform) {
 				((platform || cursor.jump || map.detectLadder() || cursor.stepup) && map.detectCollision(DIR_UP)))) {
 	  scrollMap(DIR_UP);	
 	  if(map.accelerate) {
-		if(cursor.speed_y < TILE_H) {
+		if(cursor.speed_y < SPEED_MAX_Y) {
 		  cursor.speed_y += SPEED_INC_Y;
-		  if(cursor.speed_y >= TILE_H) cursor.speed_y = TILE_H;
+		  if(cursor.speed_y >= SPEED_MAX_Y) cursor.speed_y = SPEED_MAX_Y;
 		}
 	  }
 	  return 1;
@@ -627,9 +629,9 @@ int moveDown(int checkCollision, int platform, int slide) {
 				((platform || cursor.gravity || map.detectLadder() || slide) && map.detectCollision(DIR_DOWN)))) {
 	  scrollMap(DIR_DOWN);	
 	  if(map.accelerate) {
-		if(cursor.speed_y < TILE_H) {
+		if(cursor.speed_y < SPEED_MAX_Y) {
 		  cursor.speed_y += SPEED_INC_Y;
-		  if(cursor.speed_y >= TILE_H) cursor.speed_y = TILE_H;
+		  if(cursor.speed_y >= SPEED_MAX_Y) cursor.speed_y = SPEED_MAX_Y;
 		}
 	  }
 	  return 1;
@@ -648,10 +650,16 @@ int moveDown(int checkCollision, int platform, int slide) {
    Returns 1 on success, 0 on failure.
  */
 int canStepUp(int dir) {
+  int ret;
+  int old_speed_x, old_speed_y;
+
   // Take an unchecked step into the wall and don't scroll the screen.
   // This is so after stepping up, gravity won't pull us back down.
   // TILE_W b/c we always stop on pixel_x==0			
-  cursor.speed_x = TILE_W;
+
+  old_speed_x = cursor.speed_x;
+  old_speed_y = cursor.speed_y;
+  //  cursor.speed_x = TILE_W;
   if(dir == DIR_LEFT) {
 	moveLeft(0);
   } else {
@@ -664,18 +672,22 @@ int canStepUp(int dir) {
   if(!moveUp(1, 0)) {
 	cursor.stepup = 0;
 	// if can't step up
-	cursor.speed_x = TILE_W;
+	//	cursor.speed_x = TILE_W;
 	if(dir == DIR_LEFT) {
 	  moveRight(0);
 	} else {
 	  moveLeft(0);
 	}
 	cursor.speed_x = 0;
-	return 0;
+	ret = 0;
   } else {
 	cursor.stepup = 0;
-	return 1;
+	ret = 1;
   }
+
+  cursor.speed_x = old_speed_x;
+  cursor.speed_y = old_speed_y;
+  return ret;
 }
 
 int moveJump() {
@@ -734,7 +746,7 @@ void moveGravity() {
   }
 	
   old_speed = cursor.speed_y;
-  cursor.speed_y = 10;
+  cursor.speed_y = GRAVITY_SPEED;
   cursor.gravity = 1;
   cursor.gravity = moveDown(1, 0, 0);
   cursor.gravity = 0;
@@ -872,6 +884,8 @@ void moveMap() {
 	  if(curr_time > next_time) 
 		next_time = curr_time + TICK_AMOUNT;
 	}
+
+	//	SDL_Delay(20);
   }
 }
 

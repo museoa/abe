@@ -7,7 +7,7 @@
 #define MAPS_DIR "maps"
 
 // Throttle the game speed at 25 fps (for fast machines)
-#define FPS_THROTTLE 25
+#define FPS_THROTTLE 30
 
 // Tile sizes
 #define TILE_W 20
@@ -35,16 +35,22 @@
 #define EXTRA_Y 5
 
 // the speed increments in accelerated mode
-#define SPEED_INC_X 2
-#define SPEED_INC_Y 2
+#define SPEED_INC_X 1
+#define SPEED_INC_Y 1
+
+// the max speed
+#define SPEED_MAX_X 12
+#define SPEED_MAX_Y 12
 
 // the minimum (starting) speed in accelerated mode
 #define START_SPEED_X 6
 #define START_SPEED_Y 6
 
 // how many units is in a jump?
-#define JUMP_LENGTH 7
+#define JUMP_LENGTH 10
 #define JUMP_SPEED 14
+
+#define GRAVITY_SPEED 10
 
 // an empty map position
 #define EMPTY_MAP 0xffff

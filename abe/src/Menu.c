@@ -15,8 +15,7 @@ typedef struct _settingEntry {
 SettingEntry entries[] = {
   { "sound", 2, { "on", "off" }, 0 },
   { "music", 2, { "on", "off" }, 0 },
-  { "crap", 4, { "a", "b", "c", "d" }, 0 },
-  { "other crap", 3, { "aaa", "bbb", "cccccc" }, 0 },
+  { "screen", 2, { "fullscreen", "window" }, 0 },
   { "", 0, { "" }, 0 }
 };
 int entry_count;

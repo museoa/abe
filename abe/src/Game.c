@@ -149,7 +149,11 @@ void gameBeforeDrawToScreen() {
   if(GOD_MODE) {
 	drawString(screen, 255, 41, (game.god_mode ? "t" : "f"));
 
-	sprintf(s, "pos %d %d pixel %d %d", cursor.pos_x, cursor.pos_y, cursor.pixel_x, cursor.pixel_y);
+	sprintf(s, "pos %d %d", cursor.pos_x, cursor.pos_y);
+	drawString(screen, 0, screen->h - 60, s);
+	sprintf(s, "pixel %d %d", cursor.pixel_x, cursor.pixel_y);
+	drawString(screen, 0, screen->h - 40, s);
+	sprintf(s, "speed %d %d", cursor.speed_x, cursor.speed_y);
 	drawString(screen, 0, screen->h - 20, s);
   }
 
