@@ -33,4 +33,10 @@ int intersectsBy(SDL_Rect *a, SDL_Rect *b, int value);
 int compress(Uint16 *buff, size_t nmemb, SDL_RWops *rwop);
 int decompress(Uint16 *buff, size_t nmemb, SDL_RWops *rwop);
 void createBack(SDL_Surface **back_surface);
+
+
+// some special effects
+void processEffects();
+void shimmerEffect(SDL_Rect *rect, SDL_Surface *surface);
+void damageEffect(SDL_Rect *rect, SDL_Surface *surface);
 #endif

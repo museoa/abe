@@ -1,6 +1,15 @@
 #include "Util.h"
 #include <math.h>
 
+// special effects
+#define NO_EFFECT 0
+#define SHIMMER_EFFECT 1
+#define DAMAGE_EFFECT 2
+int effect = NO_EFFECT;
+SDL_Rect fx_rect;
+SDL_Surface *fx_surface;
+int fx_x, fx_y;
+
 int getSectionDiff(int a1, int a2, int b1, int b2) {
   if(a1 <= b1 && a2 > b1) {
 	return a2 - b1;
@@ -215,5 +224,81 @@ void createBack(SDL_Surface **back_surface) {
 	  SDL_BlitSurface(img, NULL, *back_surface, &pos);
 	}
   }
-
 }
+
+void shimmerEffect(SDL_Rect *rect, SDL_Surface *surface) {
+  effect = SHIMMER_EFFECT;
+  memcpy(&fx_rect, rect, sizeof(fx_rect));
+  fx_surface = surface;
+  fx_y = rect->h;
+}
+
+void damageEffect(SDL_Rect *rect, SDL_Surface *surface) {
+  effect = DAMAGE_EFFECT;
+  memcpy(&fx_rect, rect, sizeof(fx_rect));
+  fx_surface = surface;
+  fx_y = rect->h;
+}
+
+void processShimmer() {
+  int row[3][100], size[3][100];
+  Uint32  color[3][100];
+  int count;
+  int x, i, j, r;
+  SDL_Rect pos;
+  int done;
+
+  for(r = 0; r < 3; r++) {
+	if(fx_y < 0) {
+	  effect = NO_EFFECT;
+	  break;
+	}
+	count = 0;
+	for(x = 0; x < fx_rect.w; x+=2) {
+	  j = (int)(7.0 * rand()/(RAND_MAX));
+	  if(j == 1) {
+		row[r][count] = x;
+		size[r][count] = (int)(5.0 * rand()/(RAND_MAX)) + 2;
+		if(effect == SHIMMER_EFFECT) {
+		  color[r][count] = SDL_MapRGBA(fx_surface->format, 
+									 128 + (int)(100.0 * rand()/(RAND_MAX)), 
+									 128 + (int)(100.0 * rand()/(RAND_MAX)), 
+									 128 + (int)(100.0 * rand()/(RAND_MAX)), 
+									 0x00);
+		} else {
+		  color[r][count] = SDL_MapRGBA(fx_surface->format, 
+									 255, 
+									 64 + (int)(50.0 * rand()/(RAND_MAX)), 
+									 64 + (int)(50.0 * rand()/(RAND_MAX)), 
+									 0x00);
+		}
+		count++;
+	  }
+	}
+	done = 0;
+	while(!done) {
+	  done = 1;
+	  for(x = 0; x < count; x++) {
+		if(size[r][x] > 0) {
+		  pos.x = fx_rect.x + row[r][x] - (size[r][x] / 2);
+		  pos.y = fx_rect.y + fx_y - (size[r][x] / 2);
+		  pos.w = size[r][x];
+		  pos.h = size[r][x];
+		  SDL_FillRect(fx_surface, &pos, color[r][x]);	  
+		  if(--size[r][x] > 0) done = 0;
+		}
+	  }
+	}
+	fx_y-=5;
+  }
+  SDL_UpdateRects(fx_surface, 1, &fx_rect);
+  //SDL_Flip(surface);
+  //SDL_Delay(10);
+}
+
+void processEffects() {
+  switch(effect) {
+  case SHIMMER_EFFECT: case DAMAGE_EFFECT: processShimmer(); break;
+  }
+}
+

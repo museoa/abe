@@ -172,6 +172,10 @@ void afterMainLevelDrawn() {
 	SDL_BlitSurface(tom[getGameFace()], 
 					NULL, screen, &pos);
   }
+
+  if(mainstruct.effects_enabled) {
+	processEffects();
+  }
 }
 
 void gameBeforeDrawToScreen() {
@@ -351,10 +355,22 @@ void gameMainLoop(SDL_Event *event) {
 
 void handleDeath(LiveMonster *live) {
   int i;
+  SDL_Rect fx;
+  int screen_center_x = (screen->w / TILE_W) / 2;
+  int screen_center_y = (screen->h / TILE_H) / 2;  
 
   showMapStatus(live->monster->name);
 
   game.health-=(live->monster->damage * (game.difficoulty + 1));
+
+  if(mainstruct.effects_enabled) {
+	fx.x = screen_center_x * TILE_W;
+	fx.y = screen_center_y * TILE_H;
+	fx.w = tom[0]->w;
+	fx.h = tom[0]->h;
+	damageEffect(&fx, screen);
+  }
+  
   if(game.health > 0) return;
   game.health = MAX_HEALTH;
 
@@ -400,7 +416,10 @@ void gameCheckPosition() {
   int n;
   Position pos, pos2, key;
   LiveMonster *live;
+  SDL_Rect fx;
   int ignore = 0;
+  int screen_center_x = (screen->w / TILE_W) / 2;
+  int screen_center_y = (screen->h / TILE_H) / 2;  
 
   pos.pos_x = cursor.pos_x;
   pos.pos_y = cursor.pos_y;
@@ -475,6 +494,13 @@ void gameCheckPosition() {
 	  else game.health+=10;
 	}
 	if(!ignore) {
+	  if(mainstruct.effects_enabled) {
+		fx.x = screen_center_x * TILE_W;
+		fx.y = screen_center_y * TILE_H;
+		fx.w = tom[0]->w;
+		fx.h = tom[0]->h;
+		shimmerEffect(&fx, screen);
+	  }
 	  playSound(n == img_gem[0] || n == img_gem[1] || n == img_gem[2] ? GEM_SOUND : OBJECT_SOUND);
 	  // remove from map
 	  map.image_index[LEVEL_MAIN][key.pos_x + (key.pos_y * map.w)] = EMPTY_MAP;

@@ -34,6 +34,7 @@ typedef struct _main {
   int drawBackground;
   int full_screen;
   int alphaBlend;
+  int effects_enabled;
 } Main;
 extern Main mainstruct;
 

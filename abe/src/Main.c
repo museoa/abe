@@ -79,6 +79,7 @@ int main(int argc, char *argv[]) {
 
   mainstruct.drawBackground = 1;
   mainstruct.alphaBlend = 1;
+  mainstruct.effects_enabled = 1;
   runmode = RUNMODE_SPLASH;  
   mainstruct.full_screen = 1;
 
