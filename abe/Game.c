@@ -167,7 +167,7 @@ void runMap(char *name, int w, int h) {
   initMap(name, w, h);
   // try to load the map and quit if you can't find it.
   if(!loadMap(0)) {
-	fprintf(stderr, "Can't find map file: %s", name);
+	fprintf(stderr, "Can't find map file: %s\n", name);
 	fflush(stderr);
 	exit(0);
   }

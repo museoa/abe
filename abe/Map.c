@@ -395,6 +395,7 @@ void drawMapBottomEdge() {
 void scrollMap(int dir) {
   int row, level;
   long skipped;
+  SDL_Rect pos;
 
   if(dir == DIR_NONE) return;
 
@@ -402,22 +403,34 @@ void scrollMap(int dir) {
   switch(dir) {
   case DIR_LEFT:
 
-	// scroll the virtual screens right row by row
-	for(level = LEVEL_BACK; level < LEVEL_COUNT; level++) {
-	  if(SDL_LockSurface(map.level[level]) == -1) {
-		fprintf(stderr, "Unable to lock surface for scrolling: %s\n", SDL_GetError());
-		fflush(stderr);
-		exit(0);	
+	if(screen->flags & SDL_HWSURFACE) {
+	  for(level = LEVEL_BACK; level < LEVEL_COUNT; level++) {
+		SDL_FillRect(map.transfer[level], NULL, SDL_MapRGBA(screen->format, 0x00, 0x00, 0x00, 0x00));
+		SDL_BlitSurface(map.level[level], NULL, map.transfer[level], NULL);
+		pos.x = cursor.speed_x;
+		pos.y = 0;
+		pos.w = map.level[level]->w - cursor.speed_x;
+		pos.h = map.level[level]->h;
+		SDL_BlitSurface(map.transfer[level], NULL, map.level[level], &pos);
 	  }
-	  for(row = 0; row < map.level[level]->h; row++) {
-		memmove((Uint8*)((Uint8*)(map.level[level]->pixels) + 
-						 ((long)map.level[level]->pitch * (long)row) + 
-						 (long)cursor.speed_x * map.level[level]->format->BytesPerPixel), 
-				(Uint8*)((Uint8*)(map.level[level]->pixels) + 
-						 ((long)map.level[level]->pitch * (long)row)),
-				(long)(map.level[level]->pitch - (cursor.speed_x * map.level[level]->format->BytesPerPixel)));
+	} else {
+	  // scroll the virtual screens right row by row
+	  for(level = LEVEL_BACK; level < LEVEL_COUNT; level++) {
+		if(SDL_LockSurface(map.level[level]) == -1) {
+		  fprintf(stderr, "Unable to lock surface for scrolling: %s\n", SDL_GetError());
+		  fflush(stderr);
+		  exit(0);	
+		}
+		for(row = 0; row < map.level[level]->h; row++) {
+		  memmove((Uint8*)((Uint8*)(map.level[level]->pixels) + 
+						   ((long)map.level[level]->pitch * (long)row) + 
+						   (long)cursor.speed_x * map.level[level]->format->BytesPerPixel), 
+				  (Uint8*)((Uint8*)(map.level[level]->pixels) + 
+						   ((long)map.level[level]->pitch * (long)row)),
+				  (long)(map.level[level]->pitch - (cursor.speed_x * map.level[level]->format->BytesPerPixel)));
+		}
+		SDL_UnlockSurface(map.level[level]);
 	  }
-	  SDL_UnlockSurface(map.level[level]);
 	}
 
 	// draw only the new left edge
@@ -428,22 +441,39 @@ void scrollMap(int dir) {
 
   case DIR_RIGHT:
 
-	// scroll the virtual screens left row by row
-	for(level = LEVEL_BACK; level < LEVEL_COUNT; level++) {
-	  if(SDL_LockSurface(map.level[level]) == -1) {
-		fprintf(stderr, "Unable to lock surface for scrolling: %s\n", SDL_GetError());
-		fflush(stderr);
-		exit(0);	
+	if(screen->flags & SDL_HWSURFACE) {
+	  for(level = LEVEL_BACK; level < LEVEL_COUNT; level++) {
+		SDL_FillRect(map.transfer[level], NULL, SDL_MapRGBA(screen->format, 0x00, 0x00, 0x00, 0x00));
+		pos.x = cursor.speed_x;
+		pos.y = 0;
+		pos.w = map.level[level]->w - cursor.speed_x;
+		pos.h = map.level[level]->h;
+		SDL_BlitSurface(map.level[level], &pos, map.transfer[level], NULL);
+		pos.x = 0;
+		pos.y = 0;
+		pos.w = map.level[level]->w - cursor.speed_x;
+		pos.h = map.level[level]->h;
+		SDL_BlitSurface(map.transfer[level], NULL, map.level[level], &pos);
 	  }
-	  for(row = 0; row < map.level[level]->h; row++) {
-		memmove((Uint8*)((Uint8*)(map.level[level]->pixels) + 
-						 ((long)map.level[level]->pitch * (long)row)), 
-				(Uint8*)((Uint8*)(map.level[level]->pixels) + 
-						 ((long)map.level[level]->pitch * (long)row + 
-						  (long)cursor.speed_x * map.level[level]->format->BytesPerPixel)),
-				(long)(map.level[level]->pitch - (long)(cursor.speed_x *  map.level[level]->format->BytesPerPixel)));
+	} else {
+
+	  // scroll the virtual screens left row by row
+	  for(level = LEVEL_BACK; level < LEVEL_COUNT; level++) {
+		if(SDL_LockSurface(map.level[level]) == -1) {
+		  fprintf(stderr, "Unable to lock surface for scrolling: %s\n", SDL_GetError());
+		  fflush(stderr);
+		  exit(0);	
+		}
+		for(row = 0; row < map.level[level]->h; row++) {
+		  memmove((Uint8*)((Uint8*)(map.level[level]->pixels) + 
+						   ((long)map.level[level]->pitch * (long)row)), 
+				  (Uint8*)((Uint8*)(map.level[level]->pixels) + 
+						   ((long)map.level[level]->pitch * (long)row + 
+							(long)cursor.speed_x * map.level[level]->format->BytesPerPixel)),
+				  (long)(map.level[level]->pitch - (long)(cursor.speed_x *  map.level[level]->format->BytesPerPixel)));
+		}
+		SDL_UnlockSurface(map.level[level]);
 	  }
-	  SDL_UnlockSurface(map.level[level]);
 	}
 
 	// draw only the new left edge
@@ -914,6 +944,18 @@ void initMap(char *name, int w, int h) {
 	  fflush(stderr);
 	  return;
 	}
+	fprintf(stderr, "level[%d] is HW surface? %s\n", i, (map.level[i]->flags & SDL_HWSURFACE ? "true" : "false"));	
+	if(!(map.transfer[i] = SDL_CreateRGBSurface(SDL_HWSURFACE, 
+												screen->w + EXTRA_X * TILE_W, 
+												screen->h + EXTRA_Y * TILE_H, 
+												screen->format->BitsPerPixel, 
+												0, 0, 0, 0))) {
+	  fprintf(stderr, "Error creating surface: %s\n", SDL_GetError());
+	  fflush(stderr);
+	  return;
+	}
+	fprintf(stderr, "transfer[%d] is HW surface? %s\n", i, (map.transfer[i]->flags & SDL_HWSURFACE ? "true" : "false"));	
+
 	// set black as the transparent color key
 	if(i > LEVEL_BACK) {
 	  SDL_SetColorKey(map.level[i], SDL_SRCCOLORKEY, SDL_MapRGBA(map.level[i]->format, 0x00, 0x00, 0x00, 0xff));
@@ -969,7 +1011,7 @@ void saveMap() {
   fflush(stdout);
 
   if(!(fp = fopen(path, "wb"))) {
-	fprintf(stderr, "Can't open file for writing.");
+	fprintf(stderr, "Can't open file for writing.\n");
 	fflush(stderr);
 	return;
   }
@@ -1003,7 +1045,7 @@ int loadMap(int draw_map) {
   printf("Loading map %s\n", path);  
   fflush(stdout);
   if(!(fp = fopen(path, "rb"))) {
-	fprintf(stderr, "Can't open file for reading.");
+	fprintf(stderr, "Can't open file for reading.\n");
 	fflush(stderr);
 	return 0;
   }
