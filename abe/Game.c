@@ -1,5 +1,26 @@
 #include "Game.h"
 
+int getGameFace() {
+  // change the face
+  if(game.balloonTimer) {
+	game.face = (game.dir == GAME_DIR_LEFT ? 6 : 7);
+	game.balloonTimer--;
+	if(game.balloonTimer <= 0) {
+	  game.balloonTimer = 0;
+	  map.gravity = 1;
+	} else {
+	  return game.face;
+	}
+  }
+  if(cursor.dir == DIR_LEFT || cursor.dir == DIR_RIGHT) {
+	game.face++;
+	if(game.face >= FACE_COUNT * FACE_STEP) game.face = 0;
+  }
+  return (game.dir == GAME_DIR_LEFT ? 
+		  (game.face / FACE_STEP) : 
+		  (game.face / FACE_STEP) + FACE_COUNT);
+}
+
 /**
    The editor-specific map drawing event.
    This is called before the map is sent to the screen.
@@ -15,15 +36,8 @@ void afterMainLevelDrawn() {
   pos.w = tom[0]->w;
   pos.h = tom[0]->h;
 
-  // change the face
-  if(cursor.dir == DIR_LEFT || cursor.dir == DIR_RIGHT) {
-	game.face++;
-	if(game.face >= FACE_COUNT * FACE_STEP) game.face = 0;
-  }
   if(game.draw_player) {
-	SDL_BlitSurface(tom[(game.dir == GAME_DIR_LEFT ? 
-						 (game.face / FACE_STEP) : 
-						 (game.face / FACE_STEP) + FACE_COUNT)], 
+	SDL_BlitSurface(tom[getGameFace()], 
 					NULL, screen, &pos);
   }
 }
@@ -69,6 +83,12 @@ void gameMainLoop(SDL_Event *event) {
 	case SDLK_ESCAPE:
 	  cursor.dir = DIR_QUIT;
 	  break;
+	case SDLK_RETURN:
+	  if(!game.balloonTimer && game.balloons) {
+		game.balloons--;
+		game.balloonTimer = BALLOON_RIDE_INTERVAL;
+		map.gravity = 0;
+	  }
 	}
 	break;	
   case SDL_KEYUP: 
@@ -97,7 +117,6 @@ void handleDeath() {
   fflush(stderr);
 
   game.lives--;
-  if(game.lives <= 0) exit(0); // FIXME!
 
   // Flash player. Don't move monsters during this.
   move_monsters = 0;
@@ -110,11 +129,15 @@ void handleDeath() {
 	SDL_Delay(200);
   }
   move_monsters = 1;
-  
-  repositionCursor(game.player_start_x, game.player_start_y);
-  cursor.speed_x = 0;
-  cursor.speed_y = 0;
-  drawMap();
+
+  if(game.lives <= 0) {
+	cursor.dir = DIR_QUIT;
+  } else {
+	repositionCursor(game.player_start_x, game.player_start_y);
+	cursor.speed_x = 0;
+	cursor.speed_y = 0;
+	drawMap();
+  }
 }
 
 // return a 1 to proceed, 0 to stop
@@ -170,6 +193,8 @@ int detectCollision(int dir) {
 
 int detectLadder() {
   Position pos;
+  if(game.balloonTimer) return 1; // With a balloon you can move where you want
+
   pos.pos_x = cursor.pos_x;
   pos.pos_y = cursor.pos_y;
   pos.pixel_x = cursor.pixel_x;
@@ -204,6 +229,7 @@ void runMap(char *name, int w, int h) {
   game.draw_player = 1;
   game.keys = 0;
   game.balloons = 0;
+  game.balloonTimer = 0;
 
   // start inside
   cursor.pos_x = game.player_start_x;
@@ -238,4 +264,5 @@ void runMap(char *name, int w, int h) {
 void initGame() {
   game.face = 0;
   game.dir = GAME_DIR_RIGHT;
+  game.balloonTimer = 0;
 }

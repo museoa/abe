@@ -14,6 +14,8 @@
 
 #define GOD_MODE 0
 
+#define BALLOON_RIDE_INTERVAL 500
+
 typedef struct _game {
   int face;
   int dir;
@@ -23,6 +25,7 @@ typedef struct _game {
   int draw_player;
   int keys;
   int balloons;
+  int balloonTimer;
 } Game;
 Game game;
 

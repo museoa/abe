@@ -8,7 +8,7 @@
 #define IMAGES_DIR "images"
 
 SDL_Surface *title;
-SDL_Surface *tom[6];
+SDL_Surface *tom[8];
 
 void loadImages();
 void loadImagesFromTar();

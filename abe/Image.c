@@ -47,6 +47,10 @@ void doLoadImage(char *filename, char *name) {
 	tom[4] = image;
   } else if(!strcmp(name, "tom6")) {
 	tom[5] = image;
+  } else if(!strcmp(name, "tom7")) {
+	tom[6] = image;
+  } else if(!strcmp(name, "tom8")) {
+	tom[7] = image;
   } else {
 	// a primitive hashtable
 	if(!strcmp(name, "brick")) {
