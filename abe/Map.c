@@ -448,7 +448,7 @@ void scrollMap(int dir) {
   }
 }
 
-int moveLeft() {
+int moveLeft(int checkCollision) {
   if(cursor.dontMove) {
 	finishDrawMap();
 	return 0;
@@ -467,7 +467,7 @@ int moveLeft() {
 		move = 0;
 	  }
 	}
-	if(move && map.detectCollision(DIR_LEFT)) {
+	if(move && (!checkCollision || map.detectCollision(DIR_LEFT))) {
 	  scrollMap(DIR_LEFT);	
 	  if(map.accelerate) {
 		if(cursor.speed_x < TILE_W) {
@@ -485,7 +485,7 @@ int moveLeft() {
   return 0;
 }
 
-int moveRight() {
+int moveRight(int checkCollision) {
   if(cursor.dontMove) {
 	finishDrawMap();
 	return 0;
@@ -504,7 +504,7 @@ int moveRight() {
 		move = 0;
 	  }
 	}
-	if(move && map.detectCollision(DIR_RIGHT)) {
+	if(move && (!checkCollision || map.detectCollision(DIR_RIGHT))) {
 	  scrollMap(DIR_RIGHT);	
 	  if(map.accelerate) {
 		if(cursor.speed_x < TILE_W) {
@@ -606,6 +606,17 @@ void unlockMap() {
   }
 }
 
+int canStepUp(int pos_x, int pos_y) {
+  // are we off the map?
+  if(pos_x < 0) return 0;
+  // is there a shape that starts at this position?
+  int n = map.image_index[LEVEL_MAIN][pos_x + (pos_y * map.w)];
+  return(n > -1 ? 1 : 0);
+  // should also check that there's enough space here for tom
+  // to fit... although moveUp() does this and gravity will pull
+  // us back if we can fit anyway.
+}
+
 /**
    Move in the dir direction.
    This could be optimized by blitting the screen 1 tile unit in the 
@@ -613,6 +624,7 @@ void unlockMap() {
  */
 int moveMap(void *data) {
   int delay, old_dir;
+  int x;
   while(!map.stopThread) {
 	// a direction change
 	if(cursor.dir != last_dir) {
@@ -629,13 +641,36 @@ int moveMap(void *data) {
 	case DIR_QUIT:
 	  return 0;
 	case DIR_LEFT:
-	  if(!moveLeft()) {
-		// see if you can step up on it
+	  if(!moveLeft(1)) {
+		// if the wall on the left is less then TILE_H height then step up
+		for(x = 1; x <= EXTRA_X; x++) {
+		  if(canStepUp(cursor.pos_x - x, 
+					   cursor.pos_y + (tom[0]->h / TILE_H) - 1 + (cursor.pixel_y > 0 ? 1 : 0))) {
+			cursor.speed_x = 4;
+			cursor.dir = DIR_LEFT;
+			cursor.speed_y = (cursor.pixel_y == 0 ? TILE_H : cursor.pixel_y);
+			if(!moveUp(1)) {
+			  cursor.speed_x = 0;
+			}
+			break;
+		  }
+		}
 	  }
 	  break;	
 	case DIR_RIGHT:
-	  moveRight();
-	  break;
+	  if(!moveRight(1)) {
+		// if the wall on the left is less then TILE_H height then step up
+		if(canStepUp(cursor.pos_x + (tom[0]->w / TILE_W), 
+					 cursor.pos_y + (tom[0]->h / TILE_H) - 1 + (cursor.pixel_y > 0 ? 1 : 0))) {
+		  cursor.speed_x = 4;
+		  cursor.dir = DIR_RIGHT;
+		  cursor.speed_y = (cursor.pixel_y == 0 ? TILE_H : cursor.pixel_y);
+		  if(!moveUp(1)) {
+			cursor.speed_x = 0;
+		  }
+		}
+	  }
+	  break;	
 	case DIR_UP:
 	  moveUp(1);
 	  break;

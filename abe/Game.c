@@ -70,7 +70,6 @@ void gameMainLoop(SDL_Event *event) {
 	}
 	break;
   case SDL_KEYUP: 
-	//	printf("The %s key was released! scan=%d\n", SDL_GetKeyName(event->key.keysym.sym), event->key.keysym.scancode);	
 	cursor.dir = DIR_UPDATE; 
 	signalMapMoveThread();
 	break;

@@ -198,6 +198,7 @@ void allocMap(char *name, int w, int h) {
 	}
   }
 
+  /*
   // fill the LEVEL_MAIN with rock tiles.
   img = images[img_rock];
   step_x = img->image->w / TILE_W;
@@ -215,6 +216,7 @@ void allocMap(char *name, int w, int h) {
 	  }
 	}
   }
+  */
 
   // reset the cursor
   resetCursor();
