@@ -46,6 +46,6 @@ void addMonsterImage(int monster_index, int image_index);
 int isMonsterImage(int image_index);
 
 void addLiveMonster(int monster_index, int image_index, int x, int y);
-void drawLiveMonsters(SDL_Surface *surface, MapDrawParams *params);
+void drawLiveMonsters(SDL_Surface *surface, int start_x, int start_y);
 
 #endif

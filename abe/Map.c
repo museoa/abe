@@ -3,18 +3,21 @@
 void waitUntilPaintingStops();
 void finishDrawMap();
 int last_dir = -1;
-SDL_Rect screen_rect;
 // some private global variables used to draw the map
 int screen_center_x, screen_center_y; // the screen's center in tiles
 int screen_w, screen_h;               // the screen's size in tiles
 
-/**
-   Here rect is in pixels where 0, 0 is the screen's left top corner.
-   Returns 0 for false and non-0 for true.
- */
-int isOnScreen(SDL_Rect rect) {
-  return intersects(&rect, &screen_rect);
-}
+/** 
+	Which section of the screen is visible
+*/
+typedef struct _mapDrawParams {
+  int start_x; // where to start drawing the map
+  int start_y;
+  int end_x;   // where to stop drawing the map
+  int end_y;
+  int offset_x;  // how many tiles to offset from the top/left edge of the screen
+  int offset_y;
+} MapDrawParams;
 
 /**
    Compute what to draw based on the cursor's location.
@@ -780,9 +783,13 @@ void finishDrawMap() {
 	pos.h = map.level[level]->h;
 	SDL_BlitSurface(map.level[level], NULL, screen, &pos);
 	// make a callback if it exists
-	if(level == LEVEL_MAIN && map.afterMainLevelDrawn) {
-	  map.afterMainLevelDrawn();
-	  if(map.monsters) drawLiveMonsters(screen, &params);
+	if(level == LEVEL_MAIN) {	  
+	  // draw Tom
+	  if(map.afterMainLevelDrawn) map.afterMainLevelDrawn();
+	  // draw creatures
+	  if(map.monsters) drawLiveMonsters(screen, 
+										params.start_x + EXTRA_X, 
+										params.start_y + EXTRA_Y);
 	}
   }
 
@@ -893,12 +900,6 @@ void initMap(char *name, int w, int h) {
   screen_w = screen->w / TILE_W;
   //  screen_h = (screen->h - edit_panel.image->h) / TILE_H;
   screen_h = screen->h / TILE_H;
-
-  // init the screen rectangle.
-  screen_rect.x = 0;
-  screen_rect.y = 0;
-  screen_rect.w = screen->w;
-  screen_rect.h = screen->h;
 }
 
 void destroyMap() {

@@ -106,10 +106,4 @@ void decompressMap();
 
 void startJump();
 
-/**
-   Here rect is in pixels where 0, 0 is the screen's left top corner.
-   Returns 1 for yes, 0 for false.
- */
-int isOnScreen(SDL_Rect rect);
-
 #endif

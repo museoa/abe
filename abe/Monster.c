@@ -1,5 +1,7 @@
 #include "Monster.h"
 
+SDL_Rect extended_screen_rect;
+
 void defaultMoveMonster(LiveMonster *live) {
   // no-op
 }
@@ -14,6 +16,12 @@ void moveCrab(LiveMonster *live_monster) {
  */
 void initMonsters() {
   live_monster_count = 0;
+
+  // init the screen rectangle.
+  extended_screen_rect.x = -EXTRA_X * TILE_W;
+  extended_screen_rect.y = -EXTRA_Y * TILE_H;
+  extended_screen_rect.w = screen->w + EXTRA_X * TILE_W;
+  extended_screen_rect.h = screen->h + EXTRA_Y * TILE_H;
   
   // common properties.
   int i;
@@ -78,7 +86,7 @@ void removeLiveMonster(int live_monster_index) {
   // this crashes... also it should add it back into the map
 
   int t;
-  for(t = live_monster_index; t < live_monster_count; t++) {
+  for(t = live_monster_index; t < live_monster_count - 1; t++) {
 	memcpy(&live_monsters[t], &live_monsters[t + 1], sizeof(LiveMonster));
   }
   live_monster_count--;
@@ -88,7 +96,19 @@ void removeLiveMonster(int live_monster_index) {
   fflush(stderr);
 }
 
-void drawLiveMonsters(SDL_Surface *surface, MapDrawParams *params) {
+/**
+   Here rect is in pixels where 0, 0 is the screen's left top corner.
+   Returns 0 for false and non-0 for true.
+ */
+int isOnScreen(SDL_Rect rect) {
+  return intersects(&rect, &extended_screen_rect);
+}
+
+/**
+   Draw all currently tracked creatures.
+   start_x, start_y are the offset of the screen's top left edge in tiles.
+ */
+void drawLiveMonsters(SDL_Surface *surface, int start_x, int start_y) {
   SDL_Rect pos;
   SDL_Surface *img;
   int i;
@@ -96,12 +116,14 @@ void drawLiveMonsters(SDL_Surface *surface, MapDrawParams *params) {
 	live_monsters[i].monster->moveMonster(&live_monsters[i]);
 
 	img = images[live_monsters[i].monster->image_index[live_monsters[i].face]]->image;
-	pos.x = (live_monsters[i].pos_x - params->start_x - EXTRA_X) * TILE_W + live_monsters[i].pixel_x;
-	pos.y = (live_monsters[i].pos_y - params->start_y - EXTRA_Y) * TILE_H + live_monsters[i].pixel_y;
+	//	pos.x = (live_monsters[i].pos_x - start_x - EXTRA_X) * TILE_W + live_monsters[i].pixel_x;
+	//	pos.y = (live_monsters[i].pos_y - start_y - EXTRA_Y) * TILE_H + live_monsters[i].pixel_y;
+	pos.x = (live_monsters[i].pos_x - start_x) * TILE_W + live_monsters[i].pixel_x;
+	pos.y = (live_monsters[i].pos_y - start_y) * TILE_H + live_monsters[i].pixel_y;
 	pos.w = img->w;
 	pos.h = img->h;
 
-	if(!isOnScreen(pos)) {
+	if(!isOnScreen(pos)) {	  
 	  removeLiveMonster(i);
 	} else {
 	  /*
