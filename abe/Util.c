@@ -28,7 +28,7 @@ int compress(int *buff, size_t size, FILE *fp) {
   int *block;
   size_t i, t = 0;
   unsigned int block_note = BLOCK_NOTE;
-  if(!(block = malloc(sizeof(int) * size))) {
+  if(!(block = (int*)malloc(sizeof(int) * size))) {
 	fprintf(stderr, "Out of memory when writing compressed file");
 	fflush(stderr);
 	exit(-1);
@@ -82,21 +82,23 @@ int compress(int *buff, size_t size, FILE *fp) {
    return number of items read into buff (should equal size on success)
 */
 int decompress(int *buff, size_t size, FILE *fp) {
-  // read the file
   int *block;
-  if(!(block = malloc(sizeof(int) * size))) {
-	fprintf(stderr, "Out of memory when writing compressed file");
-	fflush(stderr);
-	exit(-1);
-  }
-  int real_size = fread(block, sizeof(int), size, fp);
-
-#ifdef USE_COMPRESSION
-  //  printf("Decompressing... real_size=%ld\n", real_size);
+  int real_size;
   size_t i = 0, t = 0, r = 0, start = 0;
   size_t count;
   int value;
   unsigned int block_note = BLOCK_NOTE;
+
+  // read the file
+  if(!(block = (int*)malloc(sizeof(int) * size))) {
+	fprintf(stderr, "Out of memory when writing compressed file");
+	fflush(stderr);
+	exit(-1);
+  }
+  real_size = fread(block, sizeof(int), size, fp);
+
+#ifdef USE_COMPRESSION
+  //  printf("Decompressing... real_size=%ld\n", real_size);
   for(t = 0; t < real_size;) {
 
 	if((unsigned int)block[t] == BLOCK_NOTE) {

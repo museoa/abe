@@ -1,4 +1,5 @@
 #include "Splash.h"
+#include <math.h>
 
 #define TITLE_X_STEP 5
 #define RECT_WIDTH 40
@@ -86,6 +87,16 @@ void getNextPoint(int *x, int *y, int *dir, int *angle, int w) {
    Start the splash screen thread.
  */
 void showSplashScreen() {
+  SDL_Rect dest;
+  int x, y, max_y;
+  int angle = 45;
+  int dir = -1;
+  int tom_dir = 1;
+  int tom_face = 0;
+  int mode = 0;
+  SDL_Rect tom_rect;
+  SDL_Event event;
+
   // create the splash screen background
   if(!(splash_back = SDL_CreateRGBSurface(SDL_HWSURFACE, 
 										  screen->w, screen->h, 
@@ -95,9 +106,7 @@ void showSplashScreen() {
 	fflush(stderr);
 	return;
   }
-  SDL_Rect dest;
 
-  int x, y;
   for(x = 0; x < screen->w; x+=images[img_back]->image->w) {
 	for(y = 0; y < screen->h; y+=images[img_back]->image->h) {
 	  dest.x = x;
@@ -108,7 +117,7 @@ void showSplashScreen() {
 	}
   }
 
-  int max_y = screen->h;
+  max_y = screen->h;
   for(x = 0; x < screen->w; x+=images[img_brick]->image->w) {
 	if(max_y > 0) {
 	  for(y = 0; y < max_y; y+=images[img_brick]->image->h) {
@@ -126,17 +135,10 @@ void showSplashScreen() {
   // start to bounce the title about the screen
   x = 300;
   y = 240;
-  int angle = 45;
-  int dir = -1;
-  SDL_Rect tom_rect;
   tom_rect.x = 0;
   tom_rect.y = screen->h - tom[0]->h;
-  int tom_dir = 1;
   tom_rect.w = tom[0]->w;
   tom_rect.h = tom[0]->h;
-  int tom_face = 0;
-  int mode = 0;
-  SDL_Event event;
   while(1) {
 
 	// handle events

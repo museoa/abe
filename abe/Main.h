@@ -10,9 +10,12 @@
 #include "Image.h"
 #include "Font.h"
 #include "Util.h"
+#include "Splash.h"
 #include "Menu.h"
 #include "Map.h"
 #include "Monster.h"
+#include "Editor.h"
+#include "Game.h"
 
 SDL_Surface *screen;
 int state;

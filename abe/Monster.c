@@ -15,6 +15,8 @@ void moveCrab(LiveMonster *live_monster) {
    Remember here, images are not yet initialized!
  */
 void initMonsters() {
+  int i;
+
   live_monster_count = 0;
 
   // init the screen rectangle.
@@ -24,7 +26,6 @@ void initMonsters() {
   extended_screen_rect.h = screen->h + EXTRA_Y * TILE_H;
   
   // common properties.
-  int i;
   for(i = 0; i < MONSTER_COUNT; i++) {
 	monsters[i].image_count = 0;	
 	monsters[i].moveMonster = defaultMoveMonster;

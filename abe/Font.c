@@ -21,8 +21,9 @@ int getLetterOffset(char letter) {
    Assume letter is lower case.
  */
 void drawLetter(SDL_Surface *surface, int x, int y, char letter) {
-  if(letter == ' ') return;
   SDL_Rect pos, from;
+
+  if(letter == ' ') return;
   pos.x = x;
   pos.y = y;
   pos.w = FONT_WIDTH;

@@ -12,11 +12,13 @@
 /**
    Store the image in an array or a named img buffer.
  */
-doLoadImage(char *filename, char *name) {
+void doLoadImage(char *filename, char *name) {
+  SDL_Surface *image;
+
   fprintf(stderr, "\tLoading %s [%s]...\n", filename, name);
   fflush(stderr);
 
-  SDL_Surface *image = SDL_LoadBMP(filename);
+  image = SDL_LoadBMP(filename);
   if(image == NULL) {
 	fprintf(stderr, "Couldn't load %s: %s\n", filename, SDL_GetError());
 	fflush(stderr);
@@ -61,7 +63,7 @@ doLoadImage(char *filename, char *name) {
 	}
 
 	// store the image
-	if(!(images[image_count] = malloc(sizeof(Image)))) {
+	if(!(images[image_count] = (Image*)malloc(sizeof(Image)))) {
 	  fprintf(stderr, "Out of memory.");
 	  fflush(stderr);
 	  exit(0);
@@ -127,22 +129,9 @@ void loadImages() {
     order of the existing ones doesn't change.
  */
 void loadImagesFromTar() {
-  image_count = 0;
-
   char tmp_path[300];
-  sprintf(tmp_path, "%s/%s", IMAGES_DIR, "tmp.bmp");
-  FILE *tmp;
-
+  FILE *tmp, *fp;
   char path[300];
-  sprintf(path, "%s/%s", IMAGES_DIR, "images.tar");
-  fprintf(stderr, "Opening %s for reading.\n", path);
-  fflush(stderr);
-  FILE *fp = fopen(path, "rb");
-  if(!fp) {
-	fprintf(stderr, "Can't open tar file.\n");
-	fflush(stderr);
-	exit(-1);
-  }
   char buff[TAR_BLOCK_SIZE]; // a tar block
   int end = 0;
   int i;
@@ -152,6 +141,19 @@ void loadImagesFromTar() {
   int found;
   int blocks_read;
   int block = 0;
+
+  image_count = 0;
+  sprintf(tmp_path, "%s/%s", IMAGES_DIR, "tmp.bmp");
+
+  sprintf(path, "%s/%s", IMAGES_DIR, "images.tar");
+  fprintf(stderr, "Opening %s for reading.\n", path);
+  fflush(stderr);
+  fp = fopen(path, "rb");
+  if(!fp) {
+	fprintf(stderr, "Can't open tar file.\n");
+	fflush(stderr);
+	exit(-1);
+  }
   while(1) {
 	if(fread(buff, 1, TAR_BLOCK_SIZE, fp) < TAR_BLOCK_SIZE) break; // EOF or error
 	if(!mode) {

@@ -17,7 +17,7 @@ void startGame() {
 /**
    Main event handling.
 */
-mainLoop(int runmode) {
+void mainLoop(int runmode) {
   SDL_Event event;
 
   switch(runmode) {
@@ -32,16 +32,16 @@ mainLoop(int runmode) {
   }
 }
 
-main(int argc, char *argv[]) {
+int main(int argc, char *argv[]) {
   int runmode = RUNMODE_SPLASH;
+  Uint32 flags = SDL_HWSURFACE | SDL_DOUBLEBUF;
+  int i;
 
   if(SDL_Init(SDL_INIT_AUDIO|SDL_INIT_VIDEO) < 0) {
 	fprintf(stderr, "Unable to init SDL: %s\n", SDL_GetError());
 	exit(1);
   }
 
-  Uint32 flags = SDL_HWSURFACE | SDL_DOUBLEBUF;
-  int i;
   for(i = 0; i < argc; i++) {
 	if(!strcmp(argv[i], "--fullscreen") || !strcmp(argv[i], "-f")) {
 	  flags |= SDL_FULLSCREEN;
@@ -74,4 +74,6 @@ main(int argc, char *argv[]) {
   mainLoop(runmode);
   
   atexit(SDL_Quit);
+  
+  return 0;
 }

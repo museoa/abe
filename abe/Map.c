@@ -23,11 +23,13 @@ typedef struct _mapDrawParams {
    Compute what to draw based on the cursor's location.
  */
 void getMapDrawParams(MapDrawParams *params) {
+  int n;
+
   params->start_x = cursor.pos_x - screen_center_x;
   params->start_y = cursor.pos_y - screen_center_y;
   params->end_x = params->start_x + screen_w; 
   params->end_y = params->start_y + screen_h;
-  int n;
+
   params->offset_x = 0;
   params->offset_y = 0;
   if(params->start_x < 0) {
@@ -56,13 +58,14 @@ void getMapDrawParams(MapDrawParams *params) {
    is the center of the screen.
  */
 void drawMap() {
-  // compute what to draw
+  SDL_Rect pos;
+  int x, m, y, level, n;
   MapDrawParams params;
+
+  // compute what to draw
   getMapDrawParams(&params);
 
   // draw the map
-  SDL_Rect pos;
-  int x, m, y, level, n;
   for(level = LEVEL_BACK; level < LEVEL_COUNT; level++) {
 
 	// erase the screen
@@ -122,6 +125,8 @@ void drawMapLeftEdge() {
   // erase the edge
   SDL_Rect pos;
   int n, m, row, level, x, y;
+  MapDrawParams params;
+
   pos.x = 0;
   pos.y = 0;
   pos.w = cursor.speed_x;
@@ -135,7 +140,6 @@ void drawMapLeftEdge() {
   }
 
   // compute what to draw
-  MapDrawParams params;
   getMapDrawParams(&params);
 
   // override the left edge param
@@ -191,6 +195,8 @@ void drawMapTopEdge() {
   // erase the edge
   SDL_Rect pos;
   int n, m, row, level, x, y;
+  MapDrawParams params;
+
   pos.x = 0;
   pos.y = 0;
   pos.w = map.level[0]->w;
@@ -204,7 +210,6 @@ void drawMapTopEdge() {
   }
 
   // compute what to draw
-  MapDrawParams params;
   getMapDrawParams(&params);
 
   // override the top edge param
@@ -256,6 +261,8 @@ void drawMapRightEdge() {
   // erase the edge
   SDL_Rect pos;
   int n, m, row, level, x, y;
+  MapDrawParams params;
+
   pos.x = map.level[0]->w - cursor.speed_x;
   pos.y = 0;
   pos.w = cursor.speed_x;
@@ -269,7 +276,6 @@ void drawMapRightEdge() {
   }
 
   // compute what to draw
-  MapDrawParams params;
   getMapDrawParams(&params);
 
   // override the right edge param
@@ -323,6 +329,8 @@ void drawMapBottomEdge() {
   // erase the edge
   SDL_Rect pos;
   int n, m, row, level, x, y;
+  MapDrawParams params;
+
   pos.x = 0;
   pos.y = map.level[0]->h - cursor.speed_y;
   pos.w = map.level[0]->w;
@@ -336,7 +344,6 @@ void drawMapBottomEdge() {
   }
 
   // compute what to draw
-  MapDrawParams params;
   getMapDrawParams(&params);
 
   // override the bottom edge param
@@ -386,10 +393,12 @@ void drawMapBottomEdge() {
    (this is so you can string together multiple calls to this method.)
 */
 void scrollMap(int dir) {
+  int row, level;
+  long skipped;
+
   if(dir == DIR_NONE) return;
 
   // move the screen
-  int row, level;
   switch(dir) {
   case DIR_LEFT:
 
@@ -447,7 +456,7 @@ void scrollMap(int dir) {
 		fflush(stderr);
 		exit(0);	
 	  }
-	  long skipped = (long)map.level[level]->w * (long)cursor.speed_y;
+	  skipped = (long)map.level[level]->w * (long)cursor.speed_y;
 	  memmove((Uint16*)((Uint16*)(map.level[level]->pixels) + skipped), 
 			  (Uint16*)(map.level[level]->pixels),
 			  (long)(map.level[level]->w * map.level[level]->h - skipped) * (long)sizeof(Uint16));
@@ -469,7 +478,7 @@ void scrollMap(int dir) {
 		fflush(stderr);
 		exit(0);	
 	  }
-	  long skipped = (long)map.level[level]->w * (long)cursor.speed_y;
+	  skipped = (long)map.level[level]->w * (long)cursor.speed_y;
 	  memmove((Uint16*)(map.level[level]->pixels), 
 			  (Uint16*)((Uint16*)(map.level[level]->pixels) + skipped),
 			  (long)(map.level[level]->w * map.level[level]->h - skipped) * (long)sizeof(Uint16));
@@ -485,6 +494,7 @@ void scrollMap(int dir) {
 
 int moveLeft(int checkCollision) {
   int move, old_pixel, old_pos, old_speed;
+
   old_speed = cursor.speed_x;
   while(1) {
 	move = 1;
@@ -520,6 +530,7 @@ int moveLeft(int checkCollision) {
 
 int moveRight(int checkCollision) {
   int move, old_pixel, old_pos, old_speed;
+
   old_speed = cursor.speed_x;
   while(1) {
 	move = 1;
@@ -555,6 +566,7 @@ int moveRight(int checkCollision) {
 
 int moveUp(int checkCollision) {
   int move, old_pixel, old_pos, old_speed;
+
   old_speed = cursor.speed_y;
   while(cursor.speed_y > 0) {
 	move = 1;
@@ -590,6 +602,7 @@ int moveUp(int checkCollision) {
 
 int moveDown() {
   int move, old_pixel, old_pos, old_speed;
+
   old_speed = cursor.speed_y;
   while(cursor.speed_y > 0) {
 	move = 1;
@@ -631,9 +644,10 @@ int onSolidGround() {
   int old_speed = cursor.speed_y;
   int old_pixel = cursor.pixel_y;
   int old_pos = cursor.pos_y;
+  int n;
 
   cursor.speed_y = (cursor.pixel_y == 0 ? TILE_H : cursor.pixel_y);
-  int n = moveDown(1, 0);
+  n = moveDown();
   
   cursor.speed_y = old_speed;
   cursor.pixel_y = old_pixel;
@@ -681,10 +695,12 @@ int canStepUp(int dir) {
 
 int moveJump() {
   int ret = 0;
+  int old_speed;
+
   if(cursor.jump > 0) {
 	cursor.jump--;
 
-	int old_speed = cursor.speed_y;
+	old_speed = cursor.speed_y;
 	cursor.speed_y = JUMP_SPEED;
 	moveUp(1);
 	cursor.speed_y = old_speed;
@@ -697,9 +713,11 @@ int moveJump() {
    Drop down.
  */
 void moveGravity() {
+  int old_speed;
+
   if(map.gravity) {
 	if(map.detectLadder()) return;
-	int old_speed = cursor.speed_y;
+	old_speed = cursor.speed_y;
 	cursor.speed_y = 10;
 	cursor.gravity = 1;
 	moveDown();
@@ -711,9 +729,10 @@ void moveGravity() {
 /**
    The main thread loop
  */
-int moveMap() {
+void moveMap() {
   SDL_Event event;
   int delay;
+
   while(!map.stopThread) {
 
 	// handle events.
@@ -771,11 +790,12 @@ int moveMap() {
 
 void finishDrawMap() {
   MapDrawParams params;
+  SDL_Rect pos;
+  int level;
+
   getMapDrawParams(&params);
 
   // draw on screen
-  SDL_Rect pos;
-  int level;
   for(level = LEVEL_BACK; level < LEVEL_COUNT; level++) {
 	pos.x = -(EXTRA_X * TILE_W);
 	pos.y = -(EXTRA_Y * TILE_H);
@@ -803,21 +823,23 @@ void finishDrawMap() {
 
 void setImage(int level, int index) {
   int x, y, n;
-  // clear the area 
   SDL_Rect rect, img_rect;
+  int start_x, start_y, end_x, end_y;
+
+  // clear the area 
   if(index > -1) {
 	img_rect.x = cursor.pos_x;
 	img_rect.y = cursor.pos_y;
 	img_rect.w = images[index]->image->w / TILE_W;
 	img_rect.h = images[index]->image->h / TILE_H;
   }
-  int start_x = cursor.pos_x - EXTRA_X;
+  start_x = cursor.pos_x - EXTRA_X;
   if(start_x < 0) start_x = 0;
-  int start_y = cursor.pos_y - EXTRA_Y;
+  start_y = cursor.pos_y - EXTRA_Y;
   if(start_y < 0) start_y = 0;
-  int end_x = cursor.pos_x + (index > -1 ? images[index]->image->w / TILE_W : 1);
+  end_x = cursor.pos_x + (index > -1 ? images[index]->image->w / TILE_W : 1);
   if(end_x >= map.w) end_x = map.w;
-  int end_y = cursor.pos_y + (index > -1 ? images[index]->image->h / TILE_H : 1);
+  end_y = cursor.pos_y + (index > -1 ? images[index]->image->h / TILE_H : 1);
   if(end_y >= map.h) end_y = map.h;
   for(y = start_y; y < end_y; y++) {
 	for(x = start_x; x < end_x; x++) {
@@ -853,6 +875,8 @@ int defaultDetectLadder() {
 }
 
 void initMap(char *name, int w, int h) {
+  int i;
+
   // start a new Map
   map.gravity = 0;
   map.accelerate = 0;
@@ -866,9 +890,8 @@ void initMap(char *name, int w, int h) {
   map.detectLadder = defaultDetectLadder;
   map.handleMapEvent = NULL;
   map.delay = 25;
-  int i;
   for(i = LEVEL_BACK; i < LEVEL_COUNT; i++) {
-	if(!(map.image_index[i] = malloc(sizeof(int) * w * h))) {
+	if(!(map.image_index[i] = (int*)malloc(sizeof(int) * w * h))) {
 	  fprintf(stderr, "Out of memory.\n");
 	  fflush(stderr);
 	  exit(0);
@@ -903,8 +926,9 @@ void initMap(char *name, int w, int h) {
 }
 
 void destroyMap() {
-  free(map.name);
   int i;
+
+  free(map.name);
   for(i = LEVEL_BACK; i < LEVEL_COUNT; i++) {
 	SDL_FreeSurface(map.level[i]);
 	free(map.image_index[i]);
@@ -927,10 +951,14 @@ void resetCursor() {
 
 void saveMap() {
   char path[300];
+  FILE *fp;
+  size_t new_size, written;
+  int *compressed_map;
+
   sprintf(path, "%s/%s.dat", MAPS_DIR, map.name);
   printf("Saving map %s\n", path);  
   fflush(stdout);
-  FILE *fp;
+
   if(!(fp = fopen(path, "wb"))) {
 	fprintf(stderr, "Can't open file for writing.");
 	fflush(stderr);
@@ -941,13 +969,12 @@ void saveMap() {
   fwrite(&(map.h), sizeof(map.h), 1, fp);
 
   // compression step 1
-  size_t new_size;
   printf("Compressing...\n");
-  int *compressed_map = compressMap(&new_size);
+  compressed_map = compressMap(&new_size);
   fprintf(stderr, "Compressed map. old_size=%ld new_size=%ld\n", (LEVEL_COUNT * map.w * map.h), new_size);
   fflush(stderr);
   // write out and further compress in step 2
-  size_t written = compress(compressed_map, new_size, fp);
+  written = compress(compressed_map, new_size, fp);
   fprintf(stderr, "Compressed map step2. Written %ld ints. Compression ration: %f.2\%\n", written, 
 		  (float)written / ((float)(LEVEL_COUNT * map.w * map.h) / 100.0));
   fflush(stderr);
@@ -958,10 +985,14 @@ void saveMap() {
 // call this after initMap()!
 int loadMap(int draw_map) {
   char path[300];
+  FILE *fp;
+  size_t size;
+  int *read_buff;
+  int count_read;
+
   sprintf(path, "%s/%s.dat", MAPS_DIR, map.name);
   printf("Loading map %s\n", path);  
   fflush(stdout);
-  FILE *fp;
   if(!(fp = fopen(path, "rb"))) {
 	fprintf(stderr, "Can't open file for reading.");
 	fflush(stderr);
@@ -973,14 +1004,13 @@ int loadMap(int draw_map) {
 
   // compression step 1: read compressed data from disk
   // FIXME: what would be nicer is to only allocate as much mem as used on disk.
-  size_t size = LEVEL_COUNT * map.w * map.h;
-  int *read_buff;
-  if(!(read_buff = malloc(sizeof(int) * size))) {
+  size = LEVEL_COUNT * map.w * map.h;
+  if(!(read_buff = (int*)malloc(sizeof(int) * size))) {
 	fprintf(stderr, "Out of memory on map read.");
 	fflush(stderr);
 	exit(0);
   }
-  int count_read = decompress(read_buff, size, fp);
+  count_read = decompress(read_buff, size, fp);
   fprintf(stderr, "read %d ints\n", count_read);
   fflush(stderr);
   fclose(fp);
@@ -1004,13 +1034,14 @@ int loadMap(int draw_map) {
 */
 int *compressMap(size_t *new_size) {
   int *q;
-  if(!(q = malloc(sizeof(int) * map.w * map.h * LEVEL_COUNT))) {
+  int level, i, x, y, n;
+  size_t t = 0;
+
+  if(!(q = (int*)malloc(sizeof(int) * map.w * map.h * LEVEL_COUNT))) {
 	fprintf(stderr, "Out of memory in compressMap.");
 	fflush(stderr);
 	exit(-1);
   }
-  int level, i, x, y, n;
-  size_t t = 0;
   for(level = 0; level < LEVEL_COUNT; level++) {
 	for(y = 0; y < map.h; y++) {
 	  for(x = 0; x < map.w;) {
@@ -1038,6 +1069,7 @@ int *compressMap(size_t *new_size) {
 void decompressMap(int *p) {
   int level, i, x, y, n, r, nn;
   size_t t = 0;
+
   for(level = 0; level < LEVEL_COUNT; level++) {
 	for(y = 0; y < map.h; y++) {
 	  for(x = 0; x < map.w;) {

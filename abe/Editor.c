@@ -111,6 +111,9 @@ void freeMap() {
 
 void drawEditPanel() {
   SDL_Rect rect;
+  int level;
+  char s[80];
+
   rect.x = 0;
   rect.y = 0;
   rect.w = edit_panel.image->w;
@@ -125,7 +128,6 @@ void drawEditPanel() {
 
 
   // draw which level is being drawn
-  int level;
   for(level = LEVEL_BACK; level < LEVEL_COUNT; level++) {
 	rect.x = 10 + (level * 40);
 	rect.y = 10;
@@ -162,7 +164,6 @@ void drawEditPanel() {
   //  SDL_Flip(screen);
 
 
-  char s[80];
   sprintf(s, "x%d y%d level%d dir%d", cursor.pos_x, cursor.pos_y, edit_panel.level, cursor.dir);
   drawString(screen, 5, 5, s);
   sprintf(s, "spx%d spy%d px%d py%d", cursor.speed_x, cursor.speed_y, cursor.pixel_x, cursor.pixel_y);
@@ -175,6 +176,10 @@ void resetEditPanel() {
 }
 
 void allocMap(char *name, int w, int h) {
+  int level, i, x, y;
+  int step_x, step_y;
+  Image *img;
+
   initMap(name, w, h);
   
   // set our painting events
@@ -184,13 +189,12 @@ void allocMap(char *name, int w, int h) {
   map.handleMapEvent = editorMainLoop;
 
   // fill the map
-  int level, i, x, y;
 
 
   // add some tiles in the background
-  Image *img = images[img_back];
-  int step_x = img->image->w / TILE_W;
-  int step_y = img->image->h / TILE_H; 
+  img = images[img_back];
+  step_x = img->image->w / TILE_W;
+  step_y = img->image->h / TILE_H; 
   for(y = 0; y < map.h; y += step_y) {
 	for(x = 0; x < map.w; x += step_x) {
 	  i = x + (y * map.w);

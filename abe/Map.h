@@ -76,6 +76,9 @@ typedef struct _cursor {
 Cursor cursor;
 Map map;
 
+// the main map loop routine
+void moveMap();
+
 void drawMap();
 void setImage(int level, int index);
 void initMap(char *name, int w, int h);
@@ -102,7 +105,7 @@ void unlockMap();
 	can go from 12M to 14K!
 */
 int *compressMap(size_t *new_size);
-void decompressMap();
+void decompressMap(int *data);
 
 void startJump();
 
