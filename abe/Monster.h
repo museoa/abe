@@ -9,6 +9,11 @@
 
 struct _monster;
 
+// The extra number of tiles around the screen 
+// where monsters are still active
+#define MONSTER_EXTRA_X 20
+#define MONSTER_EXTRA_Y 20
+
 /**
    A monster instance currently on screen.
  */

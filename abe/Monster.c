@@ -1,5 +1,7 @@
 #include "Monster.h"
 
+int getLiveMonsterFace(LiveMonster *live);
+
 SDL_Rect extended_screen_rect;
 
 void defaultMoveMonster(LiveMonster *live) {
@@ -31,7 +33,7 @@ int stepMonsterLeft(LiveMonster *live) {
   // collision detection
   if(!fail) {
 	initMonsterPos(&pos, live);
-	if(containsType(&pos, TYPE_WALL) || atLeftEdge(&pos)) fail = 1;
+	if(containsType(&pos, TYPE_WALL) || !onSolidGround(&pos)) fail = 1;
   }
   if(fail) {
 	memcpy(live, &old, sizeof(LiveMonster));
@@ -56,7 +58,7 @@ int stepMonsterRight(LiveMonster *live) {
   // collision detection
   if(!fail) {
 	initMonsterPos(&pos, live);
-	if(containsType(&pos, TYPE_WALL) || atRightEdge(&pos)) fail = 1;
+	if(containsType(&pos, TYPE_WALL) || !onSolidGround(&pos)) fail = 1;
   }
   if(fail) {
 	memcpy(live, &old, sizeof(LiveMonster));
@@ -71,14 +73,15 @@ void moveCrab(LiveMonster *live_monster) {
   if(live_monster->face >= 
 	 live_monster->monster->image_count * live_monster->monster->face_mod) 
 	live_monster->face = 0;
+
   // move sideways until you hit a wall or an edge
   if(live_monster->dir == DIR_LEFT) {
 	if(!stepMonsterLeft(live_monster)) {
-	  live_monster->dir == DIR_RIGHT;
+	  live_monster->dir = DIR_RIGHT;
 	}
   } else {
 	if(!stepMonsterRight(live_monster)) {
-	  live_monster->dir == DIR_LEFT;
+	  live_monster->dir = DIR_LEFT;
 	}
   }
 }
@@ -92,10 +95,10 @@ void initMonsters() {
   live_monster_count = 0;
 
   // init the screen rectangle.
-  extended_screen_rect.x = -EXTRA_X * TILE_W;
-  extended_screen_rect.y = -EXTRA_Y * TILE_H;
-  extended_screen_rect.w = screen->w + 2 * EXTRA_X * TILE_W;
-  extended_screen_rect.h = screen->h + 2 * EXTRA_Y * TILE_H;
+  extended_screen_rect.x = -MONSTER_EXTRA_X * TILE_W;
+  extended_screen_rect.y = -MONSTER_EXTRA_Y * TILE_H;
+  extended_screen_rect.w = screen->w + 2 * MONSTER_EXTRA_X * TILE_W;
+  extended_screen_rect.h = screen->h + 2 * MONSTER_EXTRA_Y * TILE_H;
   
   // common properties.
   for(i = 0; i < MONSTER_COUNT; i++) {
@@ -159,7 +162,7 @@ void removeLiveMonster(int live_monster_index) {
   p = &live_monsters[live_monster_index];
   setImageNoCheck(LEVEL_MAIN, 
 				  p->pos_x, p->pos_y, 
-				  p->monster->image_index[p->face]);
+				  p->monster->image_index[getLiveMonsterFace(p)]);
 
   // remove it from memory
   for(t = live_monster_index; t < live_monster_count - 1; t++) {
@@ -193,8 +196,7 @@ void drawLiveMonsters(SDL_Surface *surface, int start_x, int start_y) {
   for(i = 0; i < live_monster_count; i++) {
 	live_monsters[i].monster->moveMonster(&live_monsters[i]);
 
-	face = live_monsters[i].face / live_monsters[i].monster->face_mod;
-	img = images[live_monsters[i].monster->image_index[face]]->image;
+	img = images[live_monsters[i].monster->image_index[getLiveMonsterFace(&live_monsters[i])]]->image;
 	pos.x = live_monsters[i].pos_x * TILE_W - start_x + live_monsters[i].pixel_x;
 	pos.y = live_monsters[i].pos_y * TILE_H - start_y + live_monsters[i].pixel_y;
 	pos.w = img->w;
@@ -208,4 +210,8 @@ void drawLiveMonsters(SDL_Surface *surface, int start_x, int start_y) {
 	  SDL_BlitSurface(img, NULL, surface, &pos);
 	}
   }
+}
+
+int getLiveMonsterFace(LiveMonster *live) {
+  return live->face / live->monster->face_mod;
 }
