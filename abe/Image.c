@@ -81,6 +81,11 @@ void doLoadImage(char *filename, char *name) {
 	  type = TYPE_LADDER;
 	} else if(!strcmp(name, "crab1") || !strcmp(name, "crab2")) {
 	  monster = MONSTER_CRAB;
+	} else if(!strcmp(name, "smash")) {
+	  monster = MONSTER_SMASHER;
+	  img_smash = image_count;
+	} else if(!strcmp(name, "smash2")) {
+	  img_smash2 = image_count;
 	}
 
 	// store the image

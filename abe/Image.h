@@ -29,7 +29,7 @@ Image *images[256];
 int image_count;
 
 // known image indexes
-int img_brick, img_rock, img_back, img_key, img_door, img_door2, img_key;
+int img_brick, img_rock, img_back, img_key, img_door, img_door2, img_key, img_smash, img_smash2;
 int img_balloon[3];
 
 #endif

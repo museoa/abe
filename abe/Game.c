@@ -46,6 +46,8 @@ void gameBeforeDrawToScreen() {
   char s[80];
   sprintf(s, "life %d score %d keys %d balloons %d", game.lives, game.score, game.keys, game.balloons);
   drawString(screen, 5, 5, s);
+  sprintf(s, "x %d y %d", cursor.pos_x, cursor.pos_y);
+  drawString(screen, 5, 5 + FONT_HEIGHT, s);
 }
 
 /**
@@ -219,11 +221,12 @@ void runMap(char *name, int w, int h) {
 	return;
   }
   // start outside
-  //  cursor.pos_x = 177;
-  //  cursor.pos_y = 44;
+  //  game.player_start_x = 20;
+  //  game.player_start_y = 28;
 
-  game.player_start_x = 20;
-  game.player_start_y = 28;
+  game.player_start_x = 114;
+  game.player_start_y = 49;
+
   game.lives = 5;
   game.score = 0;
   game.draw_player = 1;
@@ -234,10 +237,6 @@ void runMap(char *name, int w, int h) {
   // start inside
   cursor.pos_x = game.player_start_x;
   cursor.pos_y = game.player_start_y;
-
-  // monster testing
-  //  cursor.pos_x = 35;
-  //  cursor.pos_y = 44;
 
   cursor.speed_x = 8;
   cursor.speed_y = 8;

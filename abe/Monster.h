@@ -5,7 +5,8 @@
 #include "Map.h"
 
 #define MONSTER_CRAB 0
-#define MONSTER_COUNT 1
+#define MONSTER_SMASHER 1
+#define MONSTER_COUNT 2
 
 struct _monster;
 
@@ -41,6 +42,7 @@ typedef struct _monster {
   int start_speed_y;
   int face_mod;
   void (*moveMonster) (LiveMonster *live);
+  void (*drawMonster) (SDL_Rect *pos, LiveMonster *live, SDL_Surface *surface, SDL_Surface *img);
 } Monster;
 
 Monster monsters[256];

@@ -47,6 +47,7 @@ In general the keys are:
 Game:
 arrow keys - move
 space - jump
+enter - use a balloon
 esc - quit
 
 Editor:
