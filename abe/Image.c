@@ -77,8 +77,18 @@ void doLoadImage(char *filename, char *name) {
 	} else if(!strcmp(name, "balloon3")) {
 	  type = TYPE_OBJECT;
 	  img_balloon[2] = image_count;
+	} else if(!strcmp(name, "wave")) {
+	  type = TYPE_HARMFUL;
+	} else if(!strcmp(name, "water")) {
+	  img_water = image_count;
 	} else if(!strcmp(name, "ladder")) {
 	  type = TYPE_LADDER;
+	} else if(!strcmp(name, "spring")) {
+	  type = TYPE_SPRING;
+	  img_spring = image_count;
+	} else if(!strcmp(name, "spring2")) {
+	  type = TYPE_SPRING;
+	  img_spring2 = image_count;
 	} else if(!strcmp(name, "crab1") || !strcmp(name, "crab2")) {
 	  monster = MONSTER_CRAB;
 	} else if(!strcmp(name, "smash")) {

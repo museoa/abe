@@ -16,6 +16,8 @@
 
 #define BALLOON_RIDE_INTERVAL 500
 
+#define SPRING_JUMP 30
+
 typedef struct _game {
   int face;
   int dir;

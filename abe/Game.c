@@ -160,7 +160,8 @@ int detectCollision(int dir) {
   pos.h = tom[0]->h / TILE_H;
 
   // did we hit a monster?
-  if(!GOD_MODE && detectMonster(&pos)) {
+  if(!GOD_MODE && 
+	 (detectMonster(&pos) || containsType(&pos, TYPE_HARMFUL))) {
 	handleDeath();
 	return 1;
   }
@@ -192,6 +193,11 @@ int detectCollision(int dir) {
 	} else {
 	  return 0;
 	}
+  }
+
+  // did we hit a spring
+  if(containsType(&pos, TYPE_SPRING)) {
+	startJumpN(SPRING_JUMP);
   }
   
   // are we in a wall?

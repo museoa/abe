@@ -1084,8 +1084,12 @@ void repositionCursor(int tile_x, int tile_y) {
 }
 
 void startJump() {
+  startJumpN(JUMP_LENGTH);
+}
+
+void startJumpN(int n) {
   if(!cursor.jump) {
-	cursor.jump = JUMP_LENGTH;
+	cursor.jump = n;
   }
 }
 

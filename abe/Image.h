@@ -17,6 +17,8 @@ void loadImagesFromTar();
 #define TYPE_LADDER 2
 #define TYPE_OBJECT 4
 #define TYPE_DOOR 8
+#define TYPE_HARMFUL 16
+#define TYPE_SPRING 32
 
 typedef struct image {
   char *name;
@@ -29,7 +31,7 @@ Image *images[256];
 int image_count;
 
 // known image indexes
-int img_brick, img_rock, img_back, img_key, img_door, img_door2, img_key, img_smash, img_smash2;
+int img_brick, img_rock, img_back, img_key, img_door, img_door2, img_key, img_smash, img_smash2, img_water, img_spring, img_spring2;
 int img_balloon[3];
 
 #endif
