@@ -871,73 +871,80 @@ int moveWithPlatform() {
 void moveMap() {
   SDL_Event event;
   int delay;
+  Uint32 curr_time, next_time = 0;
+  Uint32 TICK_AMOUNT = 40; // 25 fps
 
   while(1) {
 
-	// where is the map?
-	map.top_left_x = cursor.pos_x - screen_center_x;
-	map.top_left_y = cursor.pos_y - screen_center_y;
+	curr_time = SDL_GetTicks();
 
-	// handle events.
-	while(SDL_PollEvent(&event)) {
-	  map.handleMapEvent(&event);
-	}
-	// jumping & platform
-	if(!moveJump() && !moveWithPlatform() && !moveSlide()) {
-	  // activate gravity
-	  moveGravity();
-	}
+	// is it time to draw the map?
+	if(!next_time || curr_time > next_time) {
 
-	// set unaccelerated speed
-	if(!map.accelerate) {
-	  cursor.speed_x = TILE_W;
-	  cursor.speed_y = TILE_H;
-	}
-	switch(cursor.dir) {
-	case DIR_QUIT:
-	  return;
-	case DIR_LEFT:
-	  if(!moveLeft(1)) {
-		// try to step up onto the obsticle
-		canStepUp(DIR_LEFT);
+
+	  // where is the map?
+	  map.top_left_x = cursor.pos_x - screen_center_x;
+	  map.top_left_y = cursor.pos_y - screen_center_y;
+	  
+	  // handle events.
+	  while(SDL_PollEvent(&event)) {
+		map.handleMapEvent(&event);
 	  }
-	  break;	
-	case DIR_RIGHT:
-	  if(!moveRight(1)) {
-		// try to step up onto the obsticle
-		canStepUp(DIR_RIGHT);
+	  // jumping & platform
+	  if(!moveJump() && !moveWithPlatform() && !moveSlide()) {
+		// activate gravity
+		moveGravity();
 	  }
-	  break;	
-	case DIR_UP:
-	  moveUp(1, 0);
+	  
+	  // set unaccelerated speed
+	  if(!map.accelerate) {
+		cursor.speed_x = TILE_W;
+		cursor.speed_y = TILE_H;
+	  }
+	  switch(cursor.dir) {
+	  case DIR_QUIT:
+		return;
+	  case DIR_LEFT:
+		if(!moveLeft(1)) {
+		  // try to step up onto the obsticle
+		  canStepUp(DIR_LEFT);
+		}
+		break;	
+	  case DIR_RIGHT:
+		if(!moveRight(1)) {
+		  // try to step up onto the obsticle
+		  canStepUp(DIR_RIGHT);
+		}
+		break;	
+	  case DIR_UP:
+		moveUp(1, 0);
+		break;
+	  case DIR_DOWN:
+		moveDown(1, 0, 0);
+		break;
+	  case DIR_UPDATE:
+		cursor.dir = DIR_NONE;
 	  break;
-	case DIR_DOWN:
-	  moveDown(1, 0, 0);
-	  break;
-	case DIR_UPDATE:
-	  cursor.dir = DIR_NONE;
-	  break;
+	  }
+	  
+	  // check for monsters, etc.
+	  if(map.checkPosition) map.checkPosition();
+	  
+	  // update the map?
+	  if(map.redraw) {
+		map.redraw = 0;
+		drawMap(); // this calls finishDrawMap
+	  } else {
+		// update the screen
+		finishDrawMap(!map.redraw);
+	  }
+	  
+	  // when to update the screen next?
+	  next_time += TICK_AMOUNT;
+	  // skip next frame if time passed already
+	  if(curr_time > next_time) 
+		next_time = curr_time + TICK_AMOUNT;
 	}
-
-	// check for monsters, etc.
-	if(map.checkPosition) map.checkPosition();
-
-	// update the screen
-	finishDrawMap();
-
-	// update the map?
-	if(map.redraw) {
-	  map.redraw = 0;
-	  drawMap();
-	}
-
-	if(cursor.wait) {
-	  cursor.wait = 0;
-	  delay = map.delay;
-	} else {
-	  delay = 10; // a small delay to not max out the cpu
-	}
-	SDL_Delay(delay);
   }
 }
 
