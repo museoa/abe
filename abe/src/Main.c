@@ -55,6 +55,7 @@ int main(int argc, char *argv[]) {
   int mapwidth, mapheight;
 
   mainstruct.drawBackground = 1;
+  mainstruct.alphaBlend = 1;
   runmode = RUNMODE_SPLASH;  
   mainstruct.full_screen = 1;
 

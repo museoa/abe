@@ -16,6 +16,8 @@ int image_count;
 int img_brick, img_rock, img_back, img_key, img_door, img_door2, img_key, img_smash, img_smash2, img_smash3, img_smash4;
 int img_water, img_spring, img_spring2, img_spider, img_spider2, img_health;
 int img_balloon[3], img_gem[2], img_bullet[4], img_slide_left[3], img_slide_right[3];
+int alphacount = 0;
+int alphas[256];
 
 /**
    Store the image in an array or a named img buffer.
@@ -36,7 +38,7 @@ void doLoadImage(char *filename, char *name) {
   }
 
   // set black as the transparent color key
-  SDL_SetColorKey(image, SDL_SRCCOLORKEY, SDL_MapRGBA(image->format, 0x00, 0x00, 0x00, 0xff));
+  SDL_SetColorKey(image, SDL_SRCCOLORKEY, SDL_MapRGBA(image->format, 0x00, 0x00, 0x00, SDL_ALPHA_OPAQUE));
 
   // save the image
   if(!strcmp(name, "abe")) {
@@ -123,8 +125,10 @@ void doLoadImage(char *filename, char *name) {
 	  img_gem[2] = image_count;
 	} else if(!strcmp(name, "wave")) {
 	  type = TYPE_HARMFUL;
+	  alphas[alphacount++] = image_count;
 	} else if(!strcmp(name, "water")) {
 	  img_water = image_count;
+	  alphas[alphacount++] = image_count;
 	} else if(!strcmp(name, "ladder")) {
 	  type = TYPE_LADDER;
 	} else if(!strcmp(name, "spring")) {
@@ -235,6 +239,7 @@ char *getImageName(char *s) {
  */
 void loadImages() {
   loadImagesFromTar();
+  setAlphaBlends();
 
   /*
   image_count = 0;
@@ -363,4 +368,15 @@ void loadImagesFromTar() {
 
   // remove the tmp file
   remove(tmp_path);
+}
+
+void setAlphaBlends() {
+  int i;
+  for(i = 0; i < alphacount; i++) {
+	if(mainstruct.alphaBlend) {
+	  SDL_SetAlpha(images[alphas[i]]->image, SDL_RLEACCEL | SDL_SRCALPHA, 128);
+	} else {
+	  SDL_SetAlpha(images[alphas[i]]->image, 0, 0);
+	}
+  }
 }

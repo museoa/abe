@@ -84,6 +84,7 @@ typedef struct _map {
   int moveBackground; // if 1 the background scroll artificially
   int max_speed_boost; // for slow machines, add this to movement speed. (0-10 extra)
   int quit;
+  SDL_Surface *overlay;
 } Map;
 
 // an optimization for looking up monsters etc. multiple times

@@ -12,6 +12,7 @@ extern SDL_Surface *tom[13];
 
 void loadImages();
 void loadImagesFromTar();
+void setAlphaBlends();
 
 #define TYPE_WALL 1
 #define TYPE_LADDER 2

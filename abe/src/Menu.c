@@ -7,7 +7,8 @@
 #define MUSIC_ENABLED 2
 #define FULLSCREEN_ENABLED 4
 #define DRAW_BACKGROUND 5
-#define GAME_DIFFICOULTY 7
+#define ALPHA_BLEND 6
+#define GAME_DIFFICOULTY 8
 
 typedef struct _settingEntry {
   char title[80];
@@ -22,6 +23,7 @@ SettingEntry entries[] = {
   { "video", 0, { "" }, 0 },
   { "full screen", 2, { "on", "off" }, 0 },
   { "background", 2, { "on", "off" }, 0 },
+  { "alpha blend", 2, { "on", "off" }, 0 },
   { "game", 0, { "" }, 0 },
   { "difficulty", 3, { "easy", "normal", "hard" }, 0 },
   { "", 0, { "" }, 0 }
@@ -121,6 +123,8 @@ void saveSettings() {
   }
   game.difficoulty = entries[GAME_DIFFICOULTY].selected;
   mainstruct.drawBackground = !(entries[DRAW_BACKGROUND].selected);
+  mainstruct.alphaBlend = !(entries[ALPHA_BLEND].selected);
+  setAlphaBlends();
 }
 
 void loadSettings() {
@@ -129,6 +133,7 @@ void loadSettings() {
   entries[FULLSCREEN_ENABLED].selected = (mainstruct.full_screen ? 0 : 1);
   entries[GAME_DIFFICOULTY].selected = game.difficoulty;
   entries[DRAW_BACKGROUND].selected = (mainstruct.drawBackground ? 0 : 1);
+  entries[ALPHA_BLEND].selected = (mainstruct.alphaBlend ? 0 : 1);
 }
 
 void paintScreen() {

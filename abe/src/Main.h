@@ -33,6 +33,7 @@ extern int state;
 typedef struct _main {
   int drawBackground;
   int full_screen;
+  int alphaBlend;
 } Main;
 extern Main mainstruct;
 

@@ -29,6 +29,7 @@ typedef struct _mapDrawParams {
   int offset_x;  // how many tiles to offset from the top/left edge of the screen
   int offset_y;
 } MapDrawParams;
+MapDrawParams params;
 
 // artificially moving the background
 int move_background_x = 0;
@@ -78,7 +79,6 @@ void getMapDrawParams(MapDrawParams *params) {
 void drawMap() {
   SDL_Rect pos;
   int x, m, y, level, n;
-  MapDrawParams params;
 
   // increment the number of moves
   moves++;
@@ -87,7 +87,7 @@ void drawMap() {
   getMapDrawParams(&params);
 
   // draw the map
-  for(level = LEVEL_BACK; level < LEVEL_COUNT; level++) {
+  for(level = LEVEL_BACK; level < LEVEL_COUNT - 1; level++) {
 
 	// erase the screen
 	pos.x = 0;
@@ -141,13 +141,12 @@ void drawMapLeftEdge() {
   // erase the edge
   SDL_Rect pos;
   int n, m, level, x, y;
-  MapDrawParams params;
 
   pos.x = 0;
   pos.y = 0;
   pos.w = cursor.speed_x;
   pos.h = map.level[0]->h;
-  for(level = LEVEL_BACK; level < LEVEL_COUNT; level++) {
+  for(level = LEVEL_BACK; level < LEVEL_COUNT - 1; level++) {
 	SDL_FillRect(map.level[level], &pos, SDL_MapRGBA(screen->format, 0x00, 0x00, 0x00, 0x00));
   }
 
@@ -160,7 +159,7 @@ void drawMapLeftEdge() {
   
   // redraw the left edge of the screen
   if(params.start_x >= 0) {
-	for(level = LEVEL_BACK; level < LEVEL_COUNT; level++) {
+	for(level = LEVEL_BACK; level < LEVEL_COUNT - 1; level++) {
 	  for(y = params.start_y; y < params.end_y; y++) {
 		for(x = params.start_x; x <= params.start_x + 1;) {
 		  n = (map.image_index[level][x + (y * map.w)]);
@@ -206,13 +205,12 @@ void drawMapTopEdge() {
   // erase the edge
   SDL_Rect pos;
   int n, m, level, x, y;
-  MapDrawParams params;
 
   pos.x = 0;
   pos.y = 0;
   pos.w = map.level[0]->w;
   pos.h = cursor.speed_y;
-  for(level = LEVEL_BACK; level < LEVEL_COUNT; level++) {
+  for(level = LEVEL_BACK; level < LEVEL_COUNT - 1; level++) {
 	SDL_FillRect(map.level[level], &pos, SDL_MapRGBA(screen->format, 0x00, 0x00, 0x00, 0x00));
   }
 
@@ -224,7 +222,7 @@ void drawMapTopEdge() {
    
   if(params.start_y >= 0) {
 	// redraw the left edge of the screen
-	for(level = LEVEL_BACK; level < LEVEL_COUNT; level++) {
+	for(level = LEVEL_BACK; level < LEVEL_COUNT - 1; level++) {
 	  for(y = params.start_y; y <= params.start_y + 1; y++) {
 		for(x = params.start_x; x < params.end_x;) {
 		  n = (map.image_index[level][x + (y * map.w)]);
@@ -267,13 +265,12 @@ void drawMapRightEdge() {
   // erase the edge
   SDL_Rect pos;
   int n, m, level, x, y;
-  MapDrawParams params;
 
   pos.x = map.level[0]->w - cursor.speed_x;
   pos.y = 0;
   pos.w = cursor.speed_x;
   pos.h = map.level[0]->h;
-  for(level = LEVEL_BACK; level < LEVEL_COUNT; level++) {
+  for(level = LEVEL_BACK; level < LEVEL_COUNT - 1; level++) {
 	SDL_FillRect(map.level[level], &pos, SDL_MapRGBA(screen->format, 0x00, 0x00, 0x00, 0x00));
   }
 
@@ -284,7 +281,7 @@ void drawMapRightEdge() {
   params.end_x = (cursor.pos_x - screen_center_x) + screen_w;
 
   // redraw the left edge of the screen
-  for(level = LEVEL_BACK; level < LEVEL_COUNT; level++) {
+  for(level = LEVEL_BACK; level < LEVEL_COUNT - 1; level++) {
 	for(y = params.start_y; y < params.end_y; y++) {
 	  // here we have to draw more than 1 column b/c images
 	  // extend from right_edge-EXTRA_X on. 
@@ -330,13 +327,12 @@ void drawMapBottomEdge() {
   // erase the edge
   SDL_Rect pos;
   int n, m, level, x, y;
-  MapDrawParams params;
 
   pos.x = 0;
   pos.y = map.level[0]->h - cursor.speed_y;
   pos.w = map.level[0]->w;
   pos.h = cursor.speed_y;
-  for(level = LEVEL_BACK; level < LEVEL_COUNT; level++) {
+  for(level = LEVEL_BACK; level < LEVEL_COUNT - 1; level++) {
 	SDL_FillRect(map.level[level], &pos, SDL_MapRGBA(screen->format, 0x00, 0x00, 0x00, 0x00));
   }
 
@@ -347,7 +343,7 @@ void drawMapBottomEdge() {
   params.end_y = (cursor.pos_y - screen_center_y) + screen_h;
    
   // redraw the left edge of the screen
-  for(level = LEVEL_BACK; level < LEVEL_COUNT; level++) {
+  for(level = LEVEL_BACK; level < LEVEL_COUNT - 1; level++) {
 	// here we have to draw more than 1 column b/c images
 	// extend from right_edge-EXTRA_X on. 
 	for(y = params.end_y - EXTRA_Y; y <= params.end_y; y++) { // FIXME: this may be y < params.end_y
@@ -402,7 +398,7 @@ void scrollMap(int dir) {
   switch(dir) {
   case DIR_LEFT:
 
-	for(level = LEVEL_BACK; level < LEVEL_COUNT; level++) {
+	for(level = LEVEL_BACK; level < LEVEL_COUNT - 1; level++) {
 	  SDL_FillRect(map.transfer, NULL, SDL_MapRGBA(screen->format, 0x00, 0x00, 0x00, 0x00));
 	  SDL_BlitSurface(map.level[level], NULL, map.transfer, NULL);
 	  pos.x = cursor.speed_x;
@@ -420,7 +416,7 @@ void scrollMap(int dir) {
 
   case DIR_RIGHT:
 
-	for(level = LEVEL_BACK; level < LEVEL_COUNT; level++) {
+	for(level = LEVEL_BACK; level < LEVEL_COUNT - 1; level++) {
 	  SDL_FillRect(map.transfer, NULL, SDL_MapRGBA(screen->format, 0x00, 0x00, 0x00, 0x00));
 	  pos.x = cursor.speed_x;
 	  pos.y = 0;
@@ -441,7 +437,7 @@ void scrollMap(int dir) {
 
 
   case DIR_UP:
-	for(level = LEVEL_BACK; level < LEVEL_COUNT; level++) {
+	for(level = LEVEL_BACK; level < LEVEL_COUNT - 1; level++) {
 	  SDL_FillRect(map.transfer, NULL, SDL_MapRGBA(screen->format, 0x00, 0x00, 0x00, 0x00));
 	  pos.x = 0;
 	  pos.y = 0;
@@ -463,7 +459,7 @@ void scrollMap(int dir) {
 
   case DIR_DOWN:
 
-	for(level = LEVEL_BACK; level < LEVEL_COUNT; level++) {
+	for(level = LEVEL_BACK; level < LEVEL_COUNT - 1; level++) {
 	  SDL_FillRect(map.transfer, NULL, SDL_MapRGBA(screen->format, 0x00, 0x00, 0x00, 0x00));
 	  pos.x = 0;
 	  pos.y = cursor.speed_y;
@@ -912,12 +908,44 @@ void scrollBackground() {
 	move_background_y = 0;
 }
 
+void drawLevelFore() {
+  SDL_Rect pos;
+  int x, y, n, i;
+
+  // draw the map
+  for(y = params.start_y; y < params.end_y; y++) {
+	for(x = params.start_x; x < params.end_x;) {
+	  i = x + (y * map.w);
+	  if(i < 0) {
+		fprintf(stderr, "ERROR: x=%d y=%d start_x=%d start_y=%d i=%d\n", x, y, params.start_x, params.start_y, i);
+		exit(1);
+	  }
+	  n = map.image_index[LEVEL_FORE][i];
+	  if(n != EMPTY_MAP) {
+		// Draw the image
+		// should be some check here in case images[n] points to la-la-land.
+		pos.x = (params.offset_x + (x - params.start_x)) * TILE_W;
+		pos.y = (params.offset_y + (y - params.start_y)) * TILE_H;
+		pos.w = images[n]->image->w;
+		pos.h = images[n]->image->h;
+		
+		// compensate for extra area
+		pos.x += -cursor.pixel_x;
+		pos.y += -cursor.pixel_y;
+		SDL_BlitSurface(images[n]->image, NULL, screen, &pos);
+		
+		// skip ahead
+		x += images[n]->image->w / TILE_W;
+	  } else {	  
+		x++;
+	  }
+	}	
+  }
+}
+
 void finishDrawMap() {
-  MapDrawParams params;
   SDL_Rect pos;
   int level;
-
-  getMapDrawParams(&params);
 
   if(mainstruct.drawBackground) {
 	// draw the background
@@ -935,22 +963,23 @@ void finishDrawMap() {
   }
 
   // draw on screen
-  for(level = LEVEL_BACK; level < LEVEL_COUNT; level++) {
+  for(level = LEVEL_BACK; level < LEVEL_COUNT - 1; level++) {
 	pos.x = -(EXTRA_X * TILE_W);
 	pos.y = -(EXTRA_Y * TILE_H);
 	pos.w = map.level[level]->w;
 	pos.h = map.level[level]->h;
 	SDL_BlitSurface(map.level[level], NULL, screen, &pos);
-	// make a callback if it exists
-	if(level == LEVEL_MAIN) {	  
-	  // draw creatures
-	  if(map.monsters) drawLiveMonsters(screen, 
-										(params.start_x - params.offset_x) * TILE_W + cursor.pixel_x,
-										(params.start_y - params.offset_y) * TILE_H + cursor.pixel_y);
-	  // draw Tom
-	  if(map.afterMainLevelDrawn) map.afterMainLevelDrawn();
-	}
   }
+  // make a callback if it exists
+  // draw creatures
+  if(map.monsters) drawLiveMonsters(screen, 
+									(params.start_x - params.offset_x) * TILE_W + cursor.pixel_x,
+									(params.start_y - params.offset_y) * TILE_H + cursor.pixel_y);
+  // draw Tom
+  if(map.afterMainLevelDrawn) map.afterMainLevelDrawn();
+
+  // draw the overlay level
+  drawLevelFore();
 
   // if the callback function is set, call it now.
   if(map.beforeDrawToScreen) {
@@ -1109,12 +1138,16 @@ int initMap(char *name, int w, int h) {
 	  fflush(stderr);
 	  //	  return 0;
 	}
-
-	// set black as the transparent color key
-	if(i != LEVEL_BACK || mainstruct.drawBackground) {
-	  SDL_SetColorKey(map.level[i], SDL_SRCCOLORKEY, SDL_MapRGBA(map.level[i]->format, 0x00, 0x00, 0x00, 0xff));
-	}
   }
+
+  // set the pixel blending for some levels
+  if(mainstruct.drawBackground) {
+	SDL_SetColorKey(map.level[LEVEL_BACK], SDL_SRCCOLORKEY, SDL_MapRGBA(map.level[LEVEL_BACK]->format, 0x00, 0x00, 0x00, 0x00));
+  }
+  SDL_SetColorKey(map.level[LEVEL_MAIN], SDL_SRCCOLORKEY, SDL_MapRGBA(map.level[LEVEL_MAIN]->format, 0x00, 0x00, 0x00, 0x00));
+  //  if(!mainstruct.alphaBlend) {
+  //	SDL_SetColorKey(map.level[LEVEL_FORE], SDL_SRCCOLORKEY, SDL_MapRGBA(map.level[LEVEL_BACK]->format, 0x00, 0x00, 0x00, 0x00));
+  //  }
 
   // init the transfer area
   if(!(map.transfer = SDL_CreateRGBSurface(SDL_HWSURFACE, 
