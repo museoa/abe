@@ -9,7 +9,7 @@ AC_CANONICAL_HOST
 AC_CANONICAL_TARGET
 
 dnl Setup for automake
-AM_INIT_AUTOMAKE(SDL_tests, $SDL_VERSION)
+AM_INIT_AUTOMAKE(abe, $SDL_VERSION)
 
 dnl Check for tools
 

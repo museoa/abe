@@ -203,8 +203,6 @@ void drawLiveMonsters(SDL_Surface *surface, int start_x, int start_y) {
 	pos.h = img->h;
 
 	if(!isOnScreen(pos)) {
-	  fprintf(stderr, ">>> offscreen at (%d,%d)-(%d,%d)\n", pos.x, pos.y, pos.x + pos.w, pos.y + pos.h);
-	  fflush(stderr);
 	  removeLiveMonster(i);
 	} else {
 	  SDL_BlitSurface(img, NULL, surface, &pos);
