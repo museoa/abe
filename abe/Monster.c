@@ -96,8 +96,8 @@ void drawLiveMonsters(SDL_Surface *surface, MapDrawParams *params) {
 	live_monsters[i].monster->moveMonster(&live_monsters[i]);
 
 	img = images[live_monsters[i].monster->image_index[live_monsters[i].face]]->image;
-	pos.x = (live_monsters[i].pos_x - params->start_x) * TILE_W + live_monsters[i].pixel_x;
-	pos.y = (live_monsters[i].pos_y - params->start_y) * TILE_H + live_monsters[i].pixel_y;
+	pos.x = (live_monsters[i].pos_x - params->start_x - EXTRA_X) * TILE_W + live_monsters[i].pixel_x;
+	pos.y = (live_monsters[i].pos_y - params->start_y - EXTRA_Y) * TILE_H + live_monsters[i].pixel_y;
 	pos.w = img->w;
 	pos.h = img->h;
 
