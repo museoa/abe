@@ -781,14 +781,34 @@ void moveGravity() {
   }
 }
 
-void moveWithPlatform() {
-  int old_speed;
-  if(!cursor.platform) return;
+int moveWithPlatform() {
+  int old_speed, old_dir;
+  if(!cursor.platform) return 0;
+  
+  // move up or down if needed.
+  if(cursor.pixel_y) {
+	old_speed = cursor.speed_y;
+	old_dir = cursor.dir;
+	if(cursor.pos_y + (tom[0]->h / TILE_H) < cursor.platform-> pos_y) {
+	  cursor.speed_y = TILE_H - cursor.pixel_y;
+	  cursor.dir = DIR_DOWN;
+	  moveDown();
+	} else {
+	  cursor.speed_y = cursor.pixel_y;
+	  cursor.dir = DIR_UP;
+	  moveUp(0);
+	}
+	cursor.speed_y = old_speed;
+	cursor.dir = old_dir;
+  }
+  
+  // move with the platform
   old_speed = cursor.speed_x;
   cursor.speed_x = cursor.platform->speed_x;
   if(cursor.platform->dir == DIR_LEFT) moveLeft(1);
   else moveRight(1);
   cursor.speed_x = old_speed;
+  return 1;
 }
 
 /**
@@ -808,14 +828,11 @@ void moveMap() {
 	while(SDL_PollEvent(&event)) {
 	  map.handleMapEvent(&event);
 	}
-	// jumping
-	if(!moveJump()) {
+	// jumping & platform
+	if(!moveJump() && !moveWithPlatform()) {
 	  // activate gravity
 	  moveGravity();
 	}
-
-	// move with the platform
-	moveWithPlatform();	
 
 	// set unaccelerated speed
 	if(!map.accelerate) {

@@ -338,8 +338,8 @@ void addLiveMonster(int monster_index, int image_index, int x, int y) {
   live_monsters[live_monster_count].pos_y = y;
   live_monsters[live_monster_count].pixel_x = 0;
   live_monsters[live_monster_count].pixel_y = 0;
-  live_monsters[live_monster_count].speed_x = m->start_speed_x;
-  live_monsters[live_monster_count].speed_y = m->start_speed_y;
+  live_monsters[live_monster_count].speed_x = m->start_speed_x + ((int)(MAX_RANDOM_SPEED * rand()/(RAND_MAX)));
+  live_monsters[live_monster_count].speed_y = m->start_speed_y + ((int)(MAX_RANDOM_SPEED * rand()/(RAND_MAX)));
   live_monsters[live_monster_count].dir = DIR_NONE;
   live_monsters[live_monster_count].face = 0;
   live_monsters[live_monster_count].monster = m;

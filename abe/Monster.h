@@ -18,6 +18,9 @@ struct _monster;
 #define MONSTER_EXTRA_X 40
 #define MONSTER_EXTRA_Y 30
 
+// The max amount of speed change
+#define MAX_RANDOM_SPEED 6.0
+
 Monster monsters[256];
 LiveMonster live_monsters[256];
 int live_monster_count;

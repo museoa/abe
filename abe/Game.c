@@ -160,7 +160,7 @@ void handleDeath() {
 // return a 1 to proceed, 0 to stop
 int detectCollision(int dir) {
   int n;
-  Position pos, key;
+  Position pos, pos2, key;
   LiveMonster *live;
 
   pos.pos_x = cursor.pos_x;
@@ -180,9 +180,15 @@ int detectCollision(int dir) {
   }
 
   // did we hit a platform?
+  pos2.pos_x = cursor.pos_x;
+  pos2.pos_y = cursor.pos_y + tom[0]->h / TILE_H;
+  pos2.pixel_x = cursor.pixel_x;
+  pos2.pixel_y = cursor.pixel_y;
+  pos2.w = tom[0]->w / TILE_W;
+  pos2.h = 1;
+  live = detectMonster(&pos2);
   if(live && live->monster->type == MONSTER_PLATFORM) {
 	cursor.platform = live;
-	return 0;
   } else {
 	cursor.platform = NULL;
   }
@@ -256,8 +262,8 @@ void runMap(char *name, int w, int h) {
   //  game.player_start_x = 20;
   //  game.player_start_y = 28;
 
-  game.player_start_x = 247;
-  game.player_start_y = 87;
+  game.player_start_x = 269;
+  game.player_start_y = 44;
 
   game.lives = 5;
   game.score = 0;
