@@ -829,7 +829,6 @@ int moveWithPlatform() {
 	cursor.speed_x = old_speed;
   }
   
-  fflush(stderr);
   return 1;
 }
 
