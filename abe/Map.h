@@ -122,5 +122,8 @@ void decompressMap(int *data);
 
 void startJump();
 int containsType(Position *p, int type);
+int onSolidGround(Position *p);
+int atLeftEdge(Position *p);
+int atRightEdge(Position *p);
 
 #endif

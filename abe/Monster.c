@@ -6,7 +6,18 @@ void defaultMoveMonster(LiveMonster *live) {
   // no-op
 }
 
+void initMonsterPos(Position *pos, LiveMonster *live) {
+  pos->pos_x = live->pos_x;
+  pos->pos_y = live->pos_y;
+  pos->pixel_x = live->pixel_x;
+  pos->pixel_y = live->pixel_y;
+  pos->w = images[live->monster->image_index[0]]->image->w / TILE_W;
+  pos->h = images[live->monster->image_index[0]]->image->h / TILE_H;
+}
+
 int stepMonsterLeft(LiveMonster *live) {
+  Position pos;
+  int fail = 0;
   LiveMonster old;
   memcpy(&old, live, sizeof(LiveMonster));
   live->pixel_x -= live->speed_x;
@@ -14,16 +25,44 @@ int stepMonsterLeft(LiveMonster *live) {
 	live->pos_x--;
 	live->pixel_x = TILE_W + live->pixel_x;
 	if(live->pos_x < 0) {
-	  memcpy(live, &old, sizeof(LiveMonster));
-	  return 0;
+	  fail = 1;
 	}
   }
-  // FIXME: use Map.containsType() here.
-  //  if() {
-  //  }
+  // collision detection
+  if(!fail) {
+	initMonsterPos(&pos, live);
+	if(containsType(&pos, TYPE_WALL) || atLeftEdge(&pos)) fail = 1;
+  }
+  if(fail) {
+	memcpy(live, &old, sizeof(LiveMonster));
+	return 0;
+  }
+  return 1;
 }
 
 int stepMonsterRight(LiveMonster *live) {
+  Position pos;
+  int fail = 0;
+  LiveMonster old;
+  memcpy(&old, live, sizeof(LiveMonster));
+  live->pixel_x += live->speed_x;
+  if(live->pixel_x > TILE_W) {
+	live->pos_x++;
+	live->pixel_x = live->pixel_x - TILE_W;
+	if(live->pos_x >= map.w) {
+	  fail = 1;
+	}
+  }
+  // collision detection
+  if(!fail) {
+	initMonsterPos(&pos, live);
+	if(containsType(&pos, TYPE_WALL) || atRightEdge(&pos)) fail = 1;
+  }
+  if(fail) {
+	memcpy(live, &old, sizeof(LiveMonster));
+	return 0;
+  }
+  return 1;
 }
 
 void moveCrab(LiveMonster *live_monster) {

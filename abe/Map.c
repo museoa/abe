@@ -710,27 +710,6 @@ int moveDown() {
 }
 
 /**
-   Is there ground beneath tom?
-   if so, return 1, 0 otherwise
- */
-int onSolidGround() {
-  int old_speed = cursor.speed_y;
-  int old_pixel = cursor.pixel_y;
-  int old_pos = cursor.pos_y;
-  int n;
-
-  cursor.speed_y = (cursor.pixel_y == 0 ? TILE_H : cursor.pixel_y);
-  n = moveDown();
-  
-  cursor.speed_y = old_speed;
-  cursor.pixel_y = old_pixel;
-  cursor.pos_y = old_pos;
-
-  // if you can't move down then we're on ground.
-  return !n;
-}
-
-/**
    When moving left or right and hitting an obsticle, call this method
    to check if we can step onto the object.
    Returns 1 on success, 0 on failure.
@@ -1222,6 +1201,10 @@ void getGameCollisionCheck(GameCollisionCheck *check, Position *p) {
   check->rect.h = tom[0]->h / TILE_H + (p->pixel_y > 0 ? 1 : 0);
 }
 
+/**
+   Does the position contain a tile of this type?
+   Return 1 if it does, 0 otherwise.
+ */
 int containsType(Position *p, int type) {
   GameCollisionCheck check;
   SDL_Rect rect, pos;
@@ -1250,3 +1233,96 @@ int containsType(Position *p, int type) {
   }
   return 0;
 }
+
+/**
+   Is there ground beneath pos?
+   if so, return 1, 0 otherwise
+ */
+int onSolidGround(Position *p) {
+  GameCollisionCheck check;
+  SDL_Rect rect, pos;
+  int x, y, n;
+  
+  getGameCollisionCheck(&check, p);
+
+  check.rect.h++;
+  if(check.rect.y + check.rect.h >= map.h) return 0;
+
+  y = check.end_y;
+  for(x = check.start_x; x < check.end_x;) {
+	n = map.image_index[LEVEL_MAIN][x + (y * map.w)];
+	if(n > -1) {
+	  rect.x = x;
+	  rect.y = y;
+	  rect.w = images[n]->image->w / TILE_W;
+	  rect.h = images[n]->image->h / TILE_H;
+	  if(intersects(&rect, &check.rect)) {
+		return 1;
+	  }	  
+	  x += images[n]->image->w / TILE_W;
+	} else {
+	  x++;
+	}
+  }
+  return 0;
+}
+
+int atLeftEdge(Position *p) {
+  GameCollisionCheck check;
+  SDL_Rect rect, pos;
+  int x, y, n;
+  
+  getGameCollisionCheck(&check, p);
+
+  check.rect.h++;
+  if(check.rect.y + check.rect.h >= map.h) return 0;
+
+  y = check.end_y;
+  for(x = check.start_x; x <= check.start_x + EXTRA_X;) {
+	n = map.image_index[LEVEL_MAIN][x + (y * map.w)];
+	if(n > -1) {
+	  rect.x = x;
+	  rect.y = y;
+	  rect.w = images[n]->image->w / TILE_W;
+	  rect.h = images[n]->image->h / TILE_H;
+	  if(intersects(&rect, &check.rect)) {
+		return 1;
+	  }	  
+	  x += images[n]->image->w / TILE_W;
+	} else {
+	  x++;
+	}
+  }
+  return 0;
+}
+
+int atRightEdge(Position *p) {
+  GameCollisionCheck check;
+  SDL_Rect rect, pos;
+  int x, y, n;
+  
+  getGameCollisionCheck(&check, p);
+
+  check.rect.h++;
+  if(check.rect.y + check.rect.h >= map.h) return 0;
+
+  y = check.end_y;
+  for(x = check.end_x - EXTRA_X; x < check.end_x;) {
+	n = map.image_index[LEVEL_MAIN][x + (y * map.w)];
+	if(n > -1) {
+	  rect.x = x;
+	  rect.y = y;
+	  rect.w = images[n]->image->w / TILE_W;
+	  rect.h = images[n]->image->h / TILE_H;
+	  if(intersects(&rect, &check.rect)) {
+		return 1;
+	  }	  
+	  x += images[n]->image->w / TILE_W;
+	} else {
+	  x++;
+	}
+  }
+  return 0;
+}
+
+
