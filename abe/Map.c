@@ -440,10 +440,9 @@ void scrollMap(int dir) {
   }
 }
 
-int moveLeft(int checkCollision, int scroll) {
+int moveLeft(int checkCollision) {
   int move, old_pixel, old_pos, old_speed;
   old_speed = cursor.speed_x;
-  //  while(cursor.speed_x > 0) {
   while(1) {
 	move = 1;
 	old_pixel = cursor.pixel_x;
@@ -458,32 +457,27 @@ int moveLeft(int checkCollision, int scroll) {
 	  }
 	}
 	if(move && (!checkCollision || map.detectCollision(DIR_LEFT))) {
-	  if(scroll) scrollMap(DIR_LEFT);	
+	  scrollMap(DIR_LEFT);	
 	  if(map.accelerate) {
 		if(cursor.speed_x < TILE_W) {
 		  cursor.speed_x += SPEED_INC_X;
 		  if(cursor.speed_x >= TILE_W) cursor.speed_x = TILE_W;
 		}
 	  }
-	  //cursor.speed_x = old_speed;
 	  return 1;
 	}
 	cursor.pixel_x = old_pixel;
 	cursor.pos_x = old_pos;	
-	//cursor.speed_x -= SPEED_INC_X;
 	if(!cursor.pixel_x) break;
 	cursor.speed_x = cursor.pixel_x;
   }
-  //  cursor.dir = DIR_NONE;
-  //cursor.jump = 0;
   cursor.speed_x = old_speed;
   return 0;
 }
 
-int moveRight(int checkCollision, int scroll) {
+int moveRight(int checkCollision) {
   int move, old_pixel, old_pos, old_speed;
   old_speed = cursor.speed_x;
-  //  while(cursor.speed_x > 0) {
   while(1) {
 	move = 1;
 	old_pixel = cursor.pixel_x;
@@ -498,29 +492,25 @@ int moveRight(int checkCollision, int scroll) {
 	  }
 	}
 	if(move && (!checkCollision || map.detectCollision(DIR_RIGHT))) {
-	  if(scroll) scrollMap(DIR_RIGHT);	
+	  scrollMap(DIR_RIGHT);	
 	  if(map.accelerate) {
 		if(cursor.speed_x < TILE_W) {
 		  cursor.speed_x += SPEED_INC_X;
 		  if(cursor.speed_x >= TILE_W) cursor.speed_x = TILE_W;
 		}
 	  }
-	  //cursor.speed_x = old_speed;
 	  return 1;
 	}
 	cursor.pixel_x = old_pixel;
 	cursor.pos_x = old_pos;
-	//cursor.speed_x -= SPEED_INC_X;
 	if(!cursor.pixel_x) break;
 	cursor.speed_x = TILE_W - cursor.pixel_x;
   }
-  //  cursor.dir = DIR_NONE;
-  //cursor.jump = 0;
   cursor.speed_x = old_speed;
   return 0;
 }
 
-int moveUp(int checkCollision, int scroll) {
+int moveUp(int checkCollision) {
   int move, old_pixel, old_pos, old_speed;
   old_speed = cursor.speed_y;
   while(cursor.speed_y > 0) {
@@ -538,22 +528,19 @@ int moveUp(int checkCollision, int scroll) {
 	}
 	if(move && (!checkCollision || 
 				((cursor.jump || map.detectLadder() || cursor.stepup) && map.detectCollision(DIR_UP)))) {
-	  if(scroll) scrollMap(DIR_UP);	
+	  scrollMap(DIR_UP);	
 	  if(map.accelerate) {
 		if(cursor.speed_y < TILE_H) {
 		  cursor.speed_y += SPEED_INC_Y;
 		  if(cursor.speed_y >= TILE_H) cursor.speed_y = TILE_H;
 		}
 	  }
-	  //	  cursor.speed_y = old_speed;
 	  return 1;
 	}
 	cursor.pixel_y = old_pixel;
 	cursor.pos_y = old_pos;
 	cursor.speed_y -= SPEED_INC_Y;
   }
-  //cursor.dir = DIR_NONE;
-  //cursor.jump = 0;
   cursor.speed_y = old_speed;
   return 0;
 }
@@ -583,15 +570,12 @@ int moveDown() {
 		  if(cursor.speed_y >= TILE_H) cursor.speed_y = TILE_H;
 		}
 	  }
-	  //	  cursor.speed_y = old_speed;
 	  return 1;
 	}
 	cursor.pixel_y = old_pixel;
 	cursor.pos_y = old_pos;
 	cursor.speed_y -= SPEED_INC_Y;
   }
-  //cursor.dir = DIR_NONE;
-  //cursor.jump = 0;
   cursor.speed_y = old_speed;
   return 0;
 }
@@ -601,16 +585,13 @@ int moveDown() {
    if so, return 1, 0 otherwise
  */
 int onSolidGround() {
-  //int old_dir = cursor.dir;
   int old_speed = cursor.speed_y;
   int old_pixel = cursor.pixel_y;
   int old_pos = cursor.pos_y;
 
-  //  cursor.dir = DIR_DOWN;
   cursor.speed_y = (cursor.pixel_y == 0 ? TILE_H : cursor.pixel_y);
   int n = moveDown(1, 0);
   
-  //cursor.dir = old_dir;
   cursor.speed_y = old_speed;
   cursor.pixel_y = old_pixel;
   cursor.pos_y = old_pos;
@@ -629,43 +610,28 @@ int canStepUp(int dir) {
   // This is so after stepping up, gravity won't pull us back down.
   // TILE_W b/c we always stop on pixel_x==0			
   cursor.speed_x = TILE_W;
-  //cursor.dir = dir;
   if(dir == DIR_LEFT) {
-	moveLeft(0, 1);
+	moveLeft(0);
   } else {
-	moveRight(0, 1);
+	moveRight(0);
   }
   
   // take a step up
-  //cursor.dir = DIR_UP;
   cursor.speed_y = (cursor.pixel_y == 0 ? TILE_H : cursor.pixel_y);
   cursor.stepup = 1;
-  //  if(!(moveUp(1, 0) && onSolidGround())) {
-  if(!moveUp(1, 1)) {
+  if(!moveUp(1)) {
 	cursor.stepup = 0;
 	// if can't step up
 	cursor.speed_x = TILE_W;
-	//cursor.dir = dir;
 	if(dir == DIR_LEFT) {
-	  moveRight(0, 1);
+	  moveRight(0);
 	} else {
-	  moveLeft(0, 1);
+	  moveLeft(0);
 	}
 	cursor.speed_x = 0;
-
-	//cursor.dir = DIR_NONE;
-	//cursor.jump = 0;
 	return 0;
   } else {
 	cursor.stepup = 0;
-	/*
-	// scroll the screen up
-	scrollMap(DIR_UP);
-	*/
-	// keep going right
-	//cursor.dir = dir;
-	// scroll the screen
-	//scrollMap(dir);
 	return 1;
   }
 }
@@ -675,12 +641,9 @@ int moveJump() {
   if(cursor.jump > 0) {
 	cursor.jump--;
 
-	//int old_dir = cursor.dir;
 	int old_speed = cursor.speed_y;
-	//cursor.dir = DIR_UP;
 	cursor.speed_y = JUMP_SPEED;
-	moveUp(1, 1);
-	//cursor.dir = old_dir;
+	moveUp(1);
 	cursor.speed_y = old_speed;
 	ret = 1;
   }
@@ -693,14 +656,11 @@ int moveJump() {
 void moveGravity() {
   if(map.gravity) {
 	if(map.detectLadder()) return;
-	//int old_dir = cursor.dir;
 	int old_speed = cursor.speed_y;
-	//cursor.dir = DIR_DOWN;
 	cursor.speed_y = 10;
 	cursor.gravity = 1;
 	moveDown();
 	cursor.gravity = 0;
-	//cursor.dir = (old_dir == DIR_NONE ? DIR_DOWN : old_dir);
 	cursor.speed_y = old_speed;
   }
 }
@@ -731,19 +691,19 @@ int moveMap() {
 	case DIR_QUIT:
 	  return;
 	case DIR_LEFT:
-	  if(!moveLeft(1, 1)) {
+	  if(!moveLeft(1)) {
 		// try to step up onto the obsticle
 		canStepUp(DIR_LEFT);
 	  }
 	  break;	
 	case DIR_RIGHT:
-	  if(!moveRight(1, 1)) {
+	  if(!moveRight(1)) {
 		// try to step up onto the obsticle
 		canStepUp(DIR_RIGHT);
 	  }
 	  break;	
 	case DIR_UP:
-	  moveUp(1, 1);
+	  moveUp(1);
 	  break;
 	case DIR_DOWN:
 	  moveDown();

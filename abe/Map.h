@@ -84,9 +84,9 @@ int loadMap(int drawMap);
 void resetCursor();
 
 // return 1 or 0 if movement in that direction is possible
-int moveLeft(int checkCollision, int scroll);
-int moveRight(int checkCollision, int scroll);
-int moveUp(int checkCollision, int scroll);
+int moveLeft(int checkCollision);
+int moveRight(int checkCollision);
+int moveUp(int checkCollision);
 int moveDown();
 
 void lockMap();

@@ -10,6 +10,8 @@
 #define TOM_W 4
 #define TOM_H 4
 
+#define FACE_STEP 2
+
 typedef struct _game {
   int face;
   int dir;

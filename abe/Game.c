@@ -19,10 +19,15 @@ void afterMainLevelDrawn() {
   pos.y = screen_center_y * TILE_H;
   pos.w = tom[0]->w;
   pos.h = tom[0]->h;
-  game.face++;
-  if(game.face >= FACE_COUNT) game.face = 0;  
-  if(cursor.dir == DIR_UPDATE || cursor.dir == DIR_NONE) game.face = FACE_STILL;
-  SDL_BlitSurface(tom[(game.dir == GAME_DIR_LEFT ? game.face : game.face + FACE_COUNT)], 
+
+  // change the face
+  if(cursor.dir == DIR_LEFT || cursor.dir == DIR_RIGHT) {
+	game.face++;
+	if(game.face >= FACE_COUNT * FACE_STEP) game.face = 0;
+  }
+  SDL_BlitSurface(tom[(game.dir == GAME_DIR_LEFT ? 
+					   (game.face / FACE_STEP) : 
+					   (game.face / FACE_STEP) + FACE_COUNT)], 
 				  NULL, screen, &pos);
 }
 
@@ -50,23 +55,19 @@ void gameMainLoop(SDL_Event *event) {
 	  game.dir = GAME_DIR_LEFT;
 	  cursor.dir = DIR_LEFT;
  	  cursor.speed_x = START_SPEED_X;
-	  //	  cursor.wait = 1;
 	  break;
 	case SDLK_RIGHT: 
 	  game.dir = GAME_DIR_RIGHT;
 	  cursor.dir = DIR_RIGHT;
  	  cursor.speed_x = START_SPEED_X;
-	  //	  cursor.wait = 1;
 	  break;
 	case SDLK_UP: 
 	  cursor.dir = DIR_UP;
 	  cursor.speed_y = START_SPEED_Y;
-	  //	  cursor.wait = 1;
 	  break;
 	case SDLK_DOWN: 
 	  cursor.dir = DIR_DOWN; 
 	  cursor.speed_y = START_SPEED_Y;
-	  //	  cursor.wait = 1;
 	  break;
 	case SDLK_r: 
 	  drawMap();
@@ -100,10 +101,8 @@ void gameMainLoop(SDL_Event *event) {
 
 GameCollisionCheck getGameCollisionCheck() {
   GameCollisionCheck check;
-  //  check.start_x = cursor.pos_x + (cursor.pixel_x > 0 ? 1 : 0) - EXTRA_X;
   check.start_x = cursor.pos_x - EXTRA_X;
   if(check.start_x < 0) check.start_x = 0;
-  //  check.start_y = cursor.pos_y + (cursor.pixel_y > 0 ? 1 : 0) - EXTRA_Y;
   check.start_y = cursor.pos_y - EXTRA_Y;
   if(check.start_y < 0) check.start_y = 0;
   check.end_x = cursor.pos_x + (tom[0]->w / TILE_W) + (cursor.pixel_x > 0 ? 1 : 0);
@@ -155,7 +154,7 @@ int detectCollision(int dir) {
 
 int detectLadder() {
   GameCollisionCheck check = getGameCollisionCheck();
-  // are we smack on top of a ladder?
+  // are we smack on top of a ladder? (extend checking to 1 row below Tom)
   if(cursor.pixel_y == 0) {
 	check.end_y++;
 	if(check.end_y >= map.h) check.end_y = map.h;
