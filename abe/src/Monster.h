@@ -21,8 +21,9 @@
 #define MONSTER_CANNON2 14
 #define MONSTER_BAT 15
 #define MONSTER_GHOST 16
+#define MONSTER_END_GAME 17
 
-#define MONSTER_COUNT 17
+#define MONSTER_COUNT 18
 
 struct _monster;
 

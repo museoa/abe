@@ -22,7 +22,6 @@ void setAlphaBlends();
 #define TYPE_SPRING 32
 #define TYPE_SLIDE 64
 #define TYPE_DECORATION 128
-#define TYPE_END_GAME 256
 
 typedef struct image {
   char *name;

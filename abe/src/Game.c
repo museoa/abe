@@ -470,6 +470,10 @@ void gameCheckPosition() {
   if(live) {
 	if(!live->monster->harmless) {
 	  handleDeath(live);
+	} else if(live->monster->type == MONSTER_END_GAME) {
+	  // end of game?
+	  *((int*)(live->custom)) = 1;
+	  game.end_game = 1;
 	} else if(live->monster->type == MONSTER_STAR) {
 	  if(game.lastSavePosX != live->pos_x && 
 		 game.lastSavePosX != live->pos_y) {
@@ -486,12 +490,6 @@ void gameCheckPosition() {
 	  }
 	}
   }
-  // FIXME: implement better water stuff
-  //  // did we hit a harmful field
-  //  if(containsType(&pos, TYPE_HARMFUL)) {
-  //	handleDeath("harmful field");
-  //	//	if(!game.god_mode) return 1;
-  //  }
 
   // did we hit a platform?
   pos2.pos_x = cursor.pos_x;
@@ -592,12 +590,6 @@ int detectCollision(int dir) {
   pos.pixel_y = cursor.pixel_y;
   pos.w = tom[0]->w / TILE_W;
   pos.h = tom[0]->h / TILE_H;
-
-  // end of game?
-  if(containsTypeWhere(&pos, &key, TYPE_END_GAME)) {
-	game.end_game = 1;
-	return 0;
-  }
 
   // did we hit a door?
   if(containsTypeWhere(&pos, &key, TYPE_DOOR)) {

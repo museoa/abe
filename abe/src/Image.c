@@ -14,7 +14,7 @@ SDL_Surface *tom[13];
 Image *images[256];
 int image_count;
 int img_brick, img_rock, img_back, img_key, img_door, img_door2, img_key, img_smash, img_smash2, img_smash3, img_smash4;
-int img_water, img_spring, img_spring2, img_spider, img_spider2, img_health, img_end;
+int img_water, img_spring, img_spring2, img_spider, img_spider2, img_health;
 int img_balloon[3], img_gem[2], img_bullet[4], img_slide_left[3], img_slide_right[3], img_slideback;
 int alphacount = 0;
 int alphas[256];
@@ -124,8 +124,7 @@ void doLoadImage(char *filename, char *name) {
 	  type = TYPE_OBJECT;
 	  img_gem[2] = image_count;
 	} else if(!strcmp(name, "endgame")) {
-	  type = TYPE_END_GAME;
-	  img_end = image_count;
+	  monster = MONSTER_END_GAME;
 	} else if(!strcmp(name, "wave")) {
 	  type = TYPE_HARMFUL;
 	  alphas[alphacount++] = image_count;

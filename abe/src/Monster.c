@@ -193,6 +193,29 @@ void movePlatform2(LiveMonster *live_monster) {
   }
 }
 
+void moveEndGame(LiveMonster *live_monster) {
+  int *p;
+  p = (int*)(live_monster->custom);
+  // if our custom int is set
+  if(*p > 0) {
+	// move up and down
+	if(live_monster->dir == DIR_DOWN) {
+	  if(!stepMonsterDown(live_monster)) {
+		live_monster->dir = DIR_UP;
+	  }
+	} else {
+	  if(!stepMonsterUp(live_monster)) {
+		live_monster->dir = DIR_DOWN;
+	  } else {
+		if((*p)++ >= 2) {
+		  *p = 1;
+		  live_monster->dir = DIR_DOWN;
+		}
+	  }
+	}
+  }
+}
+
 void moveCrab(LiveMonster *live_monster) {
   // increment the face to display
   live_monster->face++;
@@ -539,6 +562,13 @@ void allocFireCustom(LiveMonster *live) {
   }
 }
 
+void allocEndGameCustom(LiveMonster *live) {
+  if(((int*)live->custom = (int*)malloc(sizeof(int))) == NULL) {
+	fprintf(stderr, "Out of memory when trying to allocate custom storage for end game.\n");
+  }
+  *((int*)(live->custom)) = 0;
+}
+
 /**
    Remember here, images are not yet initialized!
  */
@@ -710,6 +740,14 @@ void initMonsters() {
   monsters[MONSTER_GHOST].damage = 2;
   monsters[MONSTER_GHOST].face_mod = 4;
   monsters[MONSTER_GHOST].random_speed = 0;
+
+  // end game
+  strcpy(monsters[MONSTER_END_GAME].name, "lost friend!");
+  monsters[MONSTER_END_GAME].harmless = 1;
+  monsters[MONSTER_END_GAME].moveMonster = moveEndGame;
+  monsters[MONSTER_END_GAME].start_speed_y = 3;
+  monsters[MONSTER_END_GAME].allocCustom = allocEndGameCustom;
+  monsters[MONSTER_END_GAME].random_speed = 0;
 
   // add additional monsters here
 
