@@ -9,6 +9,7 @@
 #include "Font.h"
 #include "Util.h"
 #include "Menu.h"
+#include "Map.h"
 
 SDL_Surface *screen;
 int state;
