@@ -461,6 +461,7 @@ void drawSmasher(SDL_Rect *pos, LiveMonster *live, SDL_Surface *surface, SDL_Sur
   SDL_Rect p, q;
   Position position;
   int first_image, first, second;
+  int skip;
 
   first_image = live->monster->image_index[0];
   first = (first_image == img_smash || first_image == img_smash2 ? img_smash : 
@@ -483,12 +484,16 @@ void drawSmasher(SDL_Rect *pos, LiveMonster *live, SDL_Surface *surface, SDL_Sur
   position.w = p.w / TILE_W;
   position.h = p.h / TILE_H;
 
+  skip = 0;
   while(position.pos_y >= 0 && 
 		!containsType(&position, TYPE_WALL | TYPE_DOOR)) {
 	SDL_BlitSurface(images[second]->image, NULL, surface, &p);
 	// HACK part 1: if p->y is reset to 0 the image was cropped.
 	y = p.y;
-	if(!y) break;
+	if(!y) {
+	  skip = 1;
+	  break;
+	}
 	p.x = pos->x;
 	p.y -= TILE_H;
 	p.w = pos->w;
@@ -498,7 +503,7 @@ void drawSmasher(SDL_Rect *pos, LiveMonster *live, SDL_Surface *surface, SDL_Sur
   // draw the top one.
   // HACK part 2: if y is 0 the image was cropped, don't draw
   //  if(y && live->pixel_y) {
-  if(live->pixel_y) {
+  if(!skip && live->pixel_y != 0) {
 	p.x = pos->x;
 	p.y += TILE_H;
 	p.y -= live->pixel_y;

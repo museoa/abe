@@ -50,7 +50,7 @@ space - jump
 enter - use a balloon
 esc - quit
 
-Editor:
+Editor: (to enable the editor set Game.h/GOD_MODE to 1 and re-build)
 arrow keys - move
 home,end,pageup,pagedown - move around by pages
 enter - put down tile
@@ -61,6 +61,7 @@ L - load map
 S - save map
 esc - quit
 q,w - make a slide (q-top left, w-bottom right)
+q,e - make a rectangle
 
 If you have any comments, email me at cctorok@yahoo.com.
 
