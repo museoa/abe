@@ -23,10 +23,6 @@ void saveMap() {
   rwop = SDL_RWFromFP(fp, 1);
 
   // write the header
-  //  fwrite(&(map.w), sizeof(map.w), 1, fp);
-  //  fwrite(&(map.h), sizeof(map.h), 1, fp);
-  //  SDL_RWwrite(rwop, &(map.w), sizeof(map.w), 1);
-  //  SDL_RWwrite(rwop, &(map.h), sizeof(map.h), 1);
   SDL_WriteLE16(rwop, map.w);
   SDL_WriteLE16(rwop, map.h);
 
@@ -36,12 +32,12 @@ void saveMap() {
   fprintf(stderr, "Compressed map. old_size=%ld new_size=%ld\n", (long int)(LEVEL_COUNT * map.w * map.h), (long int)new_size);
   fflush(stderr);
   // write out and further compress in step 2
-  //  written = compress(compressed_map, new_size, fp);
   written = compress(compressed_map, new_size, rwop);
   fprintf(stderr, "Compressed map step2. Written %ld ints. Compression ration: %f.2\%\n", (long int)written, 
 		  (float)written / ((float)(LEVEL_COUNT * map.w * map.h) / 100.0));
   fflush(stderr);
-  //  fclose(fp);
+
+  // Does this close the file? It should according to the constructor...
   SDL_RWclose(rwop);
   free(compressed_map);
 }
@@ -69,10 +65,6 @@ int loadMap(int draw_map) {
   rwop = SDL_RWFromFP(fp, 1);
 
   // read the header
-  //  fread(&(map.w), sizeof(map.w), 1, fp);
-  //  fread(&(map.h), sizeof(map.h), 1, fp);
-  //  SDL_RWread(rwop, &(map.w), sizeof(map.w), 1);
-  //  SDL_RWread(rwop, &(map.h), sizeof(map.h), 1);
   map.w = SDL_ReadLE16(rwop);
   map.h = SDL_ReadLE16(rwop);
 
@@ -89,11 +81,10 @@ int loadMap(int draw_map) {
 	fflush(stderr);
 	exit(0);
   }
-  //  count_read = decompress(read_buff, size, fp);
   count_read = decompress(read_buff, size, rwop);
   fprintf(stderr, "read %d ints\n", count_read);
   fflush(stderr);
-  //  fclose(fp);
+  // Does this close the file? It should according to the constructor...
   SDL_RWclose(rwop);
   
   // step 2: further uncompress

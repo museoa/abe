@@ -46,6 +46,7 @@ void afterMainLevelDrawn() {
 }
 
 void gameBeforeDrawToScreen() {
+  SDL_Rect rect;
   char s[80];
   sprintf(s, "life %d score %d keys %d balloons %d", game.lives, game.score, game.keys, game.balloons);
   drawString(screen, 5, 5, s);
@@ -54,6 +55,20 @@ void gameBeforeDrawToScreen() {
     drawString(screen, 5, 5 + FONT_HEIGHT, s);
 	sprintf(s, "px %d py %d", cursor.pixel_x, cursor.pixel_y);
     drawString(screen, 5, 5 + FONT_HEIGHT * 2, s);
+  }
+
+  // draw the balloon timer
+  if(game.balloonTimer > 0) {
+	rect.x = 0;
+	rect.y = screen->h - 8;
+	rect.w = game.balloonTimer * (screen->w / BALLOON_RIDE_INTERVAL) + 2;
+	rect.h = 5;
+	SDL_FillRect(screen, &rect, SDL_MapRGBA(screen->format, 0x00, 0x00, 0x00, 0x00));
+	rect.x = 0;
+	rect.y = screen->h - 10;
+	rect.w = game.balloonTimer * (screen->w / BALLOON_RIDE_INTERVAL);
+	rect.h = 5;
+	SDL_FillRect(screen, &rect, SDL_MapRGBA(screen->format, 0x00, 0x00, 0xa0, 0x00));
   }
 }
 

@@ -46,7 +46,6 @@ int intersectsBy(SDL_Rect *a, SDL_Rect *b, int value) {
    (Key should not appear as a valid image_index, currently key is f0f0f0f0.)
    return 0 on error, number of entries written on success
 */
-//int compress(Uint16 *buff, size_t size, FILE *fp) {
 int compress(Uint16 *buff, size_t size, SDL_RWops *rwop) {
   size_t size_written = 0;
 #ifdef USE_COMPRESSION
@@ -65,14 +64,6 @@ int compress(Uint16 *buff, size_t size, SDL_RWops *rwop) {
 	  if(t > 3) {
 		//		printf("\tcompressed block\n");
 		// compressed write
-		//		fwrite(&block_note, sizeof(Uint16), 1, fp);
-		//		fwrite(&t, sizeof(Uint16), 1, fp);
-		//		fwrite(block, sizeof(Uint16), 1, fp);
-
-		//		SDL_RWwrite(rwop, &block_note, sizeof(Uint16), 1);
-		//		SDL_RWwrite(rwop, &t, sizeof(Uint16), 1);
-		//		SDL_RWwrite(rwop, block, sizeof(Uint16), 1);
-
 		SDL_WriteLE16(rwop, block_note);
 		SDL_WriteLE16(rwop, t);
 		SDL_WriteLE16(rwop, *block);
@@ -81,10 +72,6 @@ int compress(Uint16 *buff, size_t size, SDL_RWops *rwop) {
 	  } else {
 		//		printf("\tnormal block\n");
 		// normal write
-		//		fwrite(block, sizeof(Uint16), t, fp);
-
-		//SDL_RWwrite(rwop, block, sizeof(Uint16), t);
-
 		writeEndianData(rwop, block, t);
 
 		size_written += t;
@@ -98,14 +85,6 @@ int compress(Uint16 *buff, size_t size, SDL_RWops *rwop) {
   if(t > 3) {
 	//	printf("\tcompressed block\n");
 	// compressed write
-	//	fwrite(&block_note, sizeof(Uint16), 1, fp);
-	//	fwrite(&t, sizeof(Uint16), 1, fp);
-	//	fwrite(block, sizeof(Uint16), 1, fp);
-
-	//SDL_RWwrite(rwop, &block_note, sizeof(Uint16), 1);
-	//SDL_RWwrite(rwop, &t, sizeof(Uint16), 1);
-	//SDL_RWwrite(rwop, block, sizeof(Uint16), 1);
-
 	SDL_WriteLE16(rwop, block_note);
 	SDL_WriteLE16(rwop, t);
 	SDL_WriteLE16(rwop, *block);
@@ -114,10 +93,6 @@ int compress(Uint16 *buff, size_t size, SDL_RWops *rwop) {
   } else {
 	//	printf("\tnormal block\n");
 	// normal write
-	//	fwrite(block, sizeof(Uint16), t, fp);
-
-	//SDL_RWwrite(rwop, block, sizeof(Uint16), t);
-
 	writeEndianData(rwop, block, t);
 
 	size_written += t;
@@ -125,10 +100,6 @@ int compress(Uint16 *buff, size_t size, SDL_RWops *rwop) {
   free(block);
 #else
   //  printf("Writing uncompressed...\n");
-  //  fwrite(buff, size, 1, fp);
-
-  // SDL_RWwrite(rwop, buff, size, 1);
-
   for(n = 0; n < size; n++) {
 	SDL_WriteLE16(rwop, *(buff + n));
   }
@@ -141,7 +112,6 @@ int compress(Uint16 *buff, size_t size, SDL_RWops *rwop) {
    Read above compression and decompress into buff.
    return number of items read into buff (should equal size on success)
 */
-//int decompress(Uint16 *buff, size_t size, FILE *fp) {
 int decompress(Uint16 *buff, size_t size, SDL_RWops *rwop) {
   Uint16 *block;
   size_t real_size;
@@ -162,10 +132,6 @@ int decompress(Uint16 *buff, size_t size, SDL_RWops *rwop) {
             *(block + n) = SDL_SwapLE16(*(block + n));
         }
     }
-    
-  
-  //real_size = readEndianData(rwop, block, size);
-
 
 #ifdef USE_COMPRESSION
   printf("Decompressing... real_size=%ld\n", (long int)real_size);
