@@ -266,11 +266,19 @@ void processShimmer() {
 									 128 + (int)(100.0 * rand()/(RAND_MAX)), 
 									 0x00);
 		} else {
-		  color[r][count] = SDL_MapRGBA(fx_surface->format, 
-									 255, 
-									 80 + (int)(50.0 * rand()/(RAND_MAX)), 
-									 32 + (int)(50.0 * rand()/(RAND_MAX)), 
-									 0x00);
+		  if((int)(2.0 * rand()/(RAND_MAX)) == 1) {
+			color[r][count] = SDL_MapRGBA(fx_surface->format, 
+										  255, 
+										  40 + (int)(50.0 * rand()/(RAND_MAX)), 
+										  40 + (int)(50.0 * rand()/(RAND_MAX)), 
+										  0x00);
+		  } else {
+			color[r][count] = SDL_MapRGBA(fx_surface->format, 
+										  255, 
+										  255, 
+										  40 + (int)(50.0 * rand()/(RAND_MAX)), 
+										  0x00);
+		  }
 		}
 		count++;
 	  }

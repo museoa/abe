@@ -543,6 +543,13 @@ void gameCheckPosition() {
   }
 
   // healing
+  if(game.health < MAX_HEALTH) {
+	switch(game.difficoulty) {
+	case 0: if(!(game.tick % 50)) game.health++; break;
+	case 1: if(!(game.tick % 100)) game.health++; break;
+	default:
+	}
+  }
   if(game.difficoulty < 2 && !(game.tick % 100) && game.health < MAX_HEALTH) 
 	game.health++;
 
