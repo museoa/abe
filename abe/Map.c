@@ -486,10 +486,24 @@ int moveMap(void *data) {
 		scrollMap(DIR_DOWN);
 	  }
 	  break;
+	case DIR_NONE:
+	  // wait until there's movement.
+	  if(SDL_mutexP(map.move_cond_mutex) == -1){
+		fprintf(stderr, "Couldn't lock mutex\n");
+		fflush(stderr);
+		exit(-1);
+	  }
+	  if(SDL_CondWait(map.move_cond, map.move_cond_mutex) == -1) {
+		fprintf(stderr, "Couldn't wait on condition\n");
+		fflush(stderr);
+		exit(-1);
+	  }
 	}
 	if(cursor.wait) {
 	  cursor.wait = 0;
 	  SDL_Delay(map.delay);
+	} else {
+	  SDL_Delay(10); // a small delay to not max out the cpu
 	}
   }
 }
@@ -573,6 +587,9 @@ void initMap(char *name, int w, int h) {
   map.h = h;
   map.beforeDrawToScreen = NULL;
   map.delay = 25;
+  map.thread = NULL;
+  map.move_cond = NULL;
+  map.move_cond_mutex = NULL;
   int i;
   for(i = LEVEL_BACK; i < LEVEL_COUNT; i++) {
 	if(!(map.image_index[i] = malloc(sizeof(int) * w * h))) {
@@ -609,13 +626,37 @@ void initMap(char *name, int w, int h) {
   screen_h = screen->h / TILE_H;
 }
 
+void destroyMap() {
+  stopMapMoveThread();
+  free(map.name);
+  int i;
+  for(i = LEVEL_BACK; i < LEVEL_COUNT; i++) {
+	SDL_FreeSurface(map.level[i]);
+	free(map.image_index[i]);
+  }
+}
+
 void startMapMoveThread() {
-  // start the thread
-  map.stopThread = 0;
-  if(!(map.thread = SDL_CreateThread(moveMap, NULL))) {
-	fprintf(stderr, "Unable to create thread: %s\n", SDL_GetError());
-	fflush(stderr);
-	exit(0);
+  // Create the cond
+  if(!map.thread) {
+	if(!(map.move_cond = SDL_CreateCond())) {
+	  fprintf(stderr, "Unable to create condition variable: %s\n", SDL_GetError());
+	  fflush(stderr);
+	  exit(0);
+	}
+	// Create the mutex
+	if(!(map.move_cond_mutex = SDL_CreateMutex())) {
+	  fprintf(stderr, "Unable to create mutex: %s\n", SDL_GetError());
+	  fflush(stderr);
+	  exit(0);
+	}
+	// start the thread
+	map.stopThread = 0;
+	if(!(map.thread = SDL_CreateThread(moveMap, NULL))) {
+	  fprintf(stderr, "Unable to create thread: %s\n", SDL_GetError());
+	  fflush(stderr);
+	  exit(0);
+	}
   }
 }
 
@@ -623,6 +664,77 @@ void stopMapMoveThread() {
   if(map.thread) {
 	map.stopThread == 1;
 	SDL_WaitThread(map.thread, NULL);
+	// kill the condition var
+	SDL_DestroyCond(map.move_cond);
+	// kill the mutex
+	SDL_DestroyMutex(map.move_cond_mutex);
+	map.thread = NULL;
+	map.move_cond = NULL;
+	map.move_cond_mutex = NULL;
   }
 }
 
+/**
+   You must call this method if previously the cursor's direction was DIR_NONE.
+   This wakes up the movement thread.
+ */
+void signalMapMoveThread() {
+  if(SDL_CondSignal(map.move_cond) == -1) {
+	fprintf(stderr, "Couldn't signal on condition\n");
+	fflush(stderr);
+	exit(-1);
+  }
+}
+
+void resetCursor() {
+  cursor.pos_x = 0;
+  cursor.pos_y = 0;
+  cursor.dir = DIR_NONE;
+  cursor.wait = 0;
+}
+
+void saveMap() {
+  char path[300];
+  sprintf(path, "%s/%s.dat", MAPS_DIR, map.name);
+  printf("Saving map %s\n", path);  
+  fflush(stdout);
+  FILE *fp;
+  if(!(fp = fopen(path, "wb"))) {
+	fprintf(stderr, "Can't open file for writing.");
+	fflush(stderr);
+	return;
+  }
+  fwrite(&(map.w), sizeof(map.w), 1, fp);
+  fwrite(&(map.h), sizeof(map.h), 1, fp);
+  // FIXME: use runtime compression
+  int i;
+  for(i = 0; i < LEVEL_COUNT; i++) {
+	fwrite(map.image_index[i], sizeof(int) * map.w * map.h, 1, fp);
+  }
+  fclose(fp);
+}
+
+// call this after initMap()!
+void loadMap() {
+  char path[300];
+  sprintf(path, "%s/%s.dat", MAPS_DIR, map.name);
+  printf("Loading map %s\n", path);  
+  fflush(stdout);
+  FILE *fp;
+  if(!(fp = fopen(path, "rb"))) {
+	fprintf(stderr, "Can't open file for reading.");
+	fflush(stderr);
+	return;
+  }
+  fread(&(map.w), sizeof(map.w), 1, fp);
+  fread(&(map.h), sizeof(map.h), 1, fp);
+  // FIXME: use runtime compression
+  int i;
+  for(i = 0; i < LEVEL_COUNT; i++) {
+	fread(map.image_index[i], sizeof(int) * map.w * map.h, 1, fp);
+  }
+  fclose(fp);
+
+  resetCursor();
+  drawMap();
+}

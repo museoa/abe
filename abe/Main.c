@@ -9,7 +9,7 @@ cleanUpAndExit() {
 void startEditor() {
   state = STATE_EDIT_LOOP;
   initEditor();
-  editMap("default.map", 1000, 1000);
+  editMap("default", 1000, 1000);
 }
 
 /**

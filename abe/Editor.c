@@ -30,15 +30,19 @@ void editorMainLoop(SDL_Event *event) {
 	switch(event->key.keysym.sym) {
 	case SDLK_LEFT: 
 	  cursor.dir = DIR_LEFT; cursor.wait = 1; 
+	  signalMapMoveThread();
 	  break;
 	case SDLK_RIGHT: 
 	  cursor.dir = DIR_RIGHT; cursor.wait = 1; 
+	  signalMapMoveThread();
 	  break;
 	case SDLK_UP: 
 	  cursor.dir = DIR_UP; cursor.wait = 1; 
+	  signalMapMoveThread();
 	  break;
 	case SDLK_DOWN: 
 	  cursor.dir = DIR_DOWN; cursor.wait = 1; 
+	  signalMapMoveThread();
 	  break;
 	case SDLK_RETURN: 
 	  waitUntilPaintingStops();
@@ -78,6 +82,14 @@ void editorMainLoop(SDL_Event *event) {
 		edit_panel.image_index = 0;
 	  }
 	  drawMap();
+	  break;
+	case SDLK_l: 
+	  waitUntilPaintingStops();
+	  loadMap();
+	  break;
+	case SDLK_s: 
+	  waitUntilPaintingStops();
+	  saveMap();
 	  break;
 	}
 	break;
@@ -164,13 +176,6 @@ void drawEditPanel() {
   drawString(screen, 5, 5, s);
 }
 
-void resetCursor() {
-  cursor.pos_x = 0;
-  cursor.pos_y = 0;
-  cursor.dir = DIR_NONE;
-  cursor.wait = 0;
-}
-
 void resetEditPanel() {
   edit_panel.level = LEVEL_MAIN;
   edit_panel.image_index = 0;
@@ -243,16 +248,9 @@ void editMap(char *name, int w, int h) {
   // create a new one
   allocMap(name, w, h);
 
+  // try to load it
+  loadMap();
+
   // show it
   drawMap();
-}
-
-void saveMap() {
-  printf("IMPLEMENT ME: saveMap().\n");
-  fflush(stdout);
-}
-
-void loadMap(char *name) {
-  printf("IMPLEMENT ME: loadMap(). name=%s\n", name);
-  fflush(stdout);
 }

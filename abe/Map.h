@@ -3,6 +3,9 @@
 
 #include "Main.h"
 
+// Where to store the map files (no ending /)
+#define MAPS_DIR "./maps"
+
 // Tile sizes
 #define TILE_W 20
 #define TILE_H 20
@@ -38,6 +41,8 @@ typedef struct _map {
   int stopThread;
   // painting callbacks
   void (*beforeDrawToScreen)();
+  SDL_cond *move_cond;
+  SDL_mutex *move_cond_mutex;
 } Map;
 
 typedef struct _cursor {
@@ -50,10 +55,14 @@ Cursor cursor;
 Map map;
 
 void drawMap();
-//void scrollMap(int dir);
 void setImage(int level, int index);
 void startMapMoveThread();
 void stopMapMoveThread();
+void signalMapMoveThread();
 void initMap(char *name, int w, int h);
+void destroyMap();
+void saveMap();
+void loadMap();
+void resetCursor();
 
 #endif

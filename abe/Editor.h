@@ -5,8 +5,6 @@
 #include <dirent.h>
 #include "Main.h"
 
-#define MAPS_DIR "./maps"
-
 #define EDIT_PANEL_HEIGHT 120
 
 typedef struct _editpanel {
@@ -19,8 +17,6 @@ EditPanel edit_panel;
 
 void initEditor();
 void editMap(char *name, int w, int h);
-void saveMap();
-void loadMap(char *name);
 void editorMainLoop(SDL_Event *event);
 void drawEditPanel();
 
