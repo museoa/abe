@@ -413,7 +413,7 @@ int defaultDetectMonster(Position *pos, LiveMonster *live) {
   monster.h = img->h;
 
   // compare
-  return intersectsBy(&check, &monster, MONSTER_COLLISION_FUZZ);
+  return intersectsBy(&check, &monster, (live->monster->harmless ? 1 : MONSTER_COLLISION_FUZZ));
 }
 
 int detectFire(Position *pos, LiveMonster *live) {
@@ -434,7 +434,7 @@ int detectFire(Position *pos, LiveMonster *live) {
   monster.h = *((int*)(live->custom));
 
   // compare
-  return intersectsBy(&check, &monster, MONSTER_COLLISION_FUZZ);
+  return intersectsBy(&check, &monster, (live->monster->harmless ? 1 : MONSTER_COLLISION_FUZZ));
 }
 
 void allocFireCustom(LiveMonster *live) {

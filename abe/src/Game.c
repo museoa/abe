@@ -315,6 +315,8 @@ void gameCheckPosition() {
 		 game.lastSavePosX != live->pos_y) {
 		game.lastSavePosX = live->pos_x;
 		game.lastSavePosX = live->pos_y;
+		game.player_start_x = cursor.pos_x;
+		game.player_start_y = cursor.pos_y;
 		removeAllLiveMonsters();
 		saveGame();
 		drawString(screen, 150, 220, "game saved!");

@@ -22,8 +22,8 @@ struct _monster;
 
 // if the intersection of tom and monster is bigger than this number
 // it is considered a hit. A MONSTER_COLLISION_FUZZ of 0 is the least
-// tolerant and a TILE_W is the most.
-#define MONSTER_COLLISION_FUZZ 8
+// tolerant and a TILE_W is the most. Doesn't apply to harmless monsters.
+#define MONSTER_COLLISION_FUZZ 16
 
 // The extra number of tiles around the screen 
 // ,.where monsters are still active
