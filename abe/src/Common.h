@@ -27,6 +27,9 @@ typedef struct _liveMonster {
   int face;
   struct _monster *monster;
   void *custom;
+  int remove_me;
+  int child_count;
+  struct _liveMonster *parent;
 } LiveMonster;
 
 /**
@@ -48,6 +51,9 @@ typedef struct _monster {
   void (*allocCustom) (LiveMonster *live);
   int harmless;
   int random_speed;
+  struct _monster *breeds; // creates this type of creature
+  void (*breedMonster) (LiveMonster *live, SDL_Rect *pos);
+  int max_children; // how many spawned children this creature can have active at once
 } Monster;
 
 typedef struct _cursor {

@@ -96,12 +96,16 @@ void doLoadImage(char *filename, char *name) {
 	  img_balloon[2] = image_count;
 	} else if(!strcmp(name, "bullet1")) {
 	  img_bullet[0] = image_count;
+	  monster = MONSTER_BULLET;
 	} else if(!strcmp(name, "bullet2")) {
 	  img_bullet[1] = image_count;
+	  monster = MONSTER_BULLET;
 	} else if(!strcmp(name, "bullet3")) {
 	  img_bullet[2] = image_count;
+	  monster = MONSTER_BULLET;
 	} else if(!strcmp(name, "bullet4")) {
 	  img_bullet[3] = image_count;
+	  monster = MONSTER_BULLET;
 	} else if(!strcmp(name, "gem")) {
 	  type = TYPE_OBJECT;
 	  img_gem[0] = image_count;
@@ -158,6 +162,10 @@ void doLoadImage(char *filename, char *name) {
 	  monster = MONSTER_BEAR;
 	} else if(!strcmp(name, "bear6")) {
 	  monster = MONSTER_BEAR;
+	} else if(!strcmp(name, "cannon")) {
+	  monster = MONSTER_CANNON;
+	} else if(!strcmp(name, "cannon2")) {
+	  monster = MONSTER_CANNON2;
 	} else if(!strcmp(name, "torch1") || !strcmp(name, "torch2") || !strcmp(name, "torch3")) {
 	  monster = MONSTER_TORCH;
 	} else if(!strcmp(name, "star1") || !strcmp(name, "star2") || !strcmp(name, "star3") || !strcmp(name, "star4")) {

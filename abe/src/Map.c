@@ -98,7 +98,6 @@ void drawMap() {
 		if(map.monsters) {
 		  m = isMonsterImage(n);
 		  if(m > -1) {
-			map.image_index[level][x + (y * map.w)] = EMPTY_MAP;
 			addLiveMonster(m, n, x, y);
 			continue;
 		  }
@@ -168,7 +167,6 @@ void drawMapLeftEdge() {
 		  if(map.monsters) {
 			m = isMonsterImage(n);
 			if(m > -1) {
-			  map.image_index[level][x + (y * map.w)] = EMPTY_MAP;
 			  addLiveMonster(m, n, x, y);
 			  continue;
 			}
@@ -237,7 +235,6 @@ void drawMapTopEdge() {
 		  if(map.monsters) {
 			m = isMonsterImage(n);
 			if(m > -1) {
-			  map.image_index[level][x + (y * map.w)] = EMPTY_MAP;
 			  addLiveMonster(m, n, x, y);
 			  continue;
 			}
@@ -305,7 +302,6 @@ void drawMapRightEdge() {
 		if(map.monsters) {
 		  m = isMonsterImage(n);
 		  if(m > -1) {
-			map.image_index[level][x + (y * map.w)] = EMPTY_MAP;
 			addLiveMonster(m, n, x, y);
 			continue;
 		  }
@@ -373,7 +369,6 @@ void drawMapBottomEdge() {
 		if(map.monsters) {
 		  m = isMonsterImage(n);
 		  if(m > -1) {
-			map.image_index[level][x + (y * map.w)] = EMPTY_MAP;
 			addLiveMonster(m, n, x, y);
 			continue;
 		  }
@@ -1063,9 +1058,10 @@ int initMap(char *name, int w, int h) {
 	hw_surface = (map.level[i]->flags & SDL_HWSURFACE ? 1 : 0);
 	fprintf(stderr, "level[%d] is HW surface? %d\n", i, hw_surface);
 	if(screen->flags & SDL_HWSURFACE & !hw_surface) {
-	  fprintf(stderr, "Can't create surface in video memory. Since the screen is there, this surface must too.\n");
+	  fprintf(stderr, "*** Can't create surface in video memory. Since the screen is there, this surface must too.\n");
+	  fprintf(stderr, "*** This may make the game very slow!");
 	  fflush(stderr);
-	  return 0;
+	  //	  return 0;
 	}
 
 	// set black as the transparent color key

@@ -223,6 +223,9 @@ void gameMainLoop(SDL_Event *event) {
 	case SDLK_ESCAPE:
 	  cursor.dir = DIR_QUIT;
 	  break;
+	case SDLK_d:
+	  debugMonsters();
+	  break;
 	case SDLK_RETURN:
 	  if(!game.balloonTimer && game.balloons) {
 		playSound(BUBBLE_SOUND);
@@ -489,8 +492,8 @@ void runMap() {
 	}
 	// start outside
 	if(GOD_MODE) {
-	  game.player_start_x = 211;
-	  game.player_start_y = 159;
+	  game.player_start_x = 44;
+	  game.player_start_y = 148;
 	} else {
 	  game.player_start_x = 20;
 	  game.player_start_y = 28;

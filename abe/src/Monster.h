@@ -16,7 +16,11 @@
 #define MONSTER_ARROW 9
 #define MONSTER_FIRE 10
 #define MONSTER_STAR 11
-#define MONSTER_COUNT 12
+#define MONSTER_BULLET 12
+#define MONSTER_CANNON 13
+#define MONSTER_CANNON2 14
+
+#define MONSTER_COUNT 15
 
 struct _monster;
 
@@ -44,8 +48,10 @@ void addMonsterImage(int monster_index, int image_index);
 int isMonsterImage(int image_index);
 
 void addLiveMonster(int monster_index, int image_index, int x, int y);
+void addLiveMonsterChangeMap(int monster_index, int image_index, int x, int y, int change_map);
 void removeAllLiveMonsters();
 void drawLiveMonsters(SDL_Surface *surface, int start_x, int start_y);
+void debugMonsters();
 
 /**
    Return live monster if there's a one at position pos,

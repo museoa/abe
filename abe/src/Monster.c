@@ -17,6 +17,10 @@ void defaultDrawMonster(SDL_Rect *pos, LiveMonster *live, SDL_Surface *surface, 
   SDL_BlitSurface(img, NULL, surface, pos);
 }
 
+void defaultBreedMonster(LiveMonster *live, SDL_Rect *pos) {
+  // no-op
+}
+
 void initMonsterPos(Position *pos, LiveMonster *live) {
   pos->pos_x = live->pos_x;
   pos->pos_y = live->pos_y;
@@ -204,6 +208,40 @@ void moveCrab(LiveMonster *live_monster) {
   } else {
 	if(!stepMonsterRight(live_monster, 0)) {
 	  live_monster->dir = DIR_LEFT;
+	}
+  }
+}
+
+void breedBullet(LiveMonster *live, SDL_Rect *pos) {
+  addLiveMonsterChangeMap(MONSTER_BULLET, img_bullet[0], live->pos_x + 2, live->pos_y, 0);
+  live_monsters[live_monster_count - 1].pixel_x = 10;
+  live_monsters[live_monster_count - 1].dir = DIR_RIGHT;
+  live_monsters[live_monster_count - 1].parent = live;
+  live->child_count++;
+}
+
+void breedBullet2(LiveMonster *live, SDL_Rect *pos) {
+  addLiveMonsterChangeMap(MONSTER_BULLET, img_bullet[0], live->pos_x - 1, live->pos_y, 0);
+  live_monsters[live_monster_count - 1].dir = DIR_LEFT;
+  live_monsters[live_monster_count - 1].parent = live;
+  live->child_count++;
+}
+
+void moveBullet(LiveMonster *live_monster) {
+  // increment the face to display
+  live_monster->face++;
+  if(live_monster->face >= 
+	 live_monster->monster->image_count * live_monster->monster->face_mod) 
+	live_monster->face = 0;
+
+  // move sideways until you hit a wall
+  if(live_monster->dir == DIR_LEFT) {
+	if(!stepMonsterLeft(live_monster, 1)) {
+	  live_monster->remove_me = 1;
+	}
+  } else {
+	if(!stepMonsterRight(live_monster, 1)) {
+	  live_monster->remove_me = 1;
 	}
   }
 }
@@ -460,6 +498,8 @@ void initMonsters() {
   
   // common properties.
   for(i = 0; i < MONSTER_COUNT; i++) {
+	monsters[i].start_speed_x = 2;
+	monsters[i].start_speed_y = 2;
 	monsters[i].image_count = 0;	
 	monsters[i].moveMonster = defaultMoveMonster;
 	monsters[i].drawMonster = defaultDrawMonster;
@@ -469,6 +509,8 @@ void initMonsters() {
 	monsters[i].random_speed = 1;
 	monsters[i].detectMonster = defaultDetectMonster;
 	monsters[i].allocCustom = NULL;
+	monsters[i].breeds = NULL;
+	monsters[i].breedMonster = defaultBreedMonster;
   }
 
   // crab monster
@@ -564,6 +606,29 @@ void initMonsters() {
   monsters[MONSTER_STAR].face_mod = 4;
   monsters[MONSTER_STAR].harmless = 1;
 
+  // bullet
+  strcpy(monsters[MONSTER_BULLET].name, "cannonball");
+  monsters[MONSTER_BULLET].moveMonster = moveBullet;
+  monsters[MONSTER_BULLET].start_speed_x = 8;
+  monsters[MONSTER_BULLET].start_speed_y = 4;
+  monsters[MONSTER_BULLET].face_mod = 1;
+  monsters[MONSTER_BULLET].random_speed = 0;
+
+  // cannon
+  strcpy(monsters[MONSTER_CANNON].name, "cannon");
+  monsters[MONSTER_CANNON].harmless = 1;
+  monsters[MONSTER_CANNON].breeds = &monsters[MONSTER_BULLET];
+  monsters[MONSTER_CANNON].breedMonster = breedBullet;
+  monsters[MONSTER_CANNON].max_children = 1; // 1 bullet active at a time
+
+  // cannon2
+  strcpy(monsters[MONSTER_CANNON2].name, "cannon");
+  monsters[MONSTER_CANNON2].harmless = 1;
+  monsters[MONSTER_CANNON2].breeds = &monsters[MONSTER_BULLET];
+  monsters[MONSTER_CANNON2].breedMonster = breedBullet2;
+  monsters[MONSTER_CANNON2].max_children = 1; // 1 bullet active at a time
+
+
   // add additional monsters here
 
   for(i = 0; i < MONSTER_COUNT; i++) {
@@ -590,8 +655,13 @@ int isMonsterImage(int image_index) {
 }
 
 void addLiveMonster(int monster_index, int image_index, int x, int y) {
+  addLiveMonsterChangeMap(monster_index, image_index, x, y, 1);
+}
+
+void addLiveMonsterChangeMap(int monster_index, int image_index, int x, int y, int change_map) {
   int i;
   Monster *m = &monsters[monster_index];
+  live_monsters[live_monster_count].parent = NULL;
   live_monsters[live_monster_count].pos_x = x;
   live_monsters[live_monster_count].pos_y = y;
   live_monsters[live_monster_count].pixel_x = 0;
@@ -610,19 +680,23 @@ void addLiveMonster(int monster_index, int image_index, int x, int y) {
 	  live_monsters[live_monster_count].face = i;
 	}
   }
+  live_monsters[live_monster_count].remove_me = 0;
   live_monsters[live_monster_count].monster = m;
+  live_monsters[live_monster_count].child_count = 0;
   // allocate custom storage
   if(live_monsters[live_monster_count].monster->allocCustom) {
 	live_monsters[live_monster_count].monster->allocCustom(&live_monsters[live_monster_count]);
   }
   live_monster_count++;
-  fprintf(stderr, "Added live monster! monster=%s x=%d y=%d count=%d\n", 
-		  m->name, x, y, live_monster_count);
-  fflush(stderr);
+  
+  // remove image from map
+  if(change_map) {
+	map.image_index[LEVEL_MAIN][x + (y * map.w)] = EMPTY_MAP;
+  }
 }
 
 void removeLiveMonster(int live_monster_index) {
-  int t;
+  int i, t;
   LiveMonster *p;
 
   // debug
@@ -639,9 +713,21 @@ void removeLiveMonster(int live_monster_index) {
 
   // add it back to the map
   p = &live_monsters[live_monster_index];
-  setImageNoCheck(LEVEL_MAIN, 
-				  p->pos_x, p->pos_y, 
-				  p->monster->image_index[getLiveMonsterFace(p)]);
+  // If the monster was bred (bullets) it doesn't need to be saved in the map.
+  if(!p->parent) {
+	setImageNoCheck(LEVEL_MAIN, 
+					p->pos_x, p->pos_y, 
+					p->monster->image_index[getLiveMonsterFace(p)]);
+	// remove its children
+	for(t = 0; p->child_count && t < live_monster_count; t++) {
+	  if(live_monsters[t].parent == p) {
+		removeLiveMonster(t);
+		t--;
+	  }
+	}
+  } else {
+	p->parent->child_count--;
+  }
 
   // free custom storage
   if(live_monsters[live_monster_index].monster->allocCustom) {
@@ -650,12 +736,30 @@ void removeLiveMonster(int live_monster_index) {
 
   // remove it from memory
   for(t = live_monster_index; t < live_monster_count - 1; t++) {
+	for(i = 0; i < live_monster_count; i++) {
+	  if(live_monsters[i].parent == &live_monsters[t + 1]) {
+		live_monsters[i].parent = &live_monsters[t];
+	  }
+	}
 	memcpy(&live_monsters[t], &live_monsters[t + 1], sizeof(LiveMonster));
   }
   live_monster_count--;
+}
 
-  fprintf(stderr, "Removed live monster! monster=%s index=%d count=%d\n", 
-		  live_monsters[live_monster_index].monster->name, live_monster_index, live_monster_count);
+void debugMonsters() {
+  int t, i, n;
+  fprintf(stderr, "Monsters:\n");
+  for(t = 0; t < live_monster_count; t++) {
+	n = -1;
+	for(i = 0; live_monsters[t].parent && i < live_monster_count; i++) {
+	  if(&live_monsters[i] == live_monsters[t].parent) {
+		n = i;
+		break;
+	  }
+	}
+	fprintf(stderr, "\t%d monster=%s x=%d y=%d child_count=%d remove_me=%d parent=%d\n", 
+			t, live_monsters[t].monster->name, live_monsters[t].pos_x, live_monsters[t].pos_y, live_monsters[t].child_count, live_monsters[t].remove_me, n);
+  }
   fflush(stderr);
 }
 
@@ -692,10 +796,15 @@ void drawLiveMonsters(SDL_Surface *surface, int start_x, int start_y) {
 	pos.w = img->w;
 	pos.h = img->h;
 
-	if(!isOnScreen(&pos)) {
+	if(live_monsters[i].remove_me || !isOnScreen(&pos)) {
 	  removeLiveMonster(i);
 	} else {
 	  live_monsters[i].monster->drawMonster(&pos, &live_monsters[i], surface, img);
+
+	  if(live_monsters[i].monster->breeds != NULL && 
+		 live_monsters[i].monster->max_children > live_monsters[i].child_count) {
+		live_monsters[i].monster->breedMonster(&live_monsters[i], &pos);
+	  }
 	}
   }
 }
