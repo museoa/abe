@@ -186,6 +186,10 @@ void editorMainLoop(SDL_Event *event) {
 	  }
 	  drawMap();
 	  break;
+	case SDLK_7: 
+	  edit_panel.image_index=0;
+	  drawMap();
+	  break;
 	case SDLK_l: 
 	  loadMap(1);
 	  break;
@@ -246,7 +250,7 @@ void drawEditPanel() {
 
   // draw some instructions
   drawString(edit_panel.image, 10, 35, "change level 123");
-  drawString(edit_panel.image, 10, 35 + FONT_HEIGHT, "change image 56");
+  drawString(edit_panel.image, 10, 35 + FONT_HEIGHT, "change image 567");
   drawString(edit_panel.image, 400, 5, "editor");
   drawString(edit_panel.image, 400, 5 + FONT_HEIGHT, "draw enter");
   drawString(edit_panel.image, 400, 5 + FONT_HEIGHT * 2, "erase del");

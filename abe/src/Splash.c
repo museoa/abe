@@ -38,7 +38,8 @@ void splashBeforeDrawToScreen() {
   int x, y;
 
   x = screen->w / 2 - title->w / 2;
-  y = 0;
+  y = screen->h / 2 - 240;
+  if(y < 0) y = 0;
 
   pos.x = x;
   pos.y = y;
