@@ -14,6 +14,7 @@ AM_INIT_AUTOMAKE(abe, $SDL_VERSION)
 dnl Check for tools
 
 AC_PROG_CC
+AM_PROG_CC_C_O
 
 dnl Check for compiler environment
 
