@@ -86,6 +86,8 @@ void doLoadImage(char *filename, char *name) {
 	  img_smash = image_count;
 	} else if(!strcmp(name, "smash2")) {
 	  img_smash2 = image_count;
+	} else if(!strcmp(name, "demon") || !strcmp(name, "demon2")) {
+	  monster = MONSTER_DEMON;
 	}
 
 	// store the image

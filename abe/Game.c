@@ -46,7 +46,7 @@ void gameBeforeDrawToScreen() {
   char s[80];
   sprintf(s, "life %d score %d keys %d balloons %d", game.lives, game.score, game.keys, game.balloons);
   drawString(screen, 5, 5, s);
-  sprintf(s, "x %d y %d", cursor.pos_x, cursor.pos_y);
+  sprintf(s, "x %d y %d pixel %d %d", cursor.pos_x, cursor.pos_y, cursor.pixel_x, cursor.pixel_y);
   drawString(screen, 5, 5 + FONT_HEIGHT, s);
 }
 
@@ -229,8 +229,8 @@ void runMap(char *name, int w, int h) {
   //  game.player_start_x = 20;
   //  game.player_start_y = 28;
 
-  game.player_start_x = 114;
-  game.player_start_y = 49;
+  game.player_start_x = 247;
+  game.player_start_y = 87;
 
   game.lives = 5;
   game.score = 0;

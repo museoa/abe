@@ -17,8 +17,8 @@ void initMonsterPos(Position *pos, LiveMonster *live) {
   pos->pos_y = live->pos_y;
   pos->pixel_x = live->pixel_x;
   pos->pixel_y = live->pixel_y;
-  pos->w = images[live->monster->image_index[0]]->image->w / TILE_W;
-  pos->h = images[live->monster->image_index[0]]->image->h / TILE_H;
+  pos->w = images[live->monster->image_index[0]]->image->w / TILE_W + (live->pixel_x ? 1 : 0);
+  pos->h = images[live->monster->image_index[0]]->image->h / TILE_H + (live->pixel_y ? 1 : 0);
 }
 
 int stepMonsterLeft(LiveMonster *live) {
@@ -121,6 +121,30 @@ int stepMonsterDown(LiveMonster *live) {
   return 1;
 }
 
+void moveDemon(LiveMonster *live_monster) {
+  int j;
+
+  // move sideways until you hit a wall or an edge
+  j=1+(int) (10.0*rand()/(RAND_MAX));
+  if(j > 7) {
+	// increment the face to display
+	live_monster->face++;
+	if(live_monster->face >= 
+	   live_monster->monster->image_count * live_monster->monster->face_mod) 
+	  live_monster->face = 0;	
+
+	if(live_monster->dir == DIR_LEFT) {
+	  if(!stepMonsterLeft(live_monster)) {
+		live_monster->dir = DIR_RIGHT;
+	  }
+	} else {
+	  if(!stepMonsterRight(live_monster)) {
+		live_monster->dir = DIR_LEFT;
+	  }
+	}
+  }
+}
+
 void moveCrab(LiveMonster *live_monster) {
   // increment the face to display
   live_monster->face++;
@@ -160,7 +184,8 @@ void drawSmasher(SDL_Rect *pos, LiveMonster *live, SDL_Surface *surface, SDL_Sur
   Position position;
 
   p.x = pos->x;
-  p.y = (pos->y / TILE_H) * TILE_H - TILE_H;
+  //  p.y = (pos->y / TILE_H) * TILE_H - TILE_H;
+  p.y = pos->y - TILE_H;
   p.w = pos->w;
   p.h = pos->h;
 
@@ -180,17 +205,16 @@ void drawSmasher(SDL_Rect *pos, LiveMonster *live, SDL_Surface *surface, SDL_Sur
 	p.h = pos->h;
 	position.pos_y--;	
   }
-
+  // draw the top one
   if(live->pixel_y) {
 	p.x = pos->x;
-	p.y = pos->y - live->pixel_y;
+	p.y += TILE_H;
+	p.y -= live->pixel_y;
 	p.w = pos->w;
 	p.h = pos->h;
-	q.x = q.y = 0;
-	q.w = p.w;
-	q.h = live->pixel_y;
-	SDL_BlitSurface(images[img_smash2]->image, &q, surface, &p);
+	SDL_BlitSurface(images[img_smash2]->image, NULL, surface, &p);
   }
+
   SDL_BlitSurface(img, NULL, surface, pos);
 }
 
@@ -233,6 +257,16 @@ void initMonsters() {
   monsters[MONSTER_SMASHER].type = MONSTER_SMASHER;
   monsters[MONSTER_SMASHER].start_speed_x = 8;
   monsters[MONSTER_SMASHER].start_speed_y = 8;
+
+  // demon monster
+  strcpy(monsters[MONSTER_DEMON].name, "little demon");
+  monsters[MONSTER_DEMON].moveMonster = moveDemon;
+  monsters[MONSTER_DEMON].type = MONSTER_CRAB;
+  monsters[MONSTER_DEMON].start_speed_x = 4;
+  monsters[MONSTER_DEMON].start_speed_y = 4;
+  // animation 2x slower
+  monsters[MONSTER_DEMON].face_mod = 4;
+
 
   // add additional monsters here
 
