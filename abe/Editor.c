@@ -68,7 +68,7 @@ void editorMainLoop(SDL_Event *event) {
 	  setImage(edit_panel.level, edit_panel.image_index);
 	  break;
 	case SDLK_DELETE: case SDLK_BACKSPACE: 
-	  setImage(edit_panel.level, -1);
+	  setImage(edit_panel.level, EMPTY_MAP);
 	  break;
 	case SDLK_1: 
 	  edit_panel.level = LEVEL_BACK;

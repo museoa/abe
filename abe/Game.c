@@ -171,7 +171,7 @@ int detectCollision(int dir) {
 	} else if(n == img_balloon[0] || n == img_balloon[1] || n == img_balloon[2]) {
 	  game.balloons++;
 	}
-	map.image_index[LEVEL_MAIN][key.pos_x + (key.pos_y * map.w)] = -1;
+	map.image_index[LEVEL_MAIN][key.pos_x + (key.pos_y * map.w)] = EMPTY_MAP;
 	map.redraw = 1;
   }
 
@@ -179,7 +179,7 @@ int detectCollision(int dir) {
   if(containsTypeWhere(&pos, &key, TYPE_DOOR)) {
 	if(game.keys > 0) {
 	  // open door
-	  map.image_index[LEVEL_MAIN][key.pos_x + (key.pos_y * map.w)] = -1;
+	  map.image_index[LEVEL_MAIN][key.pos_x + (key.pos_y * map.w)] = EMPTY_MAP;
 	  map.image_index[LEVEL_FORE][key.pos_x + (key.pos_y * map.w)] = img_door2;
 	  game.keys--;
 	  map.redraw = 1;
@@ -220,6 +220,8 @@ void runMap(char *name, int w, int h) {
 	fflush(stderr);
 	return;
   }
+  fprintf(stderr, "starting game\n");
+  fflush(stderr);
   // start outside
   //  game.player_start_x = 20;
   //  game.player_start_y = 28;
@@ -256,7 +258,11 @@ void runMap(char *name, int w, int h) {
   map.monsters = 1;
 
   // start the map main loop
+  fprintf(stderr, "drawing map\n");
+  fflush(stderr);
   drawMap();
+  fprintf(stderr, "running game\n");
+  fflush(stderr);
   moveMap();
 }
 

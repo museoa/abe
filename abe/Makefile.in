@@ -70,10 +70,11 @@ VERSION = @VERSION@
 
 AUTOMAKE_OPTIONS = no-dependencies
 
-noinst_PROGRAMS =  	abe
+noinst_PROGRAMS = \
+	abe
 
 
-abe_SOURCES = Main.c Image.c Trans.c Splash.c Editor.c Font.c Util.c Menu.c Map.c Game.c Monster.c
+abe_SOURCES = Main.c Image.c Trans.c Splash.c Editor.c Font.c Util.c Menu.c Map.c MapIO.c Game.c Monster.c
 abe_LDADD = @MATHLIB@
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
@@ -90,7 +91,7 @@ X_LIBS = @X_LIBS@
 X_EXTRA_LIBS = @X_EXTRA_LIBS@
 X_PRE_LIBS = @X_PRE_LIBS@
 abe_OBJECTS =  Main.o Image.o Trans.o Splash.o Editor.o Font.o Util.o \
-Menu.o Map.o Game.o Monster.o
+Menu.o Map.o MapIO.o Game.o Monster.o
 abe_DEPENDENCIES = 
 abe_LDFLAGS = 
 CFLAGS = @CFLAGS@

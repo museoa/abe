@@ -21,14 +21,14 @@ int intersects(SDL_Rect *a, SDL_Rect *b) {
    (Key should not appear as a valid image_index, currently key is f0f0f0f0.)
    return 0 on error, number of entries written on success
 */
-int compress(int *buff, size_t size, FILE *fp) {
+int compress(Uint16 *buff, size_t size, FILE *fp) {
   size_t size_written = 0;
 #ifdef USE_COMPRESSION
   //  printf("Compressing...\n");
-  int *block;
+  Uint16 *block;
   size_t i, t = 0;
-  unsigned int block_note = BLOCK_NOTE;
-  if(!(block = (int*)malloc(sizeof(int) * size))) {
+  Uint16 block_note = BLOCK_NOTE;
+  if(!(block = (Uint16*)malloc(sizeof(Uint16) * size))) {
 	fprintf(stderr, "Out of memory when writing compressed file");
 	fflush(stderr);
 	exit(-1);
@@ -39,14 +39,14 @@ int compress(int *buff, size_t size, FILE *fp) {
 	  if(t > 3) {
 		//		printf("\tcompressed block\n");
 		// compressed write
-		fwrite(&block_note, sizeof(unsigned int), 1, fp);
+		fwrite(&block_note, sizeof(Uint16), 1, fp);
 		fwrite(&t, sizeof(size_t), 1, fp);
-		fwrite(block, sizeof(int), 1, fp);
+		fwrite(block, sizeof(Uint16), 1, fp);
 		size_written += 3;
 	  } else {
 		//		printf("\tnormal block\n");
 		// normal write
-		fwrite(block, sizeof(int), t, fp);
+		fwrite(block, sizeof(Uint16), t, fp);
 		size_written += t;
 	  }
 	  t = 0;
@@ -58,14 +58,14 @@ int compress(int *buff, size_t size, FILE *fp) {
   if(t > 3) {
 	//	printf("\tcompressed block\n");
 	// compressed write
-	fwrite(&block_note, sizeof(unsigned int), 1, fp);
+	fwrite(&block_note, sizeof(Uint16), 1, fp);
 	fwrite(&t, sizeof(size_t), 1, fp);
-	fwrite(block, sizeof(int), 1, fp);
+	fwrite(block, sizeof(Uint16), 1, fp);
 	size_written += 3;
   } else {
 	//	printf("\tnormal block\n");
 	// normal write
-	fwrite(block, sizeof(int), t, fp);
+	fwrite(block, sizeof(Uint16), t, fp);
 	size_written += t;
   }
   free(block);
@@ -81,32 +81,32 @@ int compress(int *buff, size_t size, FILE *fp) {
    Read above compression and decompress into buff.
    return number of items read into buff (should equal size on success)
 */
-int decompress(int *buff, size_t size, FILE *fp) {
-  int *block;
-  int real_size;
+int decompress(Uint16 *buff, size_t size, FILE *fp) {
+  Uint16 *block;
+  size_t real_size;
   size_t i = 0, t = 0, r = 0, start = 0;
   size_t count;
-  int value;
-  unsigned int block_note = BLOCK_NOTE;
+  Uint16 value;
+  Uint16 block_note = BLOCK_NOTE;
 
   // read the file
-  if(!(block = (int*)malloc(sizeof(int) * size))) {
+  if(!(block = (Uint16*)malloc(sizeof(Uint16) * size))) {
 	fprintf(stderr, "Out of memory when writing compressed file");
 	fflush(stderr);
-	exit(-1);
+   	exit(-1);
   }
-  real_size = fread(block, sizeof(int), size, fp);
+  real_size = fread(block, sizeof(Uint16), size, fp);
 
 #ifdef USE_COMPRESSION
-  //  printf("Decompressing... real_size=%ld\n", real_size);
+  printf("Decompressing... real_size=%ld\n", real_size);
   for(t = 0; t < real_size;) {
 
-	if((unsigned int)block[t] == BLOCK_NOTE) {
+	if((Uint16)block[t] == BLOCK_NOTE) {
 	  // write the previous block
 	  if(start != t) {
 		count = t - start;
 		//		printf("\tuncompressed block: i=%ld start=%ld t=%d count=%ld\n", i, start, t, count);
-		memcpy(buff + i, block + start, count * sizeof(int));
+		memcpy(buff + i, block + start, count * sizeof(Uint16));
 		i += count;
 	  }
 
@@ -129,7 +129,7 @@ int decompress(int *buff, size_t size, FILE *fp) {
   if(start != t) {
 	count = t - start;
 	//	printf("\tuncompressed block: i=%ld start=%ld t=%d count=%ld\n", i, start, t, count);
-	memcpy(buff + i, block + start, count * sizeof(int));
+	memcpy(buff + i, block + start, count * sizeof(Uint16));
 	i += count;
   }
 
@@ -138,8 +138,8 @@ int decompress(int *buff, size_t size, FILE *fp) {
   return i;
 #else
   //  printf("Read uncompressed.");
-  memcpy(buff, block, real_size * sizeof(int));
+  memcpy(buff, block, real_size * sizeof(Uint16));
   free(block);
-  return real_size * sizeof(int);
+  return real_size * sizeof(Uint16);
 #endif
 }

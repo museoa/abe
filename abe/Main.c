@@ -77,6 +77,9 @@ int main(int argc, char *argv[]) {
 	} else if(!strcmp(argv[i], "--test") || !strcmp(argv[i], "-t")) {
 	  testModes();
 	  exit(0);
+	} else if(!strcmp(argv[i], "--convert")) {
+	  convertMap(argv[i + 1], argv[i + 2]);
+	  exit(0);
 	} else if(!strcmp(argv[i], "--help") || !strcmp(argv[i], "-?") || !strcmp(argv[i], "-h")) {
 	  printf("Abe!! Happy Birthday, 2002\n\n");
 	  printf("-f --fullscreen   Run in fullscreen mode.\n");
@@ -126,8 +129,9 @@ int main(int argc, char *argv[]) {
 	SDL_Quit();
   }
 
-  showSplashScreen();  
-  
+  if(runmode == RUNMODE_SPLASH) showSplashScreen();  
+  else showMenu();
+
   atexit(SDL_Quit);
   
   return 0;

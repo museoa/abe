@@ -13,6 +13,7 @@
 #include "Splash.h"
 #include "Menu.h"
 #include "Map.h"
+#include "MapIO.h"
 #include "Monster.h"
 #include "Editor.h"
 #include "Game.h"

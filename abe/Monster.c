@@ -250,7 +250,7 @@ void addMonsterImage(int monster_index, int image_index) {
 
 int isMonsterImage(int image_index) {
   // new fast way of doing this.
-  if(image_index < 0) return -1;
+  if(image_index == EMPTY_MAP) return -1;
   return images[image_index]->monster_index;  
 }
 

@@ -49,10 +49,13 @@
 // is used.
 #define FORCE_SDL_SCROLL 0
 
+// an empty map position
+#define EMPTY_MAP 0xffff
+
 typedef struct _map {
   char *name;
-  int w, h;
-  int *image_index[LEVEL_COUNT];
+  Uint16 w, h;
+  Uint16 *image_index[LEVEL_COUNT];
   SDL_Surface *level[LEVEL_COUNT];
   SDL_Surface *transfer;
   int delay;
@@ -92,8 +95,6 @@ void setImageNoCheck(int level, int x, int y, int image_index);
 int initMap(char *name, int w, int h);
 void resetMap();
 void destroyMap();
-void saveMap();
-int loadMap(int drawMap);
 void resetCursor();
 void repositionCursor(int tile_x, int tile_y);
 
@@ -105,17 +106,6 @@ int moveDown();
 
 void lockMap();
 void unlockMap();
-
-/** Remove unnecesary -1s. For example a 4 tile wide stone becomes a 1 int number.
-	return new number of elements in new_size. (so num of bytes=new_size * sizeof(int)).
-	caller must free returned pointer.
-	call this method before calling Utils.compress(). This prepares the map
-	for better compression by understanding the its structure. This doesn't 
-	compress the map that much, but combined with Utils.compress() map files
-	can go from 12M to 14K!
-*/
-int *compressMap(size_t *new_size);
-void decompressMap(int *data);
 
 void startJump();
 int containsType(Position *p, int type);

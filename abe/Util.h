@@ -10,8 +10,8 @@ int intersects(SDL_Rect *a, SDL_Rect *b);
 #define USE_COMPRESSION
 
 // is this portable? assumes a 4 byte int.
-// note: don't use ffffffff, it's -1
-#define BLOCK_NOTE 0xf0f0f0f0
+// note: don't use ffff, it's EMPTY_MAP
+#define BLOCK_NOTE 0xf0f0
 
 /**
    Simple run-length compression.
@@ -23,7 +23,7 @@ int intersects(SDL_Rect *a, SDL_Rect *b);
 
    return 0 on error, number of ints written on success
 */
-int compress(int *buff, size_t nmemb, FILE *fp);
-int decompress(int *buff, size_t nmemb, FILE *fp);
+int compress(Uint16 *buff, size_t nmemb, FILE *fp);
+int decompress(Uint16 *buff, size_t nmemb, FILE *fp);
 
 #endif

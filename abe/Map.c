@@ -88,16 +88,16 @@ void drawMap() {
 
 	for(y = params.start_y; y <= params.end_y && params.end_y < map.h; y++) {
 	  for(x = params.start_x; x <= params.end_x && params.end_x < map.w;) {
-		n = (map.image_index[level][x + (y * map.w)]);
+		n = map.image_index[level][x + (y * map.w)];
 		if(map.monsters) {
 		  m = isMonsterImage(n);
 		  if(m > -1) {
-			map.image_index[level][x + (y * map.w)] = -1;
+			map.image_index[level][x + (y * map.w)] = EMPTY_MAP;
 			addLiveMonster(m, n, x, y);
 			continue;
 		  }
 		}
-		if(n > -1) {
+		if(n != EMPTY_MAP) {
 		  // Draw the image
 		  // should be some check here in case images[n] points to la-la-land.
 		  pos.x = (params.offset_x + (x - params.start_x)) * TILE_W;
@@ -162,12 +162,12 @@ void drawMapLeftEdge() {
 		  if(map.monsters) {
 			m = isMonsterImage(n);
 			if(m > -1) {
-			  map.image_index[level][x + (y * map.w)] = -1;
+			  map.image_index[level][x + (y * map.w)] = EMPTY_MAP;
 			  addLiveMonster(m, n, x, y);
 			  continue;
 			}
 		  }
-		  if(n > -1) {
+		  if(n != EMPTY_MAP) {
 			// Draw the image
 			// should be some check here in case images[n] points to la-la-land.
 			//pos.x = (offset_x + (x - start_x)) * TILE_W;
@@ -231,12 +231,12 @@ void drawMapTopEdge() {
 		  if(map.monsters) {
 			m = isMonsterImage(n);
 			if(m > -1) {
-			  map.image_index[level][x + (y * map.w)] = -1;
+			  map.image_index[level][x + (y * map.w)] = EMPTY_MAP;
 			  addLiveMonster(m, n, x, y);
 			  continue;
 			}
 		  }
-		  if(n > -1) {
+		  if(n != EMPTY_MAP) {
 			// Draw the image
 			// should be some check here in case images[n] points to la-la-land.
 			pos.x = (params.offset_x + (x - params.start_x)) * TILE_W;
@@ -299,12 +299,12 @@ void drawMapRightEdge() {
 		if(map.monsters) {
 		  m = isMonsterImage(n);
 		  if(m > -1) {
-			map.image_index[level][x + (y * map.w)] = -1;
+			map.image_index[level][x + (y * map.w)] = EMPTY_MAP;
 			addLiveMonster(m, n, x, y);
 			continue;
 		  }
 		}
-		if(n > -1) {
+		if(n != EMPTY_MAP) {
 		  // Draw the image
 		  // should be some check here in case images[n] points to la-la-land.
 		  //pos.x = (offset_x + (x - start_x)) * TILE_W;
@@ -367,12 +367,12 @@ void drawMapBottomEdge() {
 		if(map.monsters) {
 		  m = isMonsterImage(n);
 		  if(m > -1) {
-			map.image_index[level][x + (y * map.w)] = -1;
+			map.image_index[level][x + (y * map.w)] = EMPTY_MAP;
 			addLiveMonster(m, n, x, y);
 			continue;
 		  }
 		}
-		if(n > -1) {
+		if(n != EMPTY_MAP) {
 		  // Draw the image
 		  // should be some check here in case images[n] points to la-la-land.
 		  pos.x = (params.offset_x + (x - params.start_x)) * TILE_W;
@@ -885,7 +885,7 @@ void setImage(int level, int index) {
   int start_x, start_y, end_x, end_y;
 
   // clear the area 
-  if(index > -1) {
+  if(index != EMPTY_MAP) {
 	img_rect.x = cursor.pos_x;
 	img_rect.y = cursor.pos_y;
 	img_rect.w = images[index]->image->w / TILE_W;
@@ -895,21 +895,21 @@ void setImage(int level, int index) {
   if(start_x < 0) start_x = 0;
   start_y = cursor.pos_y - EXTRA_Y;
   if(start_y < 0) start_y = 0;
-  end_x = cursor.pos_x + (index > -1 ? images[index]->image->w / TILE_W : 1);
+  end_x = cursor.pos_x + (index != EMPTY_MAP ? images[index]->image->w / TILE_W : 1);
   if(end_x >= map.w) end_x = map.w;
-  end_y = cursor.pos_y + (index > -1 ? images[index]->image->h / TILE_H : 1);
+  end_y = cursor.pos_y + (index != EMPTY_MAP ? images[index]->image->h / TILE_H : 1);
   if(end_y >= map.h) end_y = map.h;
   for(y = start_y; y < end_y; y++) {
 	for(x = start_x; x < end_x; x++) {
 	  n = map.image_index[level][x + (y * map.w)];
-	  if(n > -1) {
+	  if(n != EMPTY_MAP) {
 		rect.x = x;
 		rect.y = y;
 		rect.w = images[n]->image->w / TILE_W;
 		rect.h = images[n]->image->h / TILE_H;
 		if(contains(&rect, cursor.pos_x, cursor.pos_y) || 
-		   (index > -1 && intersects(&rect, &img_rect))) {	  
-		  map.image_index[level][x + (y * map.w)] = -1;
+		   (index != EMPTY_MAP && intersects(&rect, &img_rect))) {	  
+		  map.image_index[level][x + (y * map.w)] = EMPTY_MAP;
 		}
 	  }
 	}
@@ -917,7 +917,7 @@ void setImage(int level, int index) {
   // add the image
   map.image_index[level][cursor.pos_x + (cursor.pos_y * map.w)] = index;
   // move the cursor
-  if(index > -1) {
+  if(index != EMPTY_MAP) {
 	if(cursor.pos_x + (images[index]->image->w / TILE_W) < map.w) 
 	  cursor.pos_x += (images[index]->image->w / TILE_W);
   }
@@ -952,9 +952,9 @@ void resetMap() {
 
   // clean map
   for(i = 0; i < (map.w * map.h); i++) {
-	map.image_index[LEVEL_BACK][i] = -1;
-	map.image_index[LEVEL_MAIN][i] = -1;
-	map.image_index[LEVEL_FORE][i] = -1;
+	map.image_index[LEVEL_BACK][i] = EMPTY_MAP;
+	map.image_index[LEVEL_MAIN][i] = EMPTY_MAP;
+	map.image_index[LEVEL_FORE][i] = EMPTY_MAP;
   }
 }
 
@@ -977,7 +977,7 @@ int initMap(char *name, int w, int h) {
   map.delay = 25;
   map.redraw = 0;
   for(i = LEVEL_BACK; i < LEVEL_COUNT; i++) {
-	if(!(map.image_index[i] = (int*)malloc(sizeof(int) * w * h))) {
+	if(!(map.image_index[i] = (Uint16*)malloc(sizeof(Uint16) * w * h))) {
 	  fprintf(stderr, "Out of memory.\n");
 	  fflush(stderr);
 	  exit(0);
@@ -1024,9 +1024,9 @@ int initMap(char *name, int w, int h) {
   
   // clean map
   for(i = 0; i < (w * h); i++) {
-	map.image_index[LEVEL_BACK][i] = -1;
-	map.image_index[LEVEL_MAIN][i] = -1;
-	map.image_index[LEVEL_FORE][i] = -1;
+	map.image_index[LEVEL_BACK][i] = EMPTY_MAP;
+	map.image_index[LEVEL_MAIN][i] = EMPTY_MAP;
+	map.image_index[LEVEL_FORE][i] = EMPTY_MAP;
   }
 
   // init some variables
@@ -1064,151 +1064,6 @@ void repositionCursor(int tile_x, int tile_y) {
   cursor.jump = 0;
   cursor.gravity = 0;
   cursor.stepup = 0;
-}
-
-void saveMap() {
-  char path[300];
-  FILE *fp;
-  size_t new_size, written;
-  int *compressed_map;
-  char *err;
-
-  sprintf(path, "%s%s%s.dat", MAPS_DIR, PATH_SEP, map.name);
-  printf("Saving map %s\n", path);  
-  fflush(stdout);
-
-  if(!(fp = fopen(path, "wb"))) {
-	err = strerror(errno);
-	fprintf(stderr, "Can't open file for writing: %s\n", err);
-	fflush(stderr);
-	free(err);
-	return;
-  }
-  // write the header
-  fwrite(&(map.w), sizeof(map.w), 1, fp);
-  fwrite(&(map.h), sizeof(map.h), 1, fp);
-
-  // compression step 1
-  printf("Compressing...\n");
-  compressed_map = compressMap(&new_size);
-  fprintf(stderr, "Compressed map. old_size=%ld new_size=%ld\n", (LEVEL_COUNT * map.w * map.h), new_size);
-  fflush(stderr);
-  // write out and further compress in step 2
-  written = compress(compressed_map, new_size, fp);
-  fprintf(stderr, "Compressed map step2. Written %ld ints. Compression ration: %f.2\%\n", written, 
-		  (float)written / ((float)(LEVEL_COUNT * map.w * map.h) / 100.0));
-  fflush(stderr);
-  fclose(fp);
-  free(compressed_map);
-}
-
-// call this after initMap()!
-int loadMap(int draw_map) {
-  char path[300];
-  FILE *fp;
-  size_t size;
-  int *read_buff;
-  int count_read;
-  char *err;
-
-  sprintf(path, "%s%s%s.dat", MAPS_DIR, PATH_SEP, map.name);
-  printf("Loading map %s\n", path);  
-  fflush(stdout);
-  if(!(fp = fopen(path, "rb"))) {
-	err = strerror(errno);
-	fprintf(stderr, "Can't open file for reading: %s\n", err);
-	fflush(stderr);
-	free(err);
-	return 0;
-  }
-  // read the header
-  fread(&(map.w), sizeof(map.w), 1, fp);
-  fread(&(map.h), sizeof(map.h), 1, fp);
-
-  // compression step 1: read compressed data from disk
-  // FIXME: what would be nicer is to only allocate as much mem as used on disk.
-  size = LEVEL_COUNT * map.w * map.h;
-  if(!(read_buff = (int*)malloc(sizeof(int) * size))) {
-	fprintf(stderr, "Out of memory on map read.");
-	fflush(stderr);
-	exit(0);
-  }
-  count_read = decompress(read_buff, size, fp);
-  fprintf(stderr, "read %d ints\n", count_read);
-  fflush(stderr);
-  fclose(fp);
-  
-  // step 2: further uncompress
-  decompressMap(read_buff);
-  free(read_buff);
-
-  resetCursor();
-  if(draw_map) drawMap();
-  return 1;
-}
-
-/** Remove unnecesary -1s. For example a 4 tile wide stone becomes a 1 int number.
-	return new number of elements in new_size. (so num of bytes=new_size * sizeof(int)).
-	caller must free returned pointer.
-	call this method before calling Utils.compress(). This prepares the map
-	for better compression by understanding the its structure. This doesn't 
-	compress the map that much, but combined with Utils.compress() map files
-	can go from 12M to 14K!
-*/
-int *compressMap(size_t *new_size) {
-  int *q;
-  int level, i, x, y, n;
-  size_t t = 0;
-
-  if(!(q = (int*)malloc(sizeof(int) * map.w * map.h * LEVEL_COUNT))) {
-	fprintf(stderr, "Out of memory in compressMap.");
-	fflush(stderr);
-	exit(-1);
-  }
-  for(level = 0; level < LEVEL_COUNT; level++) {
-	for(y = 0; y < map.h; y++) {
-	  for(x = 0; x < map.w;) {
-		i = x + (y * map.w);
-		n = map.image_index[level][i];
-		*(q + t) = n;
-		t++;
-		if(n > -1) {
-		  // skip ahead
-		  x += images[n]->image->w / TILE_W;
-		} else {
-		  x++;
-		}
-	  }
-	}
-  }
-  *new_size = t;
-  return q;
-}
-
-/**
-   Decompress map by adding back missing -1-s. See compressMap() for
-   details.
- */
-void decompressMap(int *p) {
-  int level, i, x, y, n, r, nn;
-  size_t t = 0;
-
-  for(level = 0; level < LEVEL_COUNT; level++) {
-	for(y = 0; y < map.h; y++) {
-	  for(x = 0; x < map.w;) {
-		n = *(p + t);
-		t++;
-		i = x + (y * map.w);
-		map.image_index[level][i] = n;
-		x++;
-		if(n > -1) {
-		  for(r = 1; r < images[n]->image->w / TILE_W && x < map.w; r++, x++) {
-			map.image_index[level][i + r] = -1;
-		  }
-		}
-	  }
-	}
-  }
 }
 
 void startJump() {
@@ -1254,7 +1109,7 @@ int containsTypeWhere(Position *p, Position *ret, int type) {
   for(y = check.start_y; y < check.end_y; y++) {
 	for(x = check.start_x; x < check.end_x;) {
 	  n = map.image_index[LEVEL_MAIN][x + (y * map.w)];
-	  if(n > -1) {
+	  if(n != EMPTY_MAP) {
 		if(type & images[n]->type) {
 		  rect.x = x;
 		  rect.y = y;
@@ -1300,7 +1155,7 @@ int onSolidGround(Position *p) {
 	found = 0;
 	for(r = check.start_x; r <= x;) {
 	  n = map.image_index[LEVEL_MAIN][r + (y * map.w)];
-	  if(n > -1) {
+	  if(n != EMPTY_MAP) {
 		rect.x = r;
 		rect.y = y;
 		rect.w = images[n]->image->w / TILE_W;
