@@ -45,12 +45,10 @@ void gameMainLoop(SDL_Event *event) {
 	//	printf("The %s key was pressed! scan=%d\n", SDL_GetKeyName(event->key.keysym.sym), event->key.keysym.scancode);
 	switch(event->key.keysym.sym) {
 	case SDLK_LEFT: 
-	  cursor.dontMove = (cursor.dir == DIR_RIGHT ? 1 : 0);
 	  game.dir = GAME_DIR_LEFT;
 	  cursor.dir = DIR_LEFT;
 	  break;
 	case SDLK_RIGHT: 
-	  cursor.dontMove = (cursor.dir == DIR_LEFT ? 1 : 0);
 	  game.dir = GAME_DIR_RIGHT;
 	  cursor.dir = DIR_RIGHT;
 	  break;

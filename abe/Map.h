@@ -57,7 +57,6 @@ typedef struct _map {
 } Map;
 
 typedef struct _cursor {
-  int dontMove;
   int pos_x, pos_y;
   int pixel_x, pixel_y;
   int speed_x, speed_y;

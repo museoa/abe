@@ -441,10 +441,6 @@ void scrollMap(int dir) {
 }
 
 int moveLeft(int checkCollision, int scroll) {
-  if(cursor.dontMove) {
-	finishDrawMap();
-	return 0;
-  }
   int move, old_pixel, old_pos;
   while(cursor.speed_x > 0) {
 	move = 1;
@@ -478,10 +474,6 @@ int moveLeft(int checkCollision, int scroll) {
 }
 
 int moveRight(int checkCollision, int scroll) {
-  if(cursor.dontMove) {
-	finishDrawMap();
-	return 0;
-  }
   int move, old_pixel, old_pos;
   while(cursor.speed_x > 0) {
 	move = 1;
@@ -694,21 +686,13 @@ int moveMap() {
 	case DIR_LEFT:
 	  if(!moveLeft(1, 1)) {
 		// try to step up onto the obsticle
-		int n = canStepUp(DIR_LEFT);
-		if(n) {
-		  fprintf(stderr, "L stepped up\n");
-		  fflush(stderr);
-		}
+		canStepUp(DIR_LEFT);
 	  }
 	  break;	
 	case DIR_RIGHT:
 	  if(!moveRight(1, 1)) {
 		// try to step up onto the obsticle
-		int n = canStepUp(DIR_RIGHT);
-		if(n) {
-		  fprintf(stderr, "R stepped up\n");
-		  fflush(stderr);
-		}
+		canStepUp(DIR_RIGHT);
 	  }
 	  break;	
 	case DIR_UP:
@@ -872,7 +856,6 @@ void resetCursor() {
   cursor.speed_y = TILE_H;
   cursor.dir = DIR_NONE;
   cursor.wait = 0;
-  cursor.dontMove = 0;
 }
 
 void saveMap() {
