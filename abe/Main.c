@@ -67,6 +67,8 @@ main(int argc, char *argv[]) {
 
   SDL_ShowCursor(0);
 
+  initMonsters();
+
   loadImages();
 
   mainLoop(runmode);

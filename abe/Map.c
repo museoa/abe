@@ -3,18 +3,18 @@
 void waitUntilPaintingStops();
 void finishDrawMap();
 int last_dir = -1;
-
+SDL_Rect screen_rect;
 // some private global variables used to draw the map
 int screen_center_x, screen_center_y; // the screen's center in tiles
 int screen_w, screen_h;               // the screen's size in tiles
-typedef struct _mapDrawParams {
-  int start_x; // where to start drawing the map
-  int start_y;
-  int end_x;   // where to stop drawing the map
-  int end_y;
-  int offset_x;  // how many tiles to offset from the top/left edge of the screen
-  int offset_y;
-} MapDrawParams;
+
+/**
+   Here rect is in pixels where 0, 0 is the screen's left top corner.
+   Returns 0 for false and non-0 for true.
+ */
+int isOnScreen(SDL_Rect rect) {
+  return intersects(&rect, &screen_rect);
+}
 
 /**
    Compute what to draw based on the cursor's location.
@@ -59,7 +59,7 @@ void drawMap() {
 
   // draw the map
   SDL_Rect pos;
-  int x, y, level, n;
+  int x, m, y, level, n;
   for(level = LEVEL_BACK; level < LEVEL_COUNT; level++) {
 
 	// erase the screen
@@ -76,6 +76,14 @@ void drawMap() {
 	for(y = params.start_y; y <= params.end_y && params.end_y < map.h; y++) {
 	  for(x = params.start_x; x <= params.end_x && params.end_x < map.w;) {
 		n = (map.image_index[level][x + (y * map.w)]);
+		if(map.monsters) {
+		  m = isMonsterImage(n);
+		  if(m > -1) {
+			map.image_index[level][x + (y * map.w)] = -1;
+			addLiveMonster(m, n, x, y);
+			continue;
+		  }
+		}
 		if(n > -1) {
 		  // Draw the image
 		  // should be some check here in case images[n] points to la-la-land.
@@ -110,7 +118,7 @@ void drawMap() {
 void drawMapLeftEdge() {
   // erase the edge
   SDL_Rect pos;
-  int n, row, level, x, y;
+  int n, m, row, level, x, y;
   pos.x = 0;
   pos.y = 0;
   pos.w = cursor.speed_x;
@@ -137,6 +145,14 @@ void drawMapLeftEdge() {
 	  for(y = params.start_y; y < params.end_y; y++) {
 		for(x = params.start_x; x <= params.start_x + 1;) {
 		  n = (map.image_index[level][x + (y * map.w)]);
+		  if(map.monsters) {
+			m = isMonsterImage(n);
+			if(m > -1) {
+			  map.image_index[level][x + (y * map.w)] = -1;
+			  addLiveMonster(m, n, x, y);
+			  continue;
+			}
+		  }
 		  if(n > -1) {
 			// Draw the image
 			// should be some check here in case images[n] points to la-la-land.
@@ -171,7 +187,7 @@ void drawMapLeftEdge() {
 void drawMapTopEdge() {
   // erase the edge
   SDL_Rect pos;
-  int n, row, level, x, y;
+  int n, m, row, level, x, y;
   pos.x = 0;
   pos.y = 0;
   pos.w = map.level[0]->w;
@@ -197,6 +213,14 @@ void drawMapTopEdge() {
 	  for(y = params.start_y; y <= params.start_y + 1; y++) {
 		for(x = params.start_x; x < params.end_x;) {
 		  n = (map.image_index[level][x + (y * map.w)]);
+		  if(map.monsters) {
+			m = isMonsterImage(n);
+			if(m > -1) {
+			  map.image_index[level][x + (y * map.w)] = -1;
+			  addLiveMonster(m, n, x, y);
+			  continue;
+			}
+		  }
 		  if(n > -1) {
 			// Draw the image
 			// should be some check here in case images[n] points to la-la-land.
@@ -228,7 +252,7 @@ void drawMapTopEdge() {
 void drawMapRightEdge() {
   // erase the edge
   SDL_Rect pos;
-  int n, row, level, x, y;
+  int n, m, row, level, x, y;
   pos.x = map.level[0]->w - cursor.speed_x;
   pos.y = 0;
   pos.w = cursor.speed_x;
@@ -256,6 +280,14 @@ void drawMapRightEdge() {
 	  for(x = params.end_x - EXTRA_X; x <= params.end_x;) {
 		if(params.end_x >= map.w) break;
 		n = (map.image_index[level][x + (y * map.w)]);
+		if(map.monsters) {
+		  m = isMonsterImage(n);
+		  if(m > -1) {
+			map.image_index[level][x + (y * map.w)] = -1;
+			addLiveMonster(m, n, x, y);
+			continue;
+		  }
+		}
 		if(n > -1) {
 		  // Draw the image
 		  // should be some check here in case images[n] points to la-la-land.
@@ -287,7 +319,7 @@ void drawMapRightEdge() {
 void drawMapBottomEdge() {
   // erase the edge
   SDL_Rect pos;
-  int n, row, level, x, y;
+  int n, m, row, level, x, y;
   pos.x = 0;
   pos.y = map.level[0]->h - cursor.speed_y;
   pos.w = map.level[0]->w;
@@ -315,6 +347,14 @@ void drawMapBottomEdge() {
 	  if(params.end_y >= map.h) break;
 	  for(x = params.start_x; x < params.end_x;) {
 		n = (map.image_index[level][x + (y * map.w)]);
+		if(map.monsters) {
+		  m = isMonsterImage(n);
+		  if(m > -1) {
+			map.image_index[level][x + (y * map.w)] = -1;
+			addLiveMonster(m, n, x, y);
+			continue;
+		  }
+		}
 		if(n > -1) {
 		  // Draw the image
 		  // should be some check here in case images[n] points to la-la-land.
@@ -727,6 +767,9 @@ int moveMap() {
 }
 
 void finishDrawMap() {
+  MapDrawParams params;
+  getMapDrawParams(&params);
+
   // draw on screen
   SDL_Rect pos;
   int level;
@@ -739,6 +782,7 @@ void finishDrawMap() {
 	// make a callback if it exists
 	if(level == LEVEL_MAIN && map.afterMainLevelDrawn) {
 	  map.afterMainLevelDrawn();
+	  if(map.monsters) drawLiveMonsters(screen, &params);
 	}
   }
 
@@ -805,6 +849,7 @@ void initMap(char *name, int w, int h) {
   // start a new Map
   map.gravity = 0;
   map.accelerate = 0;
+  map.monsters = 0;
   map.name = strdup(name);
   map.w = w;
   map.h = h;
@@ -848,6 +893,12 @@ void initMap(char *name, int w, int h) {
   screen_w = screen->w / TILE_W;
   //  screen_h = (screen->h - edit_panel.image->h) / TILE_H;
   screen_h = screen->h / TILE_H;
+
+  // init the screen rectangle.
+  screen_rect.x = 0;
+  screen_rect.y = 0;
+  screen_rect.w = screen->w;
+  screen_rect.h = screen->h;
 }
 
 void destroyMap() {

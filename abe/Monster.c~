@@ -1,0 +1,15 @@
+void initMonsters() {
+
+  // crab monster
+  strcpy(monsters[MONSTER_CRAB].name, "dungenous crab");
+
+  // common properties.
+  int i;
+  for(i = 0; i < MONSTER_COUNT; i++) {
+	monsters[i].image_count = 0;
+  }
+}
+
+void addMonsterImage(int monster_index, SDL_Image *image) {
+  monsters[monster_index].images[monsters[monster_index].image_count++] = image;
+}

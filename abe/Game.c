@@ -186,6 +186,7 @@ void runMap(char *name, int w, int h) {
   // activate gravity and accelerated movement
   map.accelerate = 1;
   map.gravity = 1;
+  map.monsters = 1;
 
   // start the map main loop
   moveMap();

@@ -57,8 +57,9 @@ typedef struct _map {
   int (*detectCollision) (int);
   int (*detectLadder) ();
   void (*handleMapEvent) (SDL_Event*);
-  int accelerate; // 1 for accelerated movement, 0 otherwise
+  int accelerate; // 1 for accelerated movement, 0 otherwise(default)
   int gravity; // 1 for gravity, 0 otherwise(default)
+  int monsters; // 1 for active monsters, 0 otherwise(default)
 } Map;
 
 typedef struct _cursor {
@@ -104,5 +105,11 @@ int *compressMap(size_t *new_size);
 void decompressMap();
 
 void startJump();
+
+/**
+   Here rect is in pixels where 0, 0 is the screen's left top corner.
+   Returns 1 for yes, 0 for false.
+ */
+int isOnScreen(SDL_Rect rect);
 
 #endif

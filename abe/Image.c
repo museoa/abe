@@ -54,7 +54,12 @@ doLoadImage(char *filename, char *name) {
 	  img_back = image_count;
 	} else if(!strcmp(name, "ladder")) {
 	  type = TYPE_LADDER;
+	} else if(!strcmp(name, "crab1")) { // add monster images
+	  addMonsterImage(MONSTER_CRAB, image_count);
+	} else if(!strcmp(name, "crab2")) {
+	  addMonsterImage(MONSTER_CRAB, image_count);
 	}
+
 	// store the image
 	if(!(images[image_count] = malloc(sizeof(Image)))) {
 	  fprintf(stderr, "Out of memory.");
@@ -64,6 +69,7 @@ doLoadImage(char *filename, char *name) {
 	images[image_count]->image = image;
 	images[image_count]->name = strdup(name);
 	images[image_count]->type = type;
+
 	image_count++;
   }
 }
