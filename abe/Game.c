@@ -291,8 +291,8 @@ void runMap(char *name, int w, int h) {
   //  game.player_start_x = 20;
   //  game.player_start_y = 28;
 
-  game.player_start_x = 24;
-  game.player_start_y = 42;
+  game.player_start_x = 269;
+  game.player_start_y = 44;
 
   game.lives = 5;
   game.score = 0;

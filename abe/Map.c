@@ -782,25 +782,29 @@ void moveGravity() {
 }
 
 int moveWithPlatform() {
-  int old_speed, old_dir;
+  int old_speed, old_dir, diff;
   if(!cursor.platform) return 0;
   
   // move up or down if needed.
-  if(cursor.pixel_y) {
-	old_speed = cursor.speed_y;
-	old_dir = cursor.dir;
-	if(cursor.pos_y + (tom[0]->h / TILE_H) < cursor.platform-> pos_y) {
-	  cursor.speed_y = TILE_H - cursor.pixel_y;
-	  cursor.dir = DIR_DOWN;
-	  moveDown();
-	} else {
-	  cursor.speed_y = cursor.pixel_y;
-	  cursor.dir = DIR_UP;
-	  moveUp(0);
-	}
-	cursor.speed_y = old_speed;
-	cursor.dir = old_dir;
+  old_speed = cursor.speed_y;
+  old_dir = cursor.dir;
+  diff = (cursor.platform->pos_y + cursor.platform->pixel_y) - 
+	(cursor.pos_y + (tom[0]->h / TILE_H) + cursor.pixel_y);
+  if(diff > 0) {
+	fprintf(stderr, "down\n", diff);
+	cursor.speed_y = diff;
+	cursor.dir = DIR_DOWN;
+	moveDown();
+  } else if(diff < 0) {
+	fprintf(stderr, "up\n", diff);
+	cursor.speed_y = -diff;
+	cursor.dir = DIR_UP;
+	moveUp(0);
   }
+  cursor.speed_y = old_speed;
+  cursor.dir = old_dir;
+  fprintf(stderr, "diff=%d\n", diff);
+  fflush(stderr);
   
   // move with the platform
   old_speed = cursor.speed_x;
