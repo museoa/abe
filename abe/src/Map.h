@@ -1,5 +1,5 @@
-#ifndef MAP_H 
-#define MAP_H 
+#ifndef MAP_H
+#define MAP_H
 
 #include "Main.h"
 
@@ -65,28 +65,28 @@ typedef struct _map {
   SDL_Surface *transfer;
   int delay;
   // painting callbacks
-  void (*beforeDrawToScreen)();
-  void (*afterScreenFlipped)();
-  void (*afterMainLevelDrawn)();
+  void (*beforeDrawToScreen) ();
+  void (*afterScreenFlipped) ();
+  void (*afterMainLevelDrawn) ();
   int (*detectCollision) (int);
   void (*checkPosition) ();
   // return: 0 - no ladder, 1 - on ladder, can only move down, 2 - on ladder can move up or down
   int (*detectLadder) ();
   int (*detectSlide) ();
-  void (*handleMapEvent) (SDL_Event*);
-  int accelerate; // 1 for accelerated movement, 0 otherwise(default)
-  int gravity; // 1 for gravity, 0 otherwise(default)
-  int monsters; // 1 for active monsters, 0 otherwise(default)
-  int slides; // 1 for active slides, 0 otherwise(default)
-  int redraw; // set to 1 to cause a full map repaint
-  int top_left_x, top_left_y; // where is the tile top left corner of the map?
+  void (*handleMapEvent) (SDL_Event *);
+  int accelerate;               // 1 for accelerated movement, 0 otherwise(default)
+  int gravity;                  // 1 for gravity, 0 otherwise(default)
+  int monsters;                 // 1 for active monsters, 0 otherwise(default)
+  int slides;                   // 1 for active slides, 0 otherwise(default)
+  int redraw;                   // set to 1 to cause a full map repaint
+  int top_left_x, top_left_y;   // where is the tile top left corner of the map?
   int delta;
   int fps_override;
   // the 3d background
   SDL_Surface *background;
   SDL_Surface *background_image;
-  int moveBackground; // if 1 the background scroll artificially
-  int max_speed_boost; // for slow machines, add this to movement speed. (0-10 extra)
+  int moveBackground;           // if 1 the background scroll artificially
+  int max_speed_boost;          // for slow machines, add this to movement speed. (0-10 extra)
   int quit;
   SDL_Surface *overlay;
   char status[80];
@@ -96,8 +96,8 @@ typedef struct _map {
 // an optimization for looking up monsters etc. multiple times
 // fixme: add more object, etc. here
 typedef struct _interact {
-  int ladder_change; // did on_ladder change just now?
-  int on_ladder;     // are we on a ladder?
+  int ladder_change;            // did on_ladder change just now?
+  int on_ladder;                // are we on a ladder?
 } Interact;
 
 extern Cursor cursor;
@@ -109,7 +109,7 @@ void moveMap();
 
 void drawMap();
 void setImage(int level, int index);
-void setImagePosition(int level, int index, Position *pos);
+void setImagePosition(int level, int index, Position * pos);
 void setImageNoCheck(int level, int x, int y, int image_index);
 int initMap(char *name, int w, int h);
 void resetMap();
@@ -133,12 +133,12 @@ int startJumpN(int n);
    Return 1 if it does, 0 otherwise.
    Hack: no difference between returning index=0 vs. 0 (not found).
  */
-int containsType(Position *p, int type);
+int containsType(Position * p, int type);
 // like contains type, but returns the position of the object in ret.
-int containsTypeWhere(Position *p, Position *ret, int type);
+int containsTypeWhere(Position * p, Position * ret, int type);
 // like above but can specify a level (send NULL for *ret if not needed.)
-int containsTypeInLevel(Position *p, Position *ret, int type, int level);
-int onSolidGround(Position *p);
+int containsTypeInLevel(Position * p, Position * ret, int type, int level);
+int onSolidGround(Position * p);
 // artificially move the background
 void scrollBackground();
 void showMapStatus(char *s);

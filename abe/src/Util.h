@@ -1,16 +1,16 @@
-#ifndef UTIL_H 
-#define UTIL_H 
+#ifndef UTIL_H
+#define UTIL_H
 
 #include "Main.h"
 #include "SDL_rwops.h"
 #include "SDL_endian.h"
 
 // Rectangle math functions
-int contains(SDL_Rect *a, int x, int y);
+int contains(SDL_Rect * a, int x, int y);
 // returns 0 if no intersection, otherwise 1
-int intersects(SDL_Rect *a, SDL_Rect *b);
+int intersects(SDL_Rect * a, SDL_Rect * b);
 // same as above but the rectangles have to intersect at lease "value" pixels in both dimensions.
-int intersectsBy(SDL_Rect *a, SDL_Rect *b, int value);
+int intersectsBy(SDL_Rect * a, SDL_Rect * b, int value);
 
 #define USE_COMPRESSION
 
@@ -30,13 +30,13 @@ int intersectsBy(SDL_Rect *a, SDL_Rect *b, int value);
 */
 //int compress(Uint16 *buff, size_t nmemb, FILE *fp);
 //int decompress(Uint16 *buff, size_t nmemb, FILE *fp);
-int compress(Uint16 *buff, size_t nmemb, SDL_RWops *rwop);
-int decompress(Uint16 *buff, size_t nmemb, SDL_RWops *rwop);
-void createBack(SDL_Surface **back_surface);
+int compress(Uint16 * buff, size_t nmemb, SDL_RWops * rwop);
+int decompress(Uint16 * buff, size_t nmemb, SDL_RWops * rwop);
+void createBack(SDL_Surface ** back_surface);
 
 
 // some special effects
 void processEffects();
-void shimmerEffect(SDL_Rect *rect, SDL_Surface *surface);
-void damageEffect(SDL_Rect *rect, SDL_Surface *surface);
+void shimmerEffect(SDL_Rect * rect, SDL_Surface * surface);
+void damageEffect(SDL_Rect * rect, SDL_Surface * surface);
 #endif

@@ -9,49 +9,68 @@ int sound_loaded = 0;
 Mix_Chunk *sound[100];
 Mix_Music *intro_music, *game_music;
 
-void playSound(int index) {
-  if(!sound_enabled) return;
+void
+playSound(int index)
+{
+  if(!sound_enabled)
+    return;
   if(Mix_PlayChannel(DOOR_CHANNEL, sound[index], 0) == -1) {
-    printf("Mix_PlayChannel: %s\n",Mix_GetError());    
+    printf("Mix_PlayChannel: %s\n", Mix_GetError());
   }
 }
 
-void playIntroMusic() {
-  if(!music_enabled) return;
-  if(!intro_music) return;
-  if(Mix_PlayMusic(intro_music, -1)==-1) {
+void
+playIntroMusic()
+{
+  if(!music_enabled)
+    return;
+  if(!intro_music)
+    return;
+  if(Mix_PlayMusic(intro_music, -1) == -1) {
     printf("Mix_PlayMusic: intro %s\n", Mix_GetError());
     // well, there's no music, but most games don't break without music...
   }
 }
 
-void playGameMusic() {
-  if(!music_enabled) return;
-  if(!game_music) return;
-  if(Mix_PlayMusic(game_music, -1)==-1) {
+void
+playGameMusic()
+{
+  if(!music_enabled)
+    return;
+  if(!game_music)
+    return;
+  if(Mix_PlayMusic(game_music, -1) == -1) {
     printf("Mix_PlayMusic: game %s\n", Mix_GetError());
     // well, there's no music, but most games don't break without music...
   }
 }
 
-void loadSound(int index, char *name) {
+void
+loadSound(int index, char *name)
+{
   char path[300];
   sprintf(path, "%s%s%s.wav", SOUND_DIR, PATH_SEP, name);
   fprintf(stderr, "Loading sound: path=%s\n", path);
   sound[index] = Mix_LoadWAV(path);
   if(!sound[index]) {
-    printf("Mix_LoadWAV: name=%s path=%s error=%s\n", name, path, Mix_GetError());
-	SDL_Quit();
+    printf("Mix_LoadWAV: name=%s path=%s error=%s\n", name, path,
+           Mix_GetError());
+    SDL_Quit();
   }
 }
 
-void stopMusic() {
+void
+stopMusic()
+{
   Mix_HaltMusic();
 }
 
-void initAudio() {
+void
+initAudio()
+{
   char path[300];
-  if(!sound_enabled) return;
+  if(!sound_enabled)
+    return;
 
   if(Mix_OpenAudio(MIX_DEFAULT_FREQUENCY, MIX_DEFAULT_FORMAT, 2, 1024) == -1) {
     printf("Mix_OpenAudio: %s\n", Mix_GetError());
@@ -70,7 +89,7 @@ void initAudio() {
   game_music = Mix_LoadMUS(path);
   if(!game_music) {
     printf("Mix_LoadMUS(\"game\"): %s\n", Mix_GetError());
-  }  
+  }
   showLoadingProgress();
 
   loadSound(DOOR_SOUND, "door");

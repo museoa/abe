@@ -1,5 +1,5 @@
-#ifndef MAPIO_H 
-#define MAPIO_H 
+#ifndef MAPIO_H
+#define MAPIO_H
 
 #include "Main.h"
 #include "SDL_rwops.h"
@@ -21,8 +21,8 @@ int loadMapPath(char *path, int drawMap);
 	compress the map that much, but combined with Utils.compress() map files
 	can go from 12M to 14K!
 */
-Uint16 *compressMap(size_t *new_size);
-void decompressMap(Uint16 *data);
+Uint16 *compressMap(size_t * new_size);
+void decompressMap(Uint16 * data);
 int convertMap(char *from, char *to);
 
 #endif

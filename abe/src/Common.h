@@ -1,4 +1,4 @@
-#ifndef COMMON_H 
+#ifndef COMMON_H
 #define COMMON_H
 
 #ifdef WIN32
@@ -8,9 +8,9 @@
 #endif
 
 typedef struct _position {
-  int pos_x, pos_y; // in tiles
-  int pixel_x, pixel_y; // in pixels
-  int w, h; // in tiles
+  int pos_x, pos_y;             // in tiles
+  int pixel_x, pixel_y;         // in pixels
+  int w, h;                     // in tiles
 } Position;
 
 /**
@@ -43,17 +43,18 @@ typedef struct _monster {
   int start_speed_x;
   int start_speed_y;
   int face_mod;
-  void (*moveMonster) (LiveMonster *live);
-  void (*drawMonster) (SDL_Rect *pos, LiveMonster *live, SDL_Surface *surface, SDL_Surface *img);
+  void (*moveMonster) (LiveMonster * live);
+  void (*drawMonster) (SDL_Rect * pos, LiveMonster * live,
+                       SDL_Surface * surface, SDL_Surface * img);
   // return 1 if pos intersects with live's position; 0 otherwise
-  int (*detectMonster) (Position *pos, LiveMonster *live);
+  int (*detectMonster) (Position * pos, LiveMonster * live);
   // use this to allocate memory for the live->custom field.
-  void (*allocCustom) (LiveMonster *live);
+  void (*allocCustom) (LiveMonster * live);
   int harmless;
   int random_speed;
-  struct _monster *breeds; // creates this type of creature
-  void (*breedMonster) (LiveMonster *live, SDL_Rect *pos);
-  int max_children; // how many spawned children this creature can have active at once
+  struct _monster *breeds;      // creates this type of creature
+  void (*breedMonster) (LiveMonster * live, SDL_Rect * pos);
+  int max_children;             // how many spawned children this creature can have active at once
   int damage;
 } Monster;
 

@@ -57,8 +57,6 @@ TR_CXXFLAGS="-O2 -Wall -fomit-frame-pointer -ffast-math -fexpensive-optimization
 TR_LIBS=""
 
 case "$host" in
-i*86-*-*) TR_CFLAGS="$TR_CFLAGS -falign-loops=2 -falign-jumps=2 -falign-functions=2";
-          TR_CXXFLAGS="$TR_CXXFLAGS -falign-loops=2 -falign-jumps=2 -falign-functions=2";;
 alpha*-*-linux-*) TR_CFLAGS="$TR_CFLAGS -mieee";;
 esac
 

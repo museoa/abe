@@ -1,4 +1,4 @@
-#ifndef MONSTER_H 
+#ifndef MONSTER_H
 #define MONSTER_H
 
 #include "Main.h"
@@ -51,15 +51,16 @@ void addMonsterImage(int monster_index, int image_index);
 int isMonsterImage(int image_index);
 
 void addLiveMonster(int monster_index, int image_index, int x, int y);
-void addLiveMonsterChangeMap(int monster_index, int image_index, int x, int y, int change_map);
+void addLiveMonsterChangeMap(int monster_index, int image_index, int x, int y,
+                             int change_map);
 void removeAllLiveMonsters();
-void drawLiveMonsters(SDL_Surface *surface, int start_x, int start_y);
+void drawLiveMonsters(SDL_Surface * surface, int start_x, int start_y);
 void debugMonsters();
 
 /**
    Return live monster if there's a one at position pos,
    NULL otherwise.
  */
-LiveMonster *detectMonster(Position *pos);
+LiveMonster *detectMonster(Position * pos);
 
 #endif

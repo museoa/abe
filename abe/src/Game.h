@@ -1,5 +1,5 @@
-#ifndef GAME_H 
-#define GAME_H 
+#ifndef GAME_H
+#define GAME_H
 
 #include "Main.h"
 
@@ -57,6 +57,6 @@ extern Game game;
 
 void initGame();
 void runMap();
-void gameMainLoop(SDL_Event *event);
+void gameMainLoop(SDL_Event * event);
 
 #endif
