@@ -3,45 +3,62 @@
 void waitUntilPaintingStops();
 void finishDrawMap();
 
+// some private global variables used to draw the map
+int screen_center_x, screen_center_y; // the screen's center in tiles
+int screen_w, screen_h;               // the screen's size in tiles
+typedef struct _mapDrawParams {
+  int start_x; // where to start drawing the map
+  int start_y;
+  int end_x;   // where to stop drawing the map
+  int end_y;
+  int offset_x;  // how many tiles to offset from the top/left edge of the screen
+  int offset_y;
+} MapDrawParams;
+
 /**
-   Draw the map where tile_x, tile_y is the center tile on the screen.
+   Compute what to draw based on the cursor's location.
+ */
+void getMapDrawParams(MapDrawParams *params) {
+  params->start_x = cursor.pos_x - screen_center_x;
+  params->start_y = cursor.pos_y - screen_center_y;
+  params->end_x = params->start_x + screen_w; 
+  params->end_y = params->start_y + screen_h;
+  int n;
+  params->offset_x = 0;
+  params->offset_y = 0;
+  if(params->start_x < 0) {
+	params->offset_x = -params->start_x;
+	params->start_x = 0;
+  } else {
+	n = (params->start_x >= EXTRA_X ? EXTRA_X : params->start_x);
+	params->offset_x = -n;
+	params->start_x -= n;	
+  }
+  if(params->start_y < 0) {
+	params->offset_y = -params->start_y;
+	params->start_y = 0;	
+  } else {
+	n = (params->start_y >= EXTRA_Y ? EXTRA_Y : params->start_y);
+	params->offset_y = -n;
+	params->start_y -= n;	
+  }
+  if(params->end_x > map.w) params->end_x = map.w;
+  if(params->end_y > map.h) params->end_y = map.h;
+
+}
+
+/**
+   Draw the part of the map that appears on the screen if the cursor
+   is the center of the screen.
  */
 void drawMap() {
-  int screen_center_x = (screen->w / TILE_W) / 2;
-  int screen_center_y = (screen->h / TILE_H) / 2;
-  int screen_w = screen->w / TILE_W;
-  //  int screen_h = (screen->h - edit_panel.image->h) / TILE_H;
-  int screen_h = screen->h / TILE_H;
-  int start_x = cursor.pos_x - screen_center_x;
-  int start_y = cursor.pos_y - screen_center_y;
-  int end_x = start_x + screen_w; 
-  int end_y = start_y + screen_h;
-
-  int offset_x = 0, offset_y = 0;
-  int n;
-  if(start_x < 0) {
-	offset_x = -start_x;
-	start_x = 0;
-  } else {
-	n = (start_x >= EXTRA_X ? EXTRA_X : start_x);
-	offset_x = -n;
-	start_x -= n;	
-  }
-  if(start_y < 0) {
-	offset_y = -start_y;
-	start_y = 0;	
-  } else {
-	n = (start_y >= EXTRA_Y ? EXTRA_Y : start_y);
-	offset_y = -n;
-	start_y -= n;	
-  }
-  if(end_x > map.w) end_x = map.w;
-  if(end_y > map.h) end_y = map.h;
-
-  SDL_Rect pos;
+  // compute what to draw
+  MapDrawParams params;
+  getMapDrawParams(&params);
 
   // draw the map
-  int x, y, level;
+  SDL_Rect pos;
+  int x, y, level, n;
   for(level = LEVEL_BACK; level < LEVEL_COUNT; level++) {
 
 	// erase the screen
@@ -55,14 +72,14 @@ void drawMap() {
 	  SDL_FillRect(map.level[level], &pos, SDL_MapRGBA(screen->format, 0x0, 0x0, 0x0, 0x00));
 	}
 
-	for(y = start_y; y < end_y; y++) {
-	  for(x = start_x; x < end_x;) {
+	for(y = params.start_y; y < params.end_y; y++) {
+	  for(x = params.start_x; x < params.end_x;) {
 		n = (map.image_index[level][x + (y * map.w)]);
 		if(n > -1) {
 		  // Draw the image
 		  // should be some check here in case images[n] points to la-la-land.
-		  pos.x = (offset_x + (x - start_x)) * TILE_W;
-		  pos.y = (offset_y + (y - start_y)) * TILE_H;
+		  pos.x = (params.offset_x + (x - params.start_x)) * TILE_W;
+		  pos.y = (params.offset_y + (y - params.start_y)) * TILE_H;
 		  pos.w = images[n]->image->w;
 		  pos.h = images[n]->image->h;
 		  
@@ -82,24 +99,118 @@ void drawMap() {
   finishDrawMap();
 }
 
-void finishDrawMap() {
-  // draw on screen
-  SDL_Rect pos;
-  int level;
-  for(level = LEVEL_BACK; level < LEVEL_COUNT; level++) {
-	pos.x = -(EXTRA_X * TILE_W);
-	pos.y = -(EXTRA_Y * TILE_H);
-	pos.w = map.level[level]->w;
-	pos.h = map.level[level]->h;
-	SDL_BlitSurface(map.level[level], NULL, screen, &pos);
-  }
+/**
+   Draw only the left first column of the map.
+   This is the first column which is displayed on the virtual screens
+   given that the cursor is in the middle of the screen. Note that this
+   column will be off-screen since the virtual screens extend offscreen to
+   the left and top by EXTRA_X and EXTRA_Y tiles.
+ */
+void drawMapLeftEdge() {
+  // compute what to draw
+  MapDrawParams params;
+  getMapDrawParams(&params);
 
-  // if the callback function is set, call it now.
-  if(map.beforeDrawToScreen) {
-	map.beforeDrawToScreen();
+  // override the left edge param
+  params.start_x = (cursor.pos_x - screen_center_x) - EXTRA_X;
+
+  SDL_Rect pos;
+  int n, row, level, x, y;
+  // erase the edge
+  pos.x = 0;
+  pos.y = 0;
+  pos.w = TILE_W;
+  pos.h = map.level[0]->h;
+  for(level = LEVEL_BACK; level < LEVEL_COUNT; level++) {
+	if(level == LEVEL_BACK) {
+	  SDL_FillRect(map.level[level], &pos, SDL_MapRGBA(screen->format, 0x20, 0x20, 0x20, 0x00));
+	} else {
+	  SDL_FillRect(map.level[level], &pos, SDL_MapRGBA(screen->format, 0x00, 0x00, 0x00, 0x00));
+	}
   }
-    
-  SDL_Flip(screen);
+   
+  if(params.start_x >= 0) {
+	// redraw the left edge of the screen
+	for(level = LEVEL_BACK; level < LEVEL_COUNT; level++) {
+	  for(y = params.start_y; y < params.end_y; y++) {
+		x = params.start_x;
+		n = (map.image_index[level][x + (y * map.w)]);
+		if(n > -1) {
+		  // Draw the image
+		  // should be some check here in case images[n] points to la-la-land.
+		  //pos.x = (offset_x + (x - start_x)) * TILE_W;
+		  pos.x = 0;
+		  pos.y = (params.offset_y + (y - params.start_y)) * TILE_H;
+		  pos.w = images[n]->image->w;
+		  pos.h = images[n]->image->h;
+		  
+		  // compensate for extra area
+		  //pos.x += EXTRA_X * TILE_W;
+		  pos.y += EXTRA_Y * TILE_H;		  
+		  SDL_BlitSurface(images[n]->image, NULL, map.level[level], &pos);
+		}
+	  }
+	}
+  }
+}
+
+/**
+   Draw only the right last column of the map.
+   This is the last column which is displayed on the virtual screens
+   given that the cursor is in the middle of the screen.
+ */
+void drawMapRightEdge() {
+  // compute what to draw
+  MapDrawParams params;
+  getMapDrawParams(&params);
+
+  // override the right edge param
+  params.end_x = (cursor.pos_x - screen_center_x) + screen_w;
+
+  SDL_Rect pos;
+  int n, row, level, x, y;
+  // erase the edge
+  pos.x = map.level[0]->w - TILE_W;
+  pos.y = 0;
+  pos.w = TILE_W;
+  pos.h = map.level[0]->h;
+  for(level = LEVEL_BACK; level < LEVEL_COUNT; level++) {
+	if(level == LEVEL_BACK) {
+	  SDL_FillRect(map.level[level], &pos, SDL_MapRGBA(screen->format, 0x20, 0x20, 0x20, 0x00));
+	} else {
+	  SDL_FillRect(map.level[level], &pos, SDL_MapRGBA(screen->format, 0x00, 0x00, 0x00, 0x00));
+	}
+  }
+   
+  // redraw the left edge of the screen
+  for(level = LEVEL_BACK; level < LEVEL_COUNT; level++) {
+	for(y = params.start_y; y < params.end_y; y++) {
+	  // here we have to draw more than 1 column b/c images
+	  // extend from right_edge-EXTRA_X on. 
+	  for(x = params.end_x - EXTRA_X; x < params.end_x;) {
+		if(params.end_x >= map.w) break;
+		n = (map.image_index[level][x + (y * map.w)]);
+		if(n > -1) {
+		  // Draw the image
+		  // should be some check here in case images[n] points to la-la-land.
+		  //pos.x = (offset_x + (x - start_x)) * TILE_W;
+		  pos.x = map.level[level]->w - ((params.end_x - x) * TILE_W);
+		  pos.y = (params.offset_y + (y - params.start_y)) * TILE_H;
+		  pos.w = images[n]->image->w;
+		  pos.h = images[n]->image->h;
+		  
+		  // compensate for extra area
+		  //pos.x += EXTRA_X * TILE_W;
+		  pos.y += EXTRA_Y * TILE_H;
+		  SDL_BlitSurface(images[n]->image, NULL, map.level[level], &pos);
+		  // skip ahead
+		  x += images[n]->image->w / TILE_W;
+		} else {
+		  x++;
+		}
+	  }
+	}
+  }
 }
 
 void scrollMap(int dir) {
@@ -108,43 +219,7 @@ void scrollMap(int dir) {
   int not_implemented = 0;
 
   // move the screen
-  int row, level, x, y;
-
-  int screen_center_x = (screen->w / TILE_W) / 2;
-  int screen_center_y = (screen->h / TILE_H) / 2;
-  //int screen_w = screen->w / TILE_W;
-  //  int screen_h = (screen->h - edit_panel.image->h) / TILE_H;
-  int screen_h = screen->h / TILE_H;
-  int start_x = cursor.pos_x - screen_center_x;
-  int start_y = cursor.pos_y - screen_center_y;
-  //int end_x = start_x + screen_w; 
-  int end_y = start_y + screen_h;
-
-  int offset_x = 0, offset_y = 0;
-  int n;
-
-  /*
-  if(start_x < 0) {
-	offset_x = -start_x;
-	start_x = 0;
-  } else {
-	n = (start_x >= EXTRA_X ? EXTRA_X : start_x);
-	offset_x = -n;
-	start_x -= n;	
-  }
-  */
-  if(start_y < 0) {
-	offset_y = -start_y;
-	start_y = 0;	
-  } else {
-	n = (start_y >= EXTRA_Y ? EXTRA_Y : start_y);
-	offset_y = -n;
-	start_y -= n;	
-  }
-  //if(end_x > map.w) end_x = map.w;
-  if(end_y > map.h) end_y = map.h;
-  
-  SDL_Rect pos;
+  int row, level;
   switch(dir) {
   case DIR_LEFT:
 
@@ -155,7 +230,6 @@ void scrollMap(int dir) {
 		fflush(stderr);
 		exit(0);	
 	  }
-	  //	  for(row = 0; row < map.level[level]->h - EDIT_PANEL_HEIGHT; row++) {
 	  for(row = 0; row < map.level[level]->h; row++) {
 		memmove((Uint16*)((Uint16*)(map.level[level]->pixels) + ((long)map.level[level]->w * (long)row) + (long)TILE_W), 
 				(Uint16*)((Uint16*)(map.level[level]->pixels) + ((long)map.level[level]->w * (long)row)),
@@ -164,47 +238,36 @@ void scrollMap(int dir) {
 	  SDL_UnlockSurface(map.level[level]);
 	}
 
-	// erase the edge
-	pos.x = 0;
-	pos.y = 0;
-	pos.w = TILE_W;
-	pos.h = map.level[0]->h;
-	for(level = LEVEL_BACK; level < LEVEL_COUNT; level++) {
-	  if(level == LEVEL_BACK) {
-		SDL_FillRect(map.level[level], &pos, SDL_MapRGBA(screen->format, 0x20, 0x20, 0x20, 0x00));
-	  } else {
-		SDL_FillRect(map.level[level], &pos, SDL_MapRGBA(screen->format, 0x00, 0x00, 0x00, 0x00));
-	  }
-	}
-	
-	// adjust end_x
-	start_x -= EXTRA_X;
-
-	if(start_x >= 0) {
-	  // redraw the left edge of the screen
-	  for(level = LEVEL_BACK; level < LEVEL_COUNT; level++) {
-		for(y = start_y; y < end_y; y++) {
-		  x = start_x;
-		  n = (map.image_index[level][x + (y * map.w)]);
-		  if(n > -1) {
-			// Draw the image
-			// should be some check here in case images[n] points to la-la-land.
-			//pos.x = (offset_x + (x - start_x)) * TILE_W;
-			pos.x = 0;
-			pos.y = (offset_y + (y - start_y)) * TILE_H;
-			pos.w = images[n]->image->w;
-			pos.h = images[n]->image->h;
-			
-			// compensate for extra area
-			//pos.x += EXTRA_X * TILE_W;
-			pos.y += EXTRA_Y * TILE_H;		  
-			SDL_BlitSurface(images[n]->image, NULL, map.level[level], &pos);
-		  }
-		}
-	  }
-	}
+	// draw only the new left edge
+	drawMapLeftEdge();
 
 	break;
+
+
+  case DIR_RIGHT:
+
+	// scroll the virtual screens left row by row
+	for(level = LEVEL_BACK; level < LEVEL_COUNT; level++) {
+	  if(SDL_LockSurface(map.level[level]) == -1) {
+		fprintf(stderr, "Unable to lock surface for scrolling: %s\n", SDL_GetError());
+		fflush(stderr);
+		exit(0);	
+	  }
+	  for(row = 0; row < map.level[level]->h; row++) {
+		// I guess this could be a memcpy for left and up...
+		memmove((Uint16*)((Uint16*)(map.level[level]->pixels) + ((long)map.level[level]->w * (long)row)), 
+				(Uint16*)((Uint16*)(map.level[level]->pixels) + ((long)map.level[level]->w * (long)row + (long)TILE_W)),
+				(long)(map.level[level]->w - TILE_W) * (long)sizeof(Uint16));
+	  }
+	  SDL_UnlockSurface(map.level[level]);
+	}
+
+	// draw only the new left edge
+	drawMapRightEdge();
+
+	break;
+
+
   default:
 	// by default just draw the old way
 	not_implemented = 1;
@@ -278,6 +341,26 @@ int moveMap(void *data) {
 void waitUntilPaintingStops() {
   cursor.dir = DIR_NONE;
   SDL_Delay(map.delay + 10); // wait for the thread to stop painting
+}
+
+void finishDrawMap() {
+  // draw on screen
+  SDL_Rect pos;
+  int level;
+  for(level = LEVEL_BACK; level < LEVEL_COUNT; level++) {
+	pos.x = -(EXTRA_X * TILE_W);
+	pos.y = -(EXTRA_Y * TILE_H);
+	pos.w = map.level[level]->w;
+	pos.h = map.level[level]->h;
+	SDL_BlitSurface(map.level[level], NULL, screen, &pos);
+  }
+
+  // if the callback function is set, call it now.
+  if(map.beforeDrawToScreen) {
+	map.beforeDrawToScreen();
+  }
+    
+  SDL_Flip(screen);
 }
 
 void setImage(int level, int index) {
@@ -357,6 +440,13 @@ void initMap(char *name, int w, int h) {
 	map.image_index[LEVEL_MAIN][i] = -1;
 	map.image_index[LEVEL_FORE][i] = -1;
   }
+
+  // init some variables
+  screen_center_x = (screen->w / TILE_W) / 2;
+  screen_center_y = (screen->h / TILE_H) / 2;
+  screen_w = screen->w / TILE_W;
+  //  screen_h = (screen->h - edit_panel.image->h) / TILE_H;
+  screen_h = screen->h / TILE_H;
 }
 
 void startMapMoveThread() {
