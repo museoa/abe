@@ -8,8 +8,19 @@ Requirements:
 
 How to build it:
 -------------------------
+Linux:
+./autogen.sh
 ./configure
 ./make
+
+Windows (cross-compile on linux):
+./autogen.sh
+./cross-configure
+./cross-make clean all
+(You may need to: cp abe abe.exe)
+
+You need to install mingw's cross-compiler tools for this to work.
+See: http://www.mingw.org/mingwfaq.shtml#faq-cross
 
 How to run it:
 -------------------------
@@ -40,6 +51,7 @@ esc - quit
 
 Editor:
 arrow keys - move
+home,end,pageup,pagedown - move around by pages
 enter - put down tile
 1,2,3 - select layer
 del,backspace - clear tile
