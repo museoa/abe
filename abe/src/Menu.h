@@ -4,5 +4,6 @@
 #include "Main.h"
 
 void showSettings();
+void showAbout();
 
 #endif

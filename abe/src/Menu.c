@@ -169,6 +169,55 @@ void paintScreen() {
   SDL_Flip(screen);
 }
 
+void paintAboutScreen() {
+  SDL_Rect pos;
+  int n = 15;
+
+  if(m_face % 2 == 0) {
+	bg_x--;
+	if(bg_x < -40) bg_x = 0;
+	bg_y--;
+	if(bg_y < -40) bg_y = 0;
+  }
+  pos.x = bg_x;
+  pos.y = bg_y;
+  pos.w = back->w;
+  pos.h = back->h;
+  SDL_BlitSurface(back, NULL, screen, &pos);
+
+  drawString(screen, 50, 10, "abes amazing adventure!!");  
+  pos.x = 35;
+  pos.y = 10 + FONT_WIDTH;
+  pos.w = screen->w - 70;
+  pos.h = 2;
+  SDL_FillRect(screen, &pos, SDL_MapRGBA(screen->format, 0x80, 0x50, 0x00, 0x00));
+
+
+  drawString(screen, 50, 10 + FONT_HEIGHT * 2, "long years have passed since his");
+  drawString(screen, 50, 10 + FONT_HEIGHT * 3, "father disappeared");
+
+  drawString(screen, 50, 10 + FONT_HEIGHT * 5, "now abe braves the deadly twisting");  
+  drawString(screen, 50, 10 + FONT_HEIGHT * 6, "passages of the great pyramid!");  
+
+  drawString(screen, 50, 10 + FONT_HEIGHT * 8, "he seeks to free his father from the");
+  drawString(screen, 50, 10 + FONT_HEIGHT * 9, "fate that binds him to the dark depths");
+
+  pos.x = screen->w / 2 - (tom[0]->w / 2);
+  pos.y =  screen->h - 30 - tom[0]->h;
+  pos.w = tom[0]->w;
+  pos.h = tom[0]->h;
+  if(m_face / n == 1 || m_face / n == 3) {
+	SDL_BlitSurface(tom[1], NULL, screen, &pos);
+  } else {
+	SDL_BlitSurface(tom[m_face / n], NULL, screen, &pos);
+  }
+  m_face++;
+  if(m_face >= 4 * n) m_face = 0;
+
+  drawString(screen, screen->w / 2 - 100, screen->h - 30, "press any key");  
+  SDL_Flip(screen);  
+}
+
 void showSettings() {
   SDL_Event event;
 
@@ -213,6 +262,22 @@ void showSettings() {
 	}
 	SDL_Delay(15);
   }
+ escape:
+  SDL_FreeSurface(back);
+}
+
+void showAbout() {
+  SDL_Event event;
+
+  createBack(&back);  
+  
+  while(1) {
+	paintAboutScreen();
+	while(SDL_PollEvent(&event)) {
+	  if(event.type == SDL_KEYDOWN) goto escape;
+	}
+  }
+
  escape:
   SDL_FreeSurface(back);
 }
