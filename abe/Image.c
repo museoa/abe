@@ -1,3 +1,7 @@
+/**
+   This file handles scanning the images directory and loading images
+   into memory. It also keeps track of named images' indexes.
+ */
 #include "Image.h"
 
 /**
