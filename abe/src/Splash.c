@@ -22,16 +22,16 @@ void splashMainLoop(SDL_Event *event) {
 	//	printf("The %s key was pressed! scan=%d\n", SDL_GetKeyName(event->key.keysym.sym), event->key.keysym.scancode);
 	switch(event->key.keysym.sym) {
 	case SDLK_ESCAPE:
-	  menu_y = 4 * FONT_HEIGHT;
+	  menu_y = (GOD_MODE ? 4 : 3) * FONT_HEIGHT;
 	  cursor.dir = DIR_QUIT;	  
 	  break;
 	case SDLK_DOWN:
 	  menu_y += FONT_HEIGHT;
-	  if(menu_y >= FONT_HEIGHT * 5) menu_y = 0;
+	  if(menu_y >= FONT_HEIGHT * (GOD_MODE ? 5 : 4)) menu_y = 0;
 	  break;
 	case SDLK_UP:
 	  menu_y -= FONT_HEIGHT;
-	  if(menu_y < 0) menu_y = FONT_HEIGHT * 4;
+	  if(menu_y < 0) menu_y = FONT_HEIGHT * (GOD_MODE ? 4 : 3);
 	  break;
 	case SDLK_RETURN: case SDLK_SPACE:
 	  cursor.dir = DIR_QUIT;
@@ -46,7 +46,7 @@ void splashMainLoop(SDL_Event *event) {
 
 void splashBeforeDrawToScreen() {
   SDL_Rect pos;
-  int x, y;
+  int x, y, line;
 
   x = screen->w / 2 - title->w / 2;
   y = screen->h / 2 - 240;
@@ -60,12 +60,20 @@ void splashBeforeDrawToScreen() {
 
   x += 50;
   y += title->h + FONT_HEIGHT;
+  line = y;
 
-  drawString(screen, x, y + FONT_HEIGHT * 0, "start game");
-  drawString(screen, x, y + FONT_HEIGHT * 1, "map editor");
-  drawString(screen, x, y + FONT_HEIGHT * 2, "settings");
-  drawString(screen, x, y + FONT_HEIGHT * 3, "about");
-  drawString(screen, x, y + FONT_HEIGHT * 4, "exit abe!!");
+  drawString(screen, x, line, "start game");
+  line += FONT_HEIGHT;
+#if GOD_MODE
+  drawString(screen, x, line, "map editor");
+  line += FONT_HEIGHT;
+#endif
+  drawString(screen, x, line, "settings");
+  line += FONT_HEIGHT;
+  drawString(screen, x, line, "about");
+  line += FONT_HEIGHT;
+  drawString(screen, x, line, "exit abe!!");
+  line += FONT_HEIGHT;
 
   face++;
   if(face >= face_mod * BULLET_FACE_COUNT) {
@@ -139,18 +147,18 @@ void showIntro() {
 	  initMap("default", 1000, 1000);
 	  runMap();
 	  destroyMap();
-	  initIntroMap();
-	} else if(menu_y == 1 * FONT_HEIGHT) {
+	  initIntroMap();	  
+	} else if(GOD_MODE && menu_y == 1 * FONT_HEIGHT) {
 	  destroyMap();
 	  initMap("default", 1000, 1000);
 	  editMap();
 	  destroyMap();
 	  initIntroMap();
-	} else if(menu_y == 2 * FONT_HEIGHT) {
+	} else if(menu_y == (GOD_MODE ? 2 : 1) * FONT_HEIGHT) {
 	  destroyMap();
 	  showSettings();
 	  initIntroMap();
-	} else if(menu_y == 4 * FONT_HEIGHT) {
+	} else if(menu_y == (GOD_MODE ? 4 : 3) * FONT_HEIGHT) {
 	  return;
 	}
   }

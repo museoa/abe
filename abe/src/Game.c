@@ -175,7 +175,7 @@ void gameBeforeDrawToScreen() {
   rect.h = h;
   SDL_FillRect(screen, &rect, SDL_MapRGBA(screen->format, 0xe0, (game.health > 30 ? 0xa0 : 0x00), 0x00, 0x00));
   
-  if(GOD_MODE) {
+#if GOD_MODE
 	drawString(screen, 255, 67, (game.god_mode ? "t" : "f"));
 
 	sprintf(s, "%s%s%s%s", 
@@ -193,7 +193,7 @@ void gameBeforeDrawToScreen() {
 	sprintf(s, "speed %d %d", cursor.speed_x, cursor.speed_y);
 	drawString(screen, 0, screen->h - 20, s);
 	*/
-  }
+#endif
 
   // draw the balloon timer
   if(game.balloonTimer > 0) {
