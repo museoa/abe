@@ -556,6 +556,14 @@ void initMonsters() {
   monsters[MONSTER_FIRE].detectMonster = detectFire;
   monsters[MONSTER_FIRE].allocCustom = allocFireCustom;
 
+  // star
+  strcpy(monsters[MONSTER_STAR].name, "star");
+  monsters[MONSTER_STAR].moveMonster = moveTorch; // re-use moveTorch; not a bug
+  monsters[MONSTER_STAR].start_speed_x = 1;
+  monsters[MONSTER_STAR].start_speed_y = 1;
+  monsters[MONSTER_STAR].face_mod = 4;
+  monsters[MONSTER_STAR].harmless = 1;
+
   // add additional monsters here
 
   for(i = 0; i < MONSTER_COUNT; i++) {

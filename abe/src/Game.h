@@ -18,6 +18,8 @@
 
 #define SPRING_JUMP 30
 
+#define SAVEGAME_DIR "savegame"
+
 typedef struct _game {
   int face;
   int dir;
@@ -29,6 +31,8 @@ typedef struct _game {
   int balloons;
   int balloonTimer;
   int god_mode;
+  int lastSavePosX;
+  int lastSavePosY;
 } Game;
 extern Game game;
 

@@ -1,6 +1,87 @@
 #include "Game.h"
+#include <errno.h>
 
 Game game;
+
+void saveGame() {
+  char path[300];
+  FILE *fp;
+  char *err;
+  SDL_RWops *rwop;
+
+  sprintf(path, "%s%ssave.dat", SAVEGAME_DIR, PATH_SEP);
+  
+  if(!(fp = fopen(path, "wb"))) {
+	err = strerror(errno);
+	fprintf(stderr, "Can't open file when saving game: %s\n", err);
+	fflush(stderr);
+	return;
+  }
+  rwop = SDL_RWFromFP(fp, 1);
+  
+  // FIXME: should also write map creation date so old savegame 
+  // won't be loaded over newer map. (versioning)
+
+  // write game state
+  SDL_WriteLE16(rwop, cursor.pos_x);
+  SDL_WriteLE16(rwop, cursor.pos_y);
+  SDL_WriteLE16(rwop, cursor.pixel_x);
+  SDL_WriteLE16(rwop, cursor.pixel_y);
+  SDL_WriteLE16(rwop, game.lives);
+  SDL_WriteLE16(rwop, game.score);
+  SDL_WriteLE16(rwop, game.keys);
+  SDL_WriteLE16(rwop, game.balloons);
+  SDL_WriteLE16(rwop, game.lastSavePosX);
+  SDL_WriteLE16(rwop, game.lastSavePosY);
+  
+  SDL_RWclose(rwop);
+
+  // save the map in savegame/savedmap.dat
+  sprintf(path, "%s%ssavedmap.dat", SAVEGAME_DIR, PATH_SEP);
+  saveMapPath(path);  
+}
+
+// returns 0 if no game saved, 1 otherwise
+int loadGame() {
+  char path[300];
+  FILE *fp;
+  char *err;
+  SDL_RWops *rwop;
+
+  // load the map from savegame/savedmap.dat
+  sprintf(path, "%s%ssavedmap.dat", SAVEGAME_DIR, PATH_SEP);
+  if(!loadMapPath(path, 0)) return 0;
+
+  // we have to do this _after_ loading the map
+  // b/c it resets the cursor
+  sprintf(path, "%s%ssave.dat", SAVEGAME_DIR, PATH_SEP);  
+  if(!(fp = fopen(path, "rb"))) {
+	err = strerror(errno);
+	fprintf(stderr, "Can't open file when saving game: %s\n", err);
+	fflush(stderr);
+	return 0;
+  }
+  rwop = SDL_RWFromFP(fp, 1);
+
+  // read game state
+  cursor.pos_x = SDL_ReadLE16(rwop);
+  cursor.pos_y = SDL_ReadLE16(rwop);
+  cursor.pixel_x = SDL_ReadLE16(rwop);
+  cursor.pixel_y = SDL_ReadLE16(rwop);
+  game.lives = SDL_ReadLE16(rwop);
+  game.score = SDL_ReadLE16(rwop);
+  game.keys = SDL_ReadLE16(rwop);
+  game.balloons = SDL_ReadLE16(rwop);
+  game.lastSavePosX = SDL_ReadLE16(rwop);
+  game.lastSavePosY = SDL_ReadLE16(rwop);
+
+  game.player_start_x = cursor.pos_x;
+  game.player_start_y = cursor.pos_y;
+  
+  SDL_RWclose(rwop);  
+
+  return 1;
+}
 
 int getGameFace() {
   // change the face
@@ -226,9 +307,22 @@ void gameCheckPosition() {
   live = detectMonster(&pos);
 
   // did we hit a monster?
-  if(live && !live->monster->harmless) {
-	handleDeath(live->monster->name);
-	//	if(!game.god_mode) return 1;
+  if(live) {
+	if(!live->monster->harmless) {
+	  handleDeath(live->monster->name);
+	} else if(live->monster->type == MONSTER_STAR) {
+	  if(game.lastSavePosX != live->pos_x && 
+		 game.lastSavePosX != live->pos_y) {
+		game.lastSavePosX = live->pos_x;
+		game.lastSavePosX = live->pos_y;
+		removeAllLiveMonsters();
+		saveGame();
+		drawString(screen, 150, 220, "game saved!");
+		SDL_Flip(screen);
+		SDL_Delay(3000);
+		map.redraw = 1;
+	  }
+	}
   }
   // did we hit a harmful field
   if(containsType(&pos, TYPE_HARMFUL)) {
@@ -352,38 +446,45 @@ int gameDetectSlide() {
 }
 
 void runMap() {
+  int running_savedgame = 0;
+
   resetMap();
   resetMonsters();
 
-  // try to load the map and quit if you can't find it.
-  if(!loadMap(0)) {
-	fprintf(stderr, "Can't find map file: %s\n", map.name);
-	fflush(stderr);
-	return;
-  }
-  // start outside
-  if(GOD_MODE) {
-	game.player_start_x = 211;
-	game.player_start_y = 159;
-  } else {
-	game.player_start_x = 20;
-	game.player_start_y = 28;
-  }
+  // try to start where we left off
+  running_savedgame = loadGame();
 
-  game.lives = 5;
-  game.score = 0;
+  if(!running_savedgame) {
+	// try to load the map and quit if you can't find it.
+	if(!loadMap(0)) {
+	  fprintf(stderr, "Can't find map file: %s\n", map.name);
+	  fflush(stderr);
+	  return;
+	}
+	// start outside
+	if(GOD_MODE) {
+	  game.player_start_x = 211;
+	  game.player_start_y = 159;
+	} else {
+	  game.player_start_x = 20;
+	  game.player_start_y = 28;
+	}
+	
+	game.lives = 5;
+	game.score = 0;
+	game.keys = 0;
+	game.balloons = 0;
+	
+	// start inside
+	cursor.pos_x = game.player_start_x;
+	cursor.pos_y = game.player_start_y;
+  }
+	
   game.draw_player = 1;
-  game.keys = 0;
-  game.balloons = 0;
   game.balloonTimer = 0;
-
-  // start inside
-  cursor.pos_x = game.player_start_x;
-  cursor.pos_y = game.player_start_y;
-
   cursor.speed_x = 8;
   cursor.speed_y = 8;
-
+  
   // set our painting events
   map.beforeDrawToScreen = gameBeforeDrawToScreen;
   map.afterMainLevelDrawn = afterMainLevelDrawn;
@@ -391,10 +492,10 @@ void runMap() {
   map.detectLadder = detectLadder;
   map.detectSlide = gameDetectSlide;
   map.checkPosition = gameCheckPosition;
-
+  
   // add our event handling
   map.handleMapEvent = gameMainLoop;
-
+  
   // activate gravity and accelerated movement
   map.accelerate = 1;
   map.gravity = 1;
@@ -412,4 +513,6 @@ void initGame() {
   game.dir = GAME_DIR_RIGHT;
   game.balloonTimer = 0;
   game.god_mode = GOD_MODE;
+  game.lastSavePosX = 0;
+  game.lastSavePosY = 0;
 }

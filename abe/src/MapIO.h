@@ -10,6 +10,8 @@
 
 void saveMap();
 int loadMap(int drawMap);
+void saveMapPath(char *path);
+int loadMapPath(char *path, int drawMap);
 
 /** Remove unnecesary EMPTY_MAPs. For example a 4 tile wide stone becomes a 1 int number.
 	return new number of elements in new_size. (so num of bytes=new_size * sizeof(int)).

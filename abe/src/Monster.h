@@ -15,7 +15,8 @@
 #define MONSTER_TORCH 8
 #define MONSTER_ARROW 9
 #define MONSTER_FIRE 10
-#define MONSTER_COUNT 11
+#define MONSTER_STAR 11
+#define MONSTER_COUNT 12
 
 struct _monster;
 

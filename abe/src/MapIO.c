@@ -1,15 +1,13 @@
 #include <errno.h>
 #include "MapIO.h"
 
-void saveMap() {
-  char path[300];
+void saveMapPath(char *path) {
   FILE *fp;
   size_t new_size, written;
   Uint16 *compressed_map;
   char *err;
   SDL_RWops *rwop;
 
-  sprintf(path, "%s%s%s.dat", MAPS_DIR, PATH_SEP, map.name);
   printf("Saving map %s\n", path);  
   fflush(stdout);
 
@@ -42,9 +40,20 @@ void saveMap() {
   free(compressed_map);
 }
 
-// call this after initMap()!
+void saveMap() {
+  char path[300];
+  sprintf(path, "%s%s%s.dat", MAPS_DIR, PATH_SEP, map.name);
+  saveMapPath(path);
+}
+
+// call these after initMap()!
 int loadMap(int draw_map) {
   char path[300];
+  sprintf(path, "%s%s%s.dat", MAPS_DIR, PATH_SEP, map.name);
+  return loadMapPath(path, draw_map);
+}
+
+int loadMapPath(char *path, int draw_map) {
   FILE *fp;
   size_t size;
   Uint16 *read_buff;
@@ -53,7 +62,6 @@ int loadMap(int draw_map) {
   SDL_RWops *rwop;
   int x, y, i;
 
-  sprintf(path, "%s%s%s.dat", MAPS_DIR, PATH_SEP, map.name);
   printf("Loading map %s\n", path);  
   fflush(stdout);
   if(!(fp = fopen(path, "rb"))) {
