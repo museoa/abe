@@ -352,6 +352,8 @@ void gameMainLoop(SDL_Event *event) {
 void handleDeath(LiveMonster *live) {
   int i;
 
+  showMapStatus(live->monster->name);
+
   game.health-=(live->monster->damage * (game.difficoulty + 1));
   if(game.health > 0) return;
   game.health = MAX_HEALTH;

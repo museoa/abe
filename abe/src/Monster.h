@@ -20,8 +20,9 @@
 #define MONSTER_CANNON 13
 #define MONSTER_CANNON2 14
 #define MONSTER_BAT 15
+#define MONSTER_GHOST 16
 
-#define MONSTER_COUNT 16
+#define MONSTER_COUNT 17
 
 struct _monster;
 

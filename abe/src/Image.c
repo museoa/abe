@@ -139,6 +139,9 @@ void doLoadImage(char *filename, char *name) {
 	  img_spring2 = image_count;
 	} else if(!strcmp(name, "crab1") || !strcmp(name, "crab2")) {
 	  monster = MONSTER_CRAB;
+	} else if(!strcmp(name, "ghost") || !strcmp(name, "ghost2")) {
+	  monster = MONSTER_GHOST;
+	  alphas[alphacount++] = image_count;
 	} else if(!strcmp(name, "smash")) {
 	  monster = MONSTER_SMASHER;
 	  img_smash = image_count;

@@ -212,6 +212,29 @@ void moveCrab(LiveMonster *live_monster) {
   }
 }
 
+void moveGhost(LiveMonster *live_monster) {
+  int j;
+  // increment the face to display
+  j = (int) (10.0*rand()/(RAND_MAX));
+  if(!j) {
+	live_monster->face++;
+	if(live_monster->face >= 
+	   live_monster->monster->image_count * live_monster->monster->face_mod) 
+	  live_monster->face = 0;
+  }
+
+  // move up/down until you hit a wall or an edge
+  if(live_monster->dir == DIR_UP) {
+	if(!stepMonsterUp(live_monster)) {
+	  live_monster->dir = DIR_DOWN;
+	}
+  } else {
+	if(!stepMonsterDown(live_monster)) {
+	  live_monster->dir = DIR_UP;
+	}
+  }
+}
+
 void moveBat(LiveMonster *live_monster) {
   int j;
 
@@ -567,7 +590,7 @@ void initMonsters() {
   monsters[MONSTER_SMASHER].damage = 2;
 
   // purple smasher
-  strcpy(monsters[MONSTER_SMASHER2].name, "smasher2");
+  strcpy(monsters[MONSTER_SMASHER2].name, "cursed smasher");
   monsters[MONSTER_SMASHER2].moveMonster = moveSmasher;
   monsters[MONSTER_SMASHER2].drawMonster = drawSmasher;
   monsters[MONSTER_SMASHER2].start_speed_x = 4;
@@ -598,7 +621,7 @@ void initMonsters() {
   monsters[MONSTER_PLATFORM2].harmless = 1;
 
   // spider
-  strcpy(monsters[MONSTER_SPIDER].name, "spider");
+  strcpy(monsters[MONSTER_SPIDER].name, "patient spider");
   monsters[MONSTER_SPIDER].moveMonster = moveSmasher;
   monsters[MONSTER_SPIDER].drawMonster = drawSmasher;
   monsters[MONSTER_SPIDER].start_speed_x = 2;
@@ -623,7 +646,7 @@ void initMonsters() {
   monsters[MONSTER_TORCH].harmless = 1;
 
   // arrow trap
-  strcpy(monsters[MONSTER_ARROW].name, "arrow");
+  strcpy(monsters[MONSTER_ARROW].name, "arrow trap");
   monsters[MONSTER_ARROW].moveMonster = moveArrow;
   monsters[MONSTER_ARROW].start_speed_x = 1;
   monsters[MONSTER_ARROW].start_speed_y = 1;
@@ -631,7 +654,7 @@ void initMonsters() {
   monsters[MONSTER_ARROW].damage = 1;
 
   // fire
-  strcpy(monsters[MONSTER_FIRE].name, "fire");
+  strcpy(monsters[MONSTER_FIRE].name, "fire trap");
   monsters[MONSTER_FIRE].moveMonster = moveFire;
   monsters[MONSTER_FIRE].drawMonster = drawFire;
   monsters[MONSTER_FIRE].start_speed_x = 2;
@@ -650,7 +673,7 @@ void initMonsters() {
   monsters[MONSTER_STAR].harmless = 1;
 
   // bullet
-  strcpy(monsters[MONSTER_BULLET].name, "cannonball");
+  strcpy(monsters[MONSTER_BULLET].name, "curious cannonball");
   monsters[MONSTER_BULLET].moveMonster = moveBullet;
   monsters[MONSTER_BULLET].start_speed_x = 8;
   monsters[MONSTER_BULLET].start_speed_y = 4;
@@ -679,6 +702,14 @@ void initMonsters() {
   monsters[MONSTER_BAT].start_speed_y = 4;
   monsters[MONSTER_BAT].face_mod = 3;
   monsters[MONSTER_BAT].damage = 3;
+
+  // ghost
+  strcpy(monsters[MONSTER_GHOST].name, "entombed spirit");
+  monsters[MONSTER_GHOST].moveMonster = moveGhost;
+  monsters[MONSTER_GHOST].start_speed_y = 2;
+  monsters[MONSTER_GHOST].damage = 2;
+  monsters[MONSTER_GHOST].face_mod = 4;
+  monsters[MONSTER_GHOST].random_speed = 0;
 
   // add additional monsters here
 
