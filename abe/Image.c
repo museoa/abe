@@ -77,6 +77,15 @@ void doLoadImage(char *filename, char *name) {
 	} else if(!strcmp(name, "balloon3")) {
 	  type = TYPE_OBJECT;
 	  img_balloon[2] = image_count;
+	} else if(!strcmp(name, "gem")) {
+	  type = TYPE_OBJECT;
+	  img_gem[0] = image_count;
+	} else if(!strcmp(name, "gem2")) {
+	  type = TYPE_OBJECT;
+	  img_gem[1] = image_count;
+	} else if(!strcmp(name, "gem3")) {
+	  type = TYPE_OBJECT;
+	  img_gem[2] = image_count;
 	} else if(!strcmp(name, "wave")) {
 	  type = TYPE_HARMFUL;
 	} else if(!strcmp(name, "water")) {

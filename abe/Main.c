@@ -47,6 +47,7 @@ int main(int argc, char *argv[]) {
   int intro = 0;
   char *mapname;
   int mapwidth, mapheight;
+  int window = 0;
 
   runmode = RUNMODE_SPLASH;  
 
@@ -60,8 +61,8 @@ int main(int argc, char *argv[]) {
   }
 
   for(i = 0; i < argc; i++) {
-	if(!strcmp(argv[i], "--fullscreen") || !strcmp(argv[i], "-f")) {
-	  flags |= SDL_FULLSCREEN;
+	if(!strcmp(argv[i], "--window")) {
+	  window = 1;
 	} else if(!strcmp(argv[i], "--system") || !strcmp(argv[i], "-s")) {
 	  hw_mem = 0;
 	} else if(!strcmp(argv[i], "--editor") || !strcmp(argv[i], "-e")) {
@@ -88,9 +89,9 @@ int main(int argc, char *argv[]) {
 	  exit(0);
 	} else if(!strcmp(argv[i], "--help") || !strcmp(argv[i], "-?") || !strcmp(argv[i], "-h")) {
 	  printf("Abe!! Happy Birthday, 2002\n\n");
-	  printf("-f --fullscreen    Run in fullscreen mode.\n");
+	  printf("--window           Run in windowed mode.\n");
 	  printf("-e --editor        Skip the splash screen and run the editor.\n"); 
-	  printf("-i --intro mapname Edit intro map.\n");
+	  printf("-i --intro         Edit intro map.\n");
 	  printf("-g --game          Skip the splash screen and run the game.\n"); 
 	  printf("-t --test          Test video modes only.\n"); 
 	  printf("-s --system        Use system memory instead of video(default) memory.\n");
@@ -118,6 +119,7 @@ int main(int argc, char *argv[]) {
   } else {
 	flags |= SDL_SWSURFACE;
   }
+  if(!window) flags |= SDL_FULLSCREEN;
 
   fprintf(stderr, "Attempting to set %dx%dx%d video mode.\n", width, height, bpp);
   fflush(stderr);
@@ -142,8 +144,13 @@ int main(int argc, char *argv[]) {
   initEditor();
 
   initGame();
-
-  showIntro();
+  
+  if(intro) {
+	initMap("intro", 640 / TILE_W, 480 / TILE_H);
+	editMap();
+  } else {
+	showIntro();
+  }
 
   atexit(SDL_Quit);
   

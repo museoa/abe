@@ -214,6 +214,12 @@ void gameCheckPosition() {
 	  game.keys++;
 	} else if(n == img_balloon[0] || n == img_balloon[1] || n == img_balloon[2]) {
 	  game.balloons++;
+	} else if(n == img_gem[0]) {
+	  game.score++;
+	} else if(n == img_gem[1]) {
+	  game.score+=5;
+	} else if(n == img_gem[2]) {
+	  game.score+=10;
 	}
 	map.image_index[LEVEL_MAIN][key.pos_x + (key.pos_y * map.w)] = EMPTY_MAP;
 	map.redraw = 1;
@@ -292,8 +298,8 @@ void runMap() {
   //game.player_start_x = 20;
   //game.player_start_y = 28;
 
-  game.player_start_x = 310;
-  game.player_start_y = 8;
+  game.player_start_x = 361;
+  game.player_start_y = 80;
 
   game.lives = 5;
   game.score = 0;
