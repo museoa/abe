@@ -5,6 +5,17 @@ int menu_y;
 #define BULLET_FACE_COUNT 4
 int face = 0, face_mod = 4;
 
+char text[] = "special thanks to sadfasdf asd f asdfasdfasdfa sdf asd fasdf asd f asdfasdfasdfa sdf asd fasdf asd f asdfasdfasdfa sdf asd fasdf asd f asdfasdfasdfa sdf asd fasdf asd f asdfasdfasdfa sdf asd fasdf asd f asdfasdfasdfa sdf asd fasdf asd f asdfasdfasdfa sdf asd fasdf";
+int text_pos = -10000;
+
+void drawScrollText() {
+  if((int)text_pos < -((int)strlen(text) * (int)FONT_WIDTH)) {
+	text_pos = screen->w;
+  }
+  drawString(screen, text_pos, screen->h - 30, text);    
+  text_pos -= 4;
+}
+
 void splashMainLoop(SDL_Event *event) {
   switch(event->type) {
   case SDL_KEYDOWN:
@@ -57,7 +68,9 @@ void splashBeforeDrawToScreen() {
   drawString(screen, x, y + FONT_HEIGHT * 4, "exit abe!!");
 
   face++;
-  if(face >= face_mod * BULLET_FACE_COUNT) face = 0;
+  if(face >= face_mod * BULLET_FACE_COUNT) {
+	face = 0;
+  }
   pos.x = x - 30;
   pos.y = menu_y + y;
   pos.w = images[img_bullet[0]]->image->w;
@@ -68,6 +81,7 @@ void splashBeforeDrawToScreen() {
   pos.w = images[img_bullet[0]]->image->w;
   pos.h = images[img_bullet[0]]->image->h;
   SDL_BlitSurface(images[img_bullet[face / face_mod]]->image, NULL, screen, &pos);
+  drawScrollText();
 }
 
 void initIntroMap() {
