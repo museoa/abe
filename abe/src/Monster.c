@@ -419,7 +419,7 @@ moveBear(LiveMonster * live_monster)
       live_monster->face = 0;
     if(!stepMonsterLeft(live_monster, 0)) {
       live_monster->dir = DIR_RIGHT;
-      live_monster->face = 0;
+	  live_monster->face = n * live_monster->monster->face_mod;
     }
   } else {
     if(live_monster->face >=
