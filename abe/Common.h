@@ -13,4 +13,15 @@ typedef struct _position {
   int w, h; // in tiles
 } Position;
 
+typedef struct _cursor {
+  int pos_x, pos_y;
+  int pixel_x, pixel_y;
+  int speed_x, speed_y;
+  int dir;
+  int wait;
+  int jump;
+  int gravity;
+  int stepup;
+} Cursor;
+
 #endif

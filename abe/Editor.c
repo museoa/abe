@@ -15,6 +15,12 @@ void beforeDrawToScreen() {
   pos.w = TILE_W;
   pos.h = TILE_H;
   SDL_FillRect(screen, &pos, SDL_MapRGBA(screen->format, 0xa0, 0xa0, 0x00, 0x00));
+
+  pos.x = editor_cursor.pos_x * TILE_W;
+  pos.y = editor_cursor.pos_y * TILE_H;
+  pos.w = TILE_W;
+  pos.h = TILE_H;
+  SDL_FillRect(screen, &pos, SDL_MapRGBA(screen->format, 0x00, 0xa0, 0x00, 0x00));
   
   // draw the edit panel
   drawEditPanel();
@@ -24,10 +30,32 @@ void beforeDrawToScreen() {
    Main editor event handling
 */
 void editorMainLoop(SDL_Event *event) {
+  Position pos;
   switch(event->type) {
   case SDL_MOUSEMOTION:
-	//	cursor.pos_x += event->xrel / TILE_W;
-	//	cursor.pos_y += event->yrel / TILE_H;
+	editor_cursor.pos_x = event->motion.x / TILE_W;
+	editor_cursor.pos_y = event->motion.y / TILE_H;
+	break;
+  case SDL_MOUSEBUTTONUP:
+	switch(event->button.button) {
+	case SDL_BUTTON_LEFT:
+	  pos.pos_x = map.top_left_x + editor_cursor.pos_x;
+	  pos.pos_y = map.top_left_y + editor_cursor.pos_y;
+	  setImagePosition(edit_panel.level, edit_panel.image_index, &pos);
+	  break;
+	case SDL_BUTTON_MIDDLE:
+	  pos.pos_x = map.top_left_x + editor_cursor.pos_x;
+	  pos.pos_y = map.top_left_y + editor_cursor.pos_y;
+	  setImagePosition(edit_panel.level, EMPTY_MAP, &pos);
+	  break;
+	case SDL_BUTTON_RIGHT:
+	  edit_panel.image_index++;
+	  if(edit_panel.image_index >= image_count) {
+		edit_panel.image_index = 0;
+	  }
+	  drawMap();
+	  break;
+	}
 	break;
   case SDL_KEYDOWN:
 	//	printf("The %s key was pressed! scan=%d\n", SDL_GetKeyName(event->key.keysym.sym), event->key.keysym.scancode);
@@ -205,6 +233,8 @@ void drawEditPanel() {
   drawString(screen, 5, 5, s);
   sprintf(s, "spx%d spy%d px%d py%d", cursor.speed_x, cursor.speed_y, cursor.pixel_x, cursor.pixel_y);
   drawString(screen, 5, 5 + FONT_HEIGHT, s);
+  sprintf(s, "mouse x%d y%d", editor_cursor.pos_x, editor_cursor.pos_y);
+  drawString(screen, 5, 5 + FONT_HEIGHT * 2, s);
 }
 
 void resetEditPanel() {
@@ -222,6 +252,7 @@ void initEditor() {
 	fflush(stderr);
 	return;
   }
+  editor_cursor.pos_x = editor_cursor.pos_y = 0;
 }
 
 void editMap(char *name, int w, int h) {

@@ -32,6 +32,9 @@ typedef struct _mapDrawParams {
 void getMapDrawParams(MapDrawParams *params) {
   int n;
 
+  map.top_left_x = cursor.pos_x - screen_center_x;
+  map.top_left_y = cursor.pos_y - screen_center_y;
+
   params->start_x = cursor.pos_x - screen_center_x;
   params->start_y = cursor.pos_y - screen_center_y;
   params->end_x = params->start_x + screen_w; 
@@ -787,6 +790,10 @@ void moveMap() {
 
   while(1) {
 
+	// where is the map?
+	map.top_left_x = cursor.pos_x - screen_center_x;
+	map.top_left_y = cursor.pos_y - screen_center_y;
+
 	// handle events.
 	while(SDL_PollEvent(&event)) {
 	  map.handleMapEvent(&event);
@@ -880,24 +887,34 @@ void finishDrawMap() {
 }
 
 void setImage(int level, int index) {
+  Position pos;
+  pos.pos_x = cursor.pos_x;
+  pos.pos_y = cursor.pos_y;
+  setImagePosition(level, index, &pos);
+  cursor.pos_x = pos.pos_x;
+  cursor.pos_y = pos.pos_y;
+  drawMap();
+}
+
+void setImagePosition(int level, int index, Position *pos) {
   int x, y, n;
   SDL_Rect rect, img_rect;
   int start_x, start_y, end_x, end_y;
 
   // clear the area 
   if(index != EMPTY_MAP) {
-	img_rect.x = cursor.pos_x;
-	img_rect.y = cursor.pos_y;
+	img_rect.x = pos->pos_x;
+	img_rect.y = pos->pos_y;
 	img_rect.w = images[index]->image->w / TILE_W;
 	img_rect.h = images[index]->image->h / TILE_H;
   }
-  start_x = cursor.pos_x - EXTRA_X;
+  start_x = pos->pos_x - EXTRA_X;
   if(start_x < 0) start_x = 0;
-  start_y = cursor.pos_y - EXTRA_Y;
+  start_y = pos->pos_y - EXTRA_Y;
   if(start_y < 0) start_y = 0;
-  end_x = cursor.pos_x + (index != EMPTY_MAP ? images[index]->image->w / TILE_W : 1);
+  end_x = pos->pos_x + (index != EMPTY_MAP ? images[index]->image->w / TILE_W : 1);
   if(end_x >= map.w) end_x = map.w;
-  end_y = cursor.pos_y + (index != EMPTY_MAP ? images[index]->image->h / TILE_H : 1);
+  end_y = pos->pos_y + (index != EMPTY_MAP ? images[index]->image->h / TILE_H : 1);
   if(end_y >= map.h) end_y = map.h;
   for(y = start_y; y < end_y; y++) {
 	for(x = start_x; x < end_x; x++) {
@@ -907,7 +924,7 @@ void setImage(int level, int index) {
 		rect.y = y;
 		rect.w = images[n]->image->w / TILE_W;
 		rect.h = images[n]->image->h / TILE_H;
-		if(contains(&rect, cursor.pos_x, cursor.pos_y) || 
+		if(contains(&rect, pos->pos_x, pos->pos_y) || 
 		   (index != EMPTY_MAP && intersects(&rect, &img_rect))) {	  
 		  map.image_index[level][x + (y * map.w)] = EMPTY_MAP;
 		}
@@ -915,11 +932,11 @@ void setImage(int level, int index) {
 	}
   }
   // add the image
-  map.image_index[level][cursor.pos_x + (cursor.pos_y * map.w)] = index;
+  map.image_index[level][pos->pos_x + (pos->pos_y * map.w)] = index;
   // move the cursor
   if(index != EMPTY_MAP) {
-	if(cursor.pos_x + (images[index]->image->w / TILE_W) < map.w) 
-	  cursor.pos_x += (images[index]->image->w / TILE_W);
+	if(pos->pos_x + (images[index]->image->w / TILE_W) < map.w) 
+	  pos->pos_x += (images[index]->image->w / TILE_W);
   }
   drawMap();
 }

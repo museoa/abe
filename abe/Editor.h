@@ -14,6 +14,7 @@ typedef struct _editpanel {
 } EditPanel;
 
 EditPanel edit_panel;
+Cursor editor_cursor;
 
 void initEditor();
 void editMap(char *name, int w, int h);

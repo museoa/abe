@@ -69,19 +69,8 @@ typedef struct _map {
   int gravity; // 1 for gravity, 0 otherwise(default)
   int monsters; // 1 for active monsters, 0 otherwise(default)
   int redraw; // set to 1 to cause a full map repaint
+  int top_left_x, top_left_y; // where is the tile top left corner of the map?
 } Map;
-
-// TODO: reuse Position inside Cursor.
-typedef struct _cursor {
-  int pos_x, pos_y;
-  int pixel_x, pixel_y;
-  int speed_x, speed_y;
-  int dir;
-  int wait;
-  int jump;
-  int gravity;
-  int stepup;
-} Cursor;
 
 Cursor cursor;
 Map map;
@@ -91,6 +80,7 @@ void moveMap();
 
 void drawMap();
 void setImage(int level, int index);
+void setImagePosition(int level, int index, Position *pos);
 void setImageNoCheck(int level, int x, int y, int image_index);
 int initMap(char *name, int w, int h);
 void resetMap();
