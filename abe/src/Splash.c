@@ -23,6 +23,8 @@ void splashMainLoop(SDL_Event *event) {
 	case SDLK_RETURN: case SDLK_SPACE:
 	  cursor.dir = DIR_QUIT;
 	  break;
+	default:
+	  break;
 	}
 	playSound(MENU_SOUND);
 	break;	

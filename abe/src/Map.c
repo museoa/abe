@@ -1,6 +1,9 @@
 #include <errno.h>
 #include "Map.h"
 
+Cursor cursor;
+Map map;
+
 typedef struct _gameCollisionCheck {
   int start_x, start_y, end_x, end_y;
   SDL_Rect rect;
@@ -134,7 +137,7 @@ void drawMap() {
 void drawMapLeftEdge() {
   // erase the edge
   SDL_Rect pos;
-  int n, m, row, level, x, y;
+  int n, m, level, x, y;
   MapDrawParams params;
 
   pos.x = 0;
@@ -204,7 +207,7 @@ void drawMapLeftEdge() {
 void drawMapTopEdge() {
   // erase the edge
   SDL_Rect pos;
-  int n, m, row, level, x, y;
+  int n, m, level, x, y;
   MapDrawParams params;
 
   pos.x = 0;
@@ -270,7 +273,7 @@ void drawMapTopEdge() {
 void drawMapRightEdge() {
   // erase the edge
   SDL_Rect pos;
-  int n, m, row, level, x, y;
+  int n, m, level, x, y;
   MapDrawParams params;
 
   pos.x = map.level[0]->w - cursor.speed_x;
@@ -338,7 +341,7 @@ void drawMapRightEdge() {
 void drawMapBottomEdge() {
   // erase the edge
   SDL_Rect pos;
-  int n, m, row, level, x, y;
+  int n, m, level, x, y;
   MapDrawParams params;
 
   pos.x = 0;
@@ -1062,7 +1065,7 @@ int initMap(char *name, int w, int h) {
 											  0, 0, 0, 0))) {
 	  fprintf(stderr, "Error creating surface: %s\n", SDL_GetError());
 	  fflush(stderr);
-	  return;
+	  return 0;
 	}
 	hw_surface = (map.level[i]->flags & SDL_HWSURFACE ? 1 : 0);
 	fprintf(stderr, "level[%d] is HW surface? %d\n", i, hw_surface);
@@ -1086,7 +1089,7 @@ int initMap(char *name, int w, int h) {
 										   0, 0, 0, 0))) {
 	fprintf(stderr, "Error creating surface: %s\n", SDL_GetError());
 	fflush(stderr);
-	return;
+	return 0;
   }
   fprintf(stderr, "transfer area is HW surface? %d\n", hw_surface);
   if(screen->flags & SDL_HWSURFACE & !hw_surface) {
@@ -1192,7 +1195,7 @@ int containsType(Position *p, int type) {
 
 int containsTypeWhere(Position *p, Position *ret, int type) {
   GameCollisionCheck check;
-  SDL_Rect rect, pos;
+  SDL_Rect rect;
   int x, y, n;
   
   getGameCollisionCheck(&check, p);
@@ -1233,7 +1236,7 @@ int containsTypeWhere(Position *p, Position *ret, int type) {
  */
 int onSolidGround(Position *p) {
   GameCollisionCheck check;
-  SDL_Rect rect, pos;
+  SDL_Rect rect;
   int x, y, n, r, found;
   
   getGameCollisionCheck(&check, p);

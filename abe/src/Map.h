@@ -73,8 +73,8 @@ typedef struct _map {
   int top_left_x, top_left_y; // where is the tile top left corner of the map?
 } Map;
 
-Cursor cursor;
-Map map;
+extern Cursor cursor;
+extern Map map;
 
 // the main map loop routine
 void moveMap();

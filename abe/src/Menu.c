@@ -57,6 +57,8 @@ void showMenu() {
 	  case SDLK_UP: pos--; break;
 	  case SDLK_DOWN: pos++; break;
 	  case SDLK_SPACE: case SDLK_RETURN: e = pos; break;
+	  default:
+		break;
 	  }
 	  break;
 	}

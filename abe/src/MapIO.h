@@ -2,6 +2,8 @@
 #define MAPIO_H 
 
 #include "Main.h"
+#include "SDL_rwops.h"
+#include "SDL_endian.h"
 
 // Where to store the map files (no ending /)
 #define MAPS_DIR "maps"

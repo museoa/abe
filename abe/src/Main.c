@@ -1,8 +1,13 @@
 #include "Main.h"
 
+int runmode;
+
+SDL_Surface *screen;
+int state;
+
 void testModesInFormat(SDL_PixelFormat *format) {
   SDL_Rect **modes;
-  int i, t;
+  int i;
 
   printf("Available hardware accelerated, fullscreen modes in %d bpp:\n", format->BitsPerPixel);
 

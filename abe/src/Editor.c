@@ -1,5 +1,8 @@
 #include "Editor.h"
 
+EditPanel edit_panel;
+Cursor editor_cursor;
+
 /**
    The editor-specific map drawing event.
    This is called before the map is sent to the screen.
@@ -79,6 +82,8 @@ void editorMainLoop(SDL_Event *event) {
 		edit_panel.image_index = 0;
 	  }
 	  drawMap();
+	  break;
+	default:
 	  break;
 	}
 	break;
@@ -190,6 +195,8 @@ void editorMainLoop(SDL_Event *event) {
 	case SDLK_ESCAPE: 
 	  cursor.dir = DIR_QUIT;
 	  break;
+	default:
+	  break;
 	}
 	break;
   case SDL_KEYUP: 
@@ -281,7 +288,7 @@ void initEditor() {
 }
 
 void editMap() {
-  int level, i, x, y;
+  int i, x, y;
   int step_x, step_y;
   Image *img;
 

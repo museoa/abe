@@ -28,10 +28,10 @@ struct _monster;
 // The max amount of speed change
 #define MAX_RANDOM_SPEED 6.0
 
-Monster monsters[256];
-LiveMonster live_monsters[256];
-int live_monster_count;
-int move_monsters;
+extern Monster monsters[256];
+extern LiveMonster live_monsters[256];
+extern int live_monster_count;
+extern int move_monsters;
 
 void initMonsters();
 void resetMonsters();

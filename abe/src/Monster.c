@@ -1,5 +1,10 @@
 #include "Monster.h"
 
+Monster monsters[256];
+LiveMonster live_monsters[256];
+int live_monster_count;
+int move_monsters;
+
 int getLiveMonsterFace(LiveMonster *live);
 
 SDL_Rect extended_screen_rect;
@@ -221,7 +226,7 @@ void moveSmasher(LiveMonster *live_monster) {
 }
 
 void drawSmasher(SDL_Rect *pos, LiveMonster *live, SDL_Surface *surface, SDL_Surface *img) {
-  int y;
+  int y = 0;
   SDL_Rect p, q;
   Position position;
   int first_image, first, second;
@@ -458,7 +463,6 @@ int isOnScreen(SDL_Rect *rect) {
 void drawLiveMonsters(SDL_Surface *surface, int start_x, int start_y) {
   SDL_Rect pos;
   SDL_Surface *img;
-  int face;
   int i;
 
   for(i = 0; i < live_monster_count; i++) {

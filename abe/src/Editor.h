@@ -13,8 +13,8 @@ typedef struct _editpanel {
   int image_index;
 } EditPanel;
 
-EditPanel edit_panel;
-Cursor editor_cursor;
+extern EditPanel edit_panel;
+extern Cursor editor_cursor;
 
 void initEditor();
 void editMap();

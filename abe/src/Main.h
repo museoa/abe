@@ -25,10 +25,10 @@
 #define RUNMODE_EDITOR 1
 #define RUNMODE_GAME 2
 
-int runmode;
+extern int runmode;
 
-SDL_Surface *screen;
-int state;
+extern SDL_Surface *screen;
+extern int state;
 
 void startEditor();
 void startGame();

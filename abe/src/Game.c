@@ -1,5 +1,7 @@
 #include "Game.h"
 
+Game game;
+
 int getGameFace() {
   // change the face
   if(game.balloonTimer) {
@@ -110,6 +112,8 @@ void gameMainLoop(SDL_Event *event) {
 		drawMap();
 	  }
 	  break;
+	default:
+	  break;
 	}
 	break;	
   case SDL_KEYUP: 
@@ -125,6 +129,8 @@ void gameMainLoop(SDL_Event *event) {
 	  break;
 	case SDLK_DOWN: 
 	  if(cursor.dir == DIR_DOWN) cursor.dir = DIR_UPDATE;
+	  break;
+	default:
 	  break;
 	}
 	break;
@@ -246,9 +252,7 @@ void gameCheckPosition() {
    return a 1 to proceed, 0 to stop
  */
 int detectCollision(int dir) {
-  int n;
   Position pos, key;
-  LiveMonster *live;
 
   pos.pos_x = cursor.pos_x;
   pos.pos_y = cursor.pos_y;

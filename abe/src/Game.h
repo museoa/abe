@@ -30,7 +30,7 @@ typedef struct _game {
   int balloonTimer;
   int god_mode;
 } Game;
-Game game;
+extern Game game;
 
 void initGame();
 void runMap();

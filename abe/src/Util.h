@@ -2,6 +2,8 @@
 #define UTIL_H 
 
 #include "Main.h"
+#include "SDL_rwops.h"
+#include "SDL_endian.h"
 
 // Rectangle math functions
 int contains(SDL_Rect *a, int x, int y);
@@ -26,7 +28,9 @@ int intersectsBy(SDL_Rect *a, SDL_Rect *b, int value);
 
    return 0 on error, number of ints written on success
 */
-int compress(Uint16 *buff, size_t nmemb, FILE *fp);
-int decompress(Uint16 *buff, size_t nmemb, FILE *fp);
+//int compress(Uint16 *buff, size_t nmemb, FILE *fp);
+//int decompress(Uint16 *buff, size_t nmemb, FILE *fp);
+int compress(Uint16 *buff, size_t nmemb, SDL_RWops *rwop);
+int decompress(Uint16 *buff, size_t nmemb, SDL_RWops *rwop);
 
 #endif

@@ -7,8 +7,8 @@
 
 #define IMAGES_DIR "images"
 
-SDL_Surface *title;
-SDL_Surface *tom[8];
+extern SDL_Surface *title;
+extern SDL_Surface *tom[8];
 
 void loadImages();
 void loadImagesFromTar();
@@ -27,12 +27,12 @@ typedef struct image {
   int monster_index;
 } Image;
 
-Image *images[256];
-int image_count;
+extern Image *images[256];
+extern int image_count;
 
 // known image indexes
-int img_brick, img_rock, img_back, img_key, img_door, img_door2, img_key, img_smash, img_smash2, img_smash3, img_smash4;
-int img_water, img_spring, img_spring2, img_spider, img_spider2;
-int img_balloon[3], img_gem[2];
+extern int img_brick, img_rock, img_back, img_key, img_door, img_door2, img_key, img_smash, img_smash2, img_smash3, img_smash4;
+extern int img_water, img_spring, img_spring2, img_spider, img_spider2;
+extern int img_balloon[3], img_gem[2];
 
 #endif

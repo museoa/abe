@@ -1,5 +1,7 @@
 #include "Font.h"
 
+SDL_Surface *fonts;
+
 void initFonts(SDL_Surface *image) {
   fonts = image;
 }

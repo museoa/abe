@@ -9,6 +9,14 @@
 #define TAR_SIZE_SIZE 12
 #define TAR_SIZE_OFFSET 124
 
+SDL_Surface *title;
+SDL_Surface *tom[8];
+Image *images[256];
+int image_count;
+int img_brick, img_rock, img_back, img_key, img_door, img_door2, img_key, img_smash, img_smash2, img_smash3, img_smash4;
+int img_water, img_spring, img_spring2, img_spider, img_spider2;
+int img_balloon[3], img_gem[2];
+
 /**
    Store the image in an array or a named img buffer.
  */
@@ -197,16 +205,16 @@ void loadImages() {
  */
 void loadImagesFromTar() {
   char tmp_path[300];
-  FILE *tmp, *fp;
+  FILE *tmp = NULL, *fp;
   char path[300];
   char buff[TAR_BLOCK_SIZE]; // a tar block
   int end = 0;
   int i;
   int mode = 0; // 0-header, 1-file
   char name[TAR_NAME_SIZE + 1], size[TAR_SIZE_SIZE + 1];
-  long filesize;
+  long filesize = 0;
   int found;
-  int blocks_read;
+  int blocks_read = 0;
   int block = 0;
 
   image_count = 0;
