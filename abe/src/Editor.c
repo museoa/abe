@@ -37,6 +37,7 @@ void
 beforeDrawToScreen()
 {
   SDL_Rect pos;
+  int screen_center_x, screen_center_y;
 
   // save map images
   if(make_map) {
@@ -67,8 +68,8 @@ beforeDrawToScreen()
     }
   }
   // draw the cursor
-  int screen_center_x = (screen->w / TILE_W) / 2;
-  int screen_center_y = (screen->h / TILE_H) / 2;
+  screen_center_x = (screen->w / TILE_W) / 2;
+  screen_center_y = (screen->h / TILE_H) / 2;
   pos.x = screen_center_x * TILE_W;
   pos.y = screen_center_y * TILE_H;
   pos.w = TILE_W;
