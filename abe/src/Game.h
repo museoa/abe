@@ -5,6 +5,8 @@
 
 #define FACE_STILL 1
 #define FACE_COUNT 3
+#define CLIMB_FACE_COUNT 3
+#define CLIMB_FACE_MIN 10
 #define TOM_W 4
 #define TOM_H 4
 
@@ -41,6 +43,7 @@ typedef struct _game {
   int lastSavePosY;
   int health;
   int difficoulty;
+  int dir_changed;
 } Game;
 extern Game game;
 

@@ -10,7 +10,7 @@
 #define TAR_SIZE_OFFSET 124
 
 SDL_Surface *title, *score_image;
-SDL_Surface *tom[10];
+SDL_Surface *tom[13];
 Image *images[256];
 int image_count;
 int img_brick, img_rock, img_back, img_key, img_door, img_door2, img_key, img_smash, img_smash2, img_smash3, img_smash4;
@@ -65,6 +65,12 @@ void doLoadImage(char *filename, char *name) {
 	tom[8] = image;
   } else if(!strcmp(name, "jump2")) {
 	tom[9] = image;
+  } else if(!strcmp(name, "climb1")) {
+	tom[10] = image;
+  } else if(!strcmp(name, "climb2")) {
+	tom[11] = image;
+  } else if(!strcmp(name, "climb3")) {
+	tom[12] = image;
   } else {
 	// a primitive hashtable
 	if(!strcmp(name, "brick2")) {

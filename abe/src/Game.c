@@ -128,7 +128,22 @@ int getGameFace() {
 	} else {
 	  return game.face;
 	}
-  } 
+  }
+  if(interact.on_ladder) {
+	if(cursor.dir & DIR_LEFT || cursor.dir & DIR_RIGHT ||
+	   cursor.dir & DIR_UP || cursor.dir & DIR_DOWN) {
+	  game.face++;
+	}
+	if(game.face >= CLIMB_FACE_COUNT * FACE_STEP) game.face = 0;
+	return (game.face / FACE_STEP + CLIMB_FACE_MIN);
+  }
+  if(game.dir_changed) {
+	game.face++;
+	if(game.face >= FACE_STEP) {
+	  game.dir_changed = 0;
+	}
+	return 11;
+  }
   if(cursor.dir & DIR_LEFT || cursor.dir & DIR_RIGHT) {
 	game.face++;
   }
@@ -224,6 +239,22 @@ void gameBeforeDrawToScreen() {
   }
 }
 
+void setGameDir() {
+  if(cursor.dir & DIR_LEFT) {
+	if(game.dir != DIR_LEFT) {
+	  game.dir_changed = 1;
+	  game.face = 0;
+	}
+	game.dir = DIR_LEFT;
+  } else if(cursor.dir & DIR_RIGHT) {
+	if(game.dir != DIR_RIGHT)  {
+	  game.dir_changed = 1;
+	  game.face = 0;
+	}
+	game.dir = DIR_RIGHT;
+  }
+}
+
 /**
    Main game event handling
 */
@@ -237,12 +268,10 @@ void gameMainLoop(SDL_Event *event) {
 	case SDLK_LEFT: 
 	  cursor.dir |= DIR_LEFT;
  	  cursor.speed_x = START_SPEED_X;
-	  game.dir = DIR_LEFT;
 	  break;
 	case SDLK_RIGHT: 
 	  cursor.dir |= DIR_RIGHT;
  	  cursor.speed_x = START_SPEED_X;
-	  game.dir = DIR_RIGHT;
 	  break;
 	case SDLK_UP: 
 	  cursor.dir |= DIR_UP;
@@ -316,6 +345,8 @@ void gameMainLoop(SDL_Event *event) {
 	}
 	break;
   }
+
+  setGameDir();
 }
 
 void handleDeath(char *killer) {
@@ -590,4 +621,5 @@ void initGame() {
   game.lastSavePosY = 0;
   game.health = MAX_HEALTH;
   game.difficoulty = 1;
+  game.dir_changed = 0;
 }
