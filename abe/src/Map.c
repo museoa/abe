@@ -3,6 +3,7 @@
 
 Cursor cursor;
 Map map;
+int moves = 0;
 
 typedef struct _gameCollisionCheck {
   int start_x, start_y, end_x, end_y;
@@ -77,6 +78,9 @@ void drawMap() {
   SDL_Rect pos;
   int x, m, y, level, n;
   MapDrawParams params;
+
+  // increment the number of moves
+  moves++;
 
   // compute what to draw
   getMapDrawParams(&params);
@@ -389,6 +393,9 @@ void scrollMap(int dir) {
   SDL_Rect pos;
 
   if(dir == DIR_NONE) return;
+
+  // increment the number of moves
+  moves++;
 
   // move the screen
   switch(dir) {
@@ -872,7 +879,9 @@ void moveMap() {
 	  //SDL_Delay(30);
 
 	  // if the video is too slow to display FPS_THROTTLE then remove the constraint.
-	  map.delta = SDL_GetTicks() - curr_time;
+	  if(!moves) moves = 1;
+	  map.delta = (SDL_GetTicks() - curr_time) / moves;
+	  moves = 0;
 	  map.fps_override = (map.delta > TICK_AMOUNT);
 	  
 	  // when to update the screen next?
@@ -883,7 +892,7 @@ void moveMap() {
 
 	  // for slow machines: max speed adjustment
 	  if(map.fps_override) {
-		map.max_speed_boost = (map.delta - TICK_AMOUNT) / 3;
+		map.max_speed_boost = (map.delta - TICK_AMOUNT) / 5;
 		if(map.max_speed_boost > TILE_W - SPEED_MAX_X) 
 		  map.max_speed_boost = TILE_W - SPEED_MAX_X;
 	  } else {

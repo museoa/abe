@@ -248,6 +248,11 @@ void gameMainLoop(SDL_Event *event) {
 	case SDLK_d:
 	  debugMonsters();
 	  break;
+#if GOD_MODE
+	case SDLK_k:
+	  game.keys++;
+	  break;
+#endif
 	case SDLK_RETURN:
 	  if(!game.balloonTimer && game.balloons) {
 		playSound(BUBBLE_SOUND);
