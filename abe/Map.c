@@ -972,13 +972,23 @@ void saveMap() {
 	fflush(stderr);
 	return;
   }
+  // write the header
   fwrite(&(map.w), sizeof(map.w), 1, fp);
   fwrite(&(map.h), sizeof(map.h), 1, fp);
-  int i;
-  for(i = 0; i < LEVEL_COUNT; i++) {
-	fwrite(map.image_index[i], sizeof(int) * map.w * map.h, 1, fp);
-  }
+
+  // compression step 1
+  size_t new_size;
+  printf("Compressing...\n");
+  int *compressed_map = compressMap(&new_size);
+  fprintf(stderr, "Compressed map. old_size=%ld new_size=%ld\n", (LEVEL_COUNT * map.w * map.h), new_size);
+  fflush(stderr);
+  // write out and further compress in step 2
+  size_t written = compress(compressed_map, new_size, fp);
+  fprintf(stderr, "Compressed map step2. Written %ld ints. Compression ration: %f.2\%\n", written, 
+		  (float)written / ((float)(LEVEL_COUNT * map.w * map.h) / 100.0));
+  fflush(stderr);
   fclose(fp);
+  free(compressed_map);
 }
 
 // call this after initMap()!
@@ -993,23 +1003,41 @@ int loadMap(int draw_map) {
 	fflush(stderr);
 	return 0;
   }
+  // read the header
   fread(&(map.w), sizeof(map.w), 1, fp);
   fread(&(map.h), sizeof(map.h), 1, fp);
-  int i;
-  for(i = 0; i < LEVEL_COUNT; i++) {
-	fread(map.image_index[i], sizeof(int) * map.w * map.h, 1, fp);
+
+  // compression step 1: read compressed data from disk
+  // FIXME: what would be nicer is to only allocate as much mem as used on disk.
+  size_t size = LEVEL_COUNT * map.w * map.h;
+  int *read_buff;
+  if(!(read_buff = malloc(sizeof(int) * size))) {
+	fprintf(stderr, "Out of memory on map read.");
+	fflush(stderr);
+	exit(0);
   }
+  int count_read = decompress(read_buff, size, fp);
+  fprintf(stderr, "read %d ints\n", count_read);
+  fflush(stderr);
   fclose(fp);
+  
+  // step 2: further uncompress
+  decompressMap(read_buff);
+  free(read_buff);
+
   resetCursor();
   if(draw_map) drawMap();
   return 1;
 }
 
-// remove unnecesary -1s. For example a 4 tile wide stone becomes a 1 int number.
-// return new number of elements in new_size. (so num of bytes=new_size * sizeof(int)).
-// caller must free returned pointer.
-// call this method before calling Utils.compress(). This prepares the map
-// for better compression by understanding the its structure.
+/** Remove unnecesary -1s. For example a 4 tile wide stone becomes a 1 int number.
+	return new number of elements in new_size. (so num of bytes=new_size * sizeof(int)).
+	caller must free returned pointer.
+	call this method before calling Utils.compress(). This prepares the map
+	for better compression by understanding the its structure. This doesn't 
+	compress the map that much, but combined with Utils.compress() map files
+	can go from 12M to 14K!
+*/
 int *compressMap(size_t *new_size) {
   int *q;
   if(!(q = malloc(sizeof(int) * map.w * map.h * LEVEL_COUNT))) {
@@ -1039,6 +1067,10 @@ int *compressMap(size_t *new_size) {
   return q;
 }
 
+/**
+   Decompress map by adding back missing -1-s. See compressMap() for
+   details.
+ */
 void decompressMap(int *p) {
   int level, i, x, y, n, r, nn;
   size_t t = 0;

@@ -90,6 +90,14 @@ int moveDown();
 void lockMap();
 void unlockMap();
 
+/** Remove unnecesary -1s. For example a 4 tile wide stone becomes a 1 int number.
+	return new number of elements in new_size. (so num of bytes=new_size * sizeof(int)).
+	caller must free returned pointer.
+	call this method before calling Utils.compress(). This prepares the map
+	for better compression by understanding the its structure. This doesn't 
+	compress the map that much, but combined with Utils.compress() map files
+	can go from 12M to 14K!
+*/
 int *compressMap(size_t *new_size);
 void decompressMap();
 
