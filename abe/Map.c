@@ -873,8 +873,8 @@ void finishDrawMap() {
 	  if(map.afterMainLevelDrawn) map.afterMainLevelDrawn();
 	  // draw creatures
 	  if(map.monsters) drawLiveMonsters(screen, 
-										(params.start_x + EXTRA_X) * TILE_W + cursor.pixel_x,
-										(params.start_y + EXTRA_Y) * TILE_H + cursor.pixel_y);
+										(params.start_x - params.offset_x) * TILE_W + cursor.pixel_x,
+										(params.start_y - params.offset_y) * TILE_H + cursor.pixel_y);
 	}
   }
 
