@@ -72,6 +72,8 @@ int main(int argc, char *argv[]) {
 	  hw_mem = 0;
 	} else if(!strcmp(argv[i], "--editor") || !strcmp(argv[i], "-e")) {
 	  runmode = RUNMODE_EDITOR;
+	} else if(!strcmp(argv[i], "--nosound")) {
+	  sound_enabled = 0;
 	} else if(!strcmp(argv[i], "--intro") || !strcmp(argv[i], "-i")) {
 	  runmode = RUNMODE_EDITOR;
 	  intro = 1;
@@ -103,6 +105,7 @@ int main(int argc, char *argv[]) {
 	  printf("-w --width #       Use this width for the video mode.\n"); 
 	  printf("-h --height #      Use this height for the video mode.\n"); 
 	  printf("-b --bpp #         Use this bpp for the video mode.\n"); 
+	  printf("--nosound          Don't use sound.\n"); 
 	  printf("-? -h --help       Show this help message.\n");
 	  exit(0);
 	}

@@ -311,8 +311,8 @@ void runMap() {
   }
   // start outside
   if(GOD_MODE) {
-	game.player_start_x = 310;
-	game.player_start_y = 8;
+	game.player_start_x = 331;
+	game.player_start_y = 94;
   } else {
 	game.player_start_x = 20;
 	game.player_start_y = 28;

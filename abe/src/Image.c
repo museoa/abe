@@ -129,6 +129,18 @@ void doLoadImage(char *filename, char *name) {
 	  img_spider = image_count;
 	} else if(!strcmp(name, "spider2")) {
 	  img_spider2 = image_count;
+	} else if(!strcmp(name, "bear1")) {
+	  monster = MONSTER_BEAR;
+	} else if(!strcmp(name, "bear2")) {
+	  monster = MONSTER_BEAR;
+	} else if(!strcmp(name, "bear3")) {
+	  monster = MONSTER_BEAR;
+	} else if(!strcmp(name, "bear4")) {
+	  monster = MONSTER_BEAR;
+	} else if(!strcmp(name, "bear5")) {
+	  monster = MONSTER_BEAR;
+	} else if(!strcmp(name, "bear6")) {
+	  monster = MONSTER_BEAR;
 	}
 
 	// store the image

@@ -3,16 +3,20 @@
 #define MUSIC_CHANNEL 0
 #define DOOR_CHANNEL 1
 
+int sound_enabled = 1;
+
 Mix_Chunk *sound[100];
 Mix_Music *intro_music, *game_music;
 
 void playSound(int index) {
+  if(!sound_enabled) return;
   if(Mix_PlayChannel(DOOR_CHANNEL, sound[index], 0) == -1) {
     printf("Mix_PlayChannel: %s\n",Mix_GetError());    
   }
 }
 
 void playIntroMusic() {
+  if(!sound_enabled) return;
   if(!intro_music) return;
   if(Mix_PlayMusic(intro_music, -1)==-1) {
     printf("Mix_PlayMusic: intro %s\n", Mix_GetError());
@@ -21,6 +25,7 @@ void playIntroMusic() {
 }
 
 void playGameMusic() {
+  if(!sound_enabled) return;
   if(!game_music) return;
   if(Mix_PlayMusic(game_music, -1)==-1) {
     printf("Mix_PlayMusic: game %s\n", Mix_GetError());
@@ -41,6 +46,7 @@ void loadSound(int index, char *name) {
 
 void initAudio() {
   char path[300];
+  if(!sound_enabled) return;
 
   if(Mix_OpenAudio(MIX_DEFAULT_FREQUENCY, MIX_DEFAULT_FORMAT, 2, 1024) == -1) {
     printf("Mix_OpenAudio: %s\n", Mix_GetError());

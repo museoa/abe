@@ -208,6 +208,28 @@ void moveCrab(LiveMonster *live_monster) {
   }
 }
 
+void moveBear(LiveMonster *live_monster) {
+  // increment the face to display
+  int n = live_monster->monster->image_count / 2;
+  live_monster->face++;
+  // move sideways until you hit a wall or an edge
+  if(live_monster->dir == DIR_LEFT) {
+	if(live_monster->face >= n * live_monster->monster->face_mod) 
+	  live_monster->face = 0;
+	if(!stepMonsterLeft(live_monster, 0)) {
+	  live_monster->dir = DIR_RIGHT;
+	  live_monster->face = 0;
+	}
+  } else {
+	if(live_monster->face >= live_monster->monster->image_count * live_monster->monster->face_mod) 
+	  live_monster->face = n * live_monster->monster->face_mod;
+	if(!stepMonsterRight(live_monster, 0)) {
+	  live_monster->dir = DIR_LEFT;
+	  live_monster->face = n * live_monster->monster->face_mod;
+	}
+  }
+}
+
 void moveSmasher(LiveMonster *live_monster) {
   // move up and down until you hit an edge
   if(live_monster->dir == DIR_DOWN) {
@@ -360,6 +382,14 @@ void initMonsters() {
   monsters[MONSTER_SPIDER].drawMonster = drawSmasher;
   monsters[MONSTER_SPIDER].start_speed_x = 2;
   monsters[MONSTER_SPIDER].start_speed_y = 2;
+
+  // bear monster
+  strcpy(monsters[MONSTER_BEAR].name, "arctic cave bear");
+  monsters[MONSTER_BEAR].moveMonster = moveBear;
+  monsters[MONSTER_BEAR].start_speed_x = 1;
+  monsters[MONSTER_BEAR].start_speed_y = 1;
+  monsters[MONSTER_BEAR].face_mod = 8;
+  monsters[MONSTER_BEAR].random_speed = 0;
 
 
   // add additional monsters here

@@ -17,6 +17,8 @@
 #define JUMP_SOUND 9
 #define GEM_SOUND 10
 
+extern int sound_enabled;
+
 void initAudio();
 void playSound(int index);
 void playIntroMusic();
