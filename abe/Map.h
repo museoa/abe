@@ -92,8 +92,8 @@ void repositionCursor(int tile_x, int tile_y);
 // return 1 or 0 if movement in that direction is possible
 int moveLeft(int checkCollision);
 int moveRight(int checkCollision);
-int moveUp(int checkCollision);
-int moveDown(int checkCollision);
+int moveUp(int checkCollision, int platform);
+int moveDown(int checkCollision, int platform);
 
 void lockMap();
 void unlockMap();

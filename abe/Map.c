@@ -640,7 +640,7 @@ int moveRight(int checkCollision) {
   return 0;
 }
 
-int moveUp(int checkCollision) {
+int moveUp(int checkCollision, int platform) {
   int move, old_pixel, old_pos, old_speed;
 
   old_speed = cursor.speed_y;
@@ -658,8 +658,7 @@ int moveUp(int checkCollision) {
 	  }
 	}
 	if(move && (!checkCollision || 
-				(((cursor.platform && cursor.platform->monster->type == MONSTER_PLATFORM2) || 
-				  cursor.jump || map.detectLadder() || cursor.stepup) && map.detectCollision(DIR_UP)))) {
+				((platform || cursor.jump || map.detectLadder() || cursor.stepup) && map.detectCollision(DIR_UP)))) {
 	  scrollMap(DIR_UP);	
 	  if(map.accelerate) {
 		if(cursor.speed_y < TILE_H) {
@@ -677,7 +676,7 @@ int moveUp(int checkCollision) {
   return 0;
 }
 
-int moveDown(int checkCollision) {
+int moveDown(int checkCollision, int platform) {
   int move, old_pixel, old_pos, old_speed;
 
   old_speed = cursor.speed_y;
@@ -695,8 +694,7 @@ int moveDown(int checkCollision) {
 	  }
 	}
 	if(move && (!checkCollision ||
-				(((cursor.platform && cursor.platform->monster->type == MONSTER_PLATFORM2) || 
-				  cursor.gravity || map.detectLadder()) && map.detectCollision(DIR_DOWN)))) {
+				((platform || cursor.gravity || map.detectLadder()) && map.detectCollision(DIR_DOWN)))) {
 	  scrollMap(DIR_DOWN);	
 	  if(map.accelerate) {
 		if(cursor.speed_y < TILE_H) {
@@ -733,7 +731,7 @@ int canStepUp(int dir) {
   // take a step up
   cursor.speed_y = (cursor.pixel_y == 0 ? TILE_H : cursor.pixel_y);
   cursor.stepup = 1;
-  if(!moveUp(1)) {
+  if(!moveUp(1, 0)) {
 	cursor.stepup = 0;
 	// if can't step up
 	cursor.speed_x = TILE_W;
@@ -759,7 +757,7 @@ int moveJump() {
 
 	old_speed = cursor.speed_y;
 	cursor.speed_y = JUMP_SPEED;
-	moveUp(1);
+	moveUp(1, 0);
 	cursor.speed_y = old_speed;
 	ret = 1;
   }
@@ -777,7 +775,7 @@ void moveGravity() {
 	old_speed = cursor.speed_y;
 	cursor.speed_y = 10;
 	cursor.gravity = 1;
-	moveDown(1);
+	moveDown(1, 0);
 	cursor.gravity = 0;
 	cursor.speed_y = old_speed;
   }
@@ -797,11 +795,11 @@ int moveWithPlatform() {
 	if(cursor.platform->pos_y == cursor.pos_y + (tom[0]->h / TILE_H)) {
 	  cursor.speed_y = abs(diff);
 	  cursor.dir = DIR_UP;
-	  moveUp(0);
+	  moveUp(1, 1);
 	} else {
 	  cursor.speed_y = abs(diff);
 	  cursor.dir = DIR_DOWN;
-	  moveDown(0);
+	  moveDown(1, 1);
 	}
 	fflush(stderr);
   }
@@ -819,8 +817,8 @@ int moveWithPlatform() {
   } else {
 	old_speed = cursor.speed_y;
 	cursor.speed_y = cursor.platform->speed_y;
-	if(cursor.platform->dir == DIR_UP) moveUp(1);
-	else moveDown(1);
+	if(cursor.platform->dir == DIR_UP) moveUp(1, 1);
+	else moveDown(1, 1);
 	cursor.speed_y = old_speed;
   }
   
@@ -872,10 +870,10 @@ void moveMap() {
 	  }
 	  break;	
 	case DIR_UP:
-	  moveUp(1);
+	  moveUp(1, 0);
 	  break;
 	case DIR_DOWN:
-	  moveDown(1);
+	  moveDown(1, 0);
 	  break;
 	case DIR_UPDATE:
 	  cursor.dir = DIR_NONE;

@@ -191,11 +191,11 @@ void gameCheckPosition() {
 
   // did we hit a platform?
   pos2.pos_x = cursor.pos_x;
-  pos2.pos_y = cursor.pos_y + tom[0]->h / TILE_H;
+  pos2.pos_y = cursor.pos_y + (tom[0]->h / TILE_H) - 1;
   pos2.pixel_x = cursor.pixel_x;
   pos2.pixel_y = cursor.pixel_y;
   pos2.w = tom[0]->w / TILE_W;
-  pos2.h = 1;
+  pos2.h = 2;
   live = detectMonster(&pos2);
   if(live && 
 	 (live->monster->type == MONSTER_PLATFORM || live->monster->type == MONSTER_PLATFORM2)) {
