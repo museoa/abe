@@ -1159,7 +1159,7 @@ int startJumpN(int n) {
   pos.pixel_y = cursor.pixel_y;
   pos.w = tom[0]->w / TILE_W;
   pos.h = 1;
-  if(!cursor.jump && (containsType(&pos, TYPE_WALL) || cursor.platform)) {
+  if(!cursor.jump && (containsType(&pos, TYPE_WALL | TYPE_LADDER) || cursor.platform)) {
 	cursor.jump = n;
 	return 1;
   }

@@ -208,6 +208,26 @@ void moveCrab(LiveMonster *live_monster) {
   }
 }
 
+void moveArrow(LiveMonster *live_monster) {
+  // increment the face to display
+  int old = getLiveMonsterFace(live_monster);
+  int face;
+  int n = (int) (100.0*rand()/(RAND_MAX+1.0));
+  if(n > 0) return;
+
+  live_monster->face++;
+  if(live_monster->face >= 
+	 live_monster->monster->image_count * live_monster->monster->face_mod) {
+	live_monster->face = 0;
+  }
+  face = getLiveMonsterFace(live_monster);
+  if(old < face) {
+	live_monster->pos_y--;
+  } else if(old > face) {
+	live_monster->pos_y++;
+  }
+}
+
 void moveTorch(LiveMonster *live_monster) {
   // increment the face to display
   live_monster->face++;
@@ -235,6 +255,66 @@ void moveBear(LiveMonster *live_monster) {
 	  live_monster->dir = DIR_LEFT;
 	  live_monster->face = n * live_monster->monster->face_mod;
 	}
+  }
+}
+
+void moveFire(LiveMonster *live_monster) {
+  // move up and down until you hit an edge
+  if(live_monster->dir == DIR_DOWN) {
+	if(!stepMonsterDown(live_monster)) {
+	  live_monster->dir = DIR_UP;
+	  live_monster->speed_y = live_monster->monster->start_speed_y + ((int)((MAX_RANDOM_SPEED / 2) * rand()/(RAND_MAX)));
+	  if(live_monster->speed_y <= 0) live_monster->speed_y = 1;
+	}
+  } else {
+	if(!stepMonsterUp(live_monster)) {
+	  live_monster->dir = DIR_DOWN;
+	  live_monster->speed_y = live_monster->monster->start_speed_y + ((int)((MAX_RANDOM_SPEED / 2) * rand()/(RAND_MAX)));
+	  if(live_monster->speed_y <= 0) live_monster->speed_y = 1;
+	}
+  }
+}
+
+void drawFire(SDL_Rect *pos, LiveMonster *live, SDL_Surface *surface, SDL_Surface *img) {
+  int y = 0;
+  SDL_Rect p, q;
+  Position position;
+  int index;
+
+  p.x = pos->x;
+  //  p.y = (pos->y / TILE_H) * TILE_H - TILE_H;
+  p.y = pos->y - TILE_H;
+  p.w = pos->w;
+  p.h = pos->h;
+
+  position.pos_x = live->pos_x;
+  position.pos_y = live->pos_y;
+  position.pixel_x = 0;
+  position.pixel_y = 0;
+  position.w = p.w / TILE_W;
+  position.h = p.h / TILE_H;
+
+  while(position.pos_y < map.h && 
+		!containsType(&position, TYPE_WALL | TYPE_DOOR)) {
+	index = (int) ((double)(live->monster->image_count) * rand() / RAND_MAX);
+	SDL_BlitSurface(images[live->monster->image_index[index]]->image, NULL, surface, &p);
+	// HACK part 1: if p->y is reset to 0 the image was cropped.
+	y = p.y;
+	if(!y) break;
+	p.x = pos->x;
+	p.y += TILE_H;
+	p.w = pos->w;
+	p.h = pos->h;
+	position.pos_y++;	
+  }
+  // draw the last one
+  if(position.pos_y > live->pos_y && live->pixel_y) {
+	index = (int) ((double)(live->monster->image_count) * rand() / RAND_MAX);
+	q.x = 0;
+	q.y = 0;
+	q.w = images[live->monster->image_index[index]]->image->w;
+	q.h = images[live->monster->image_index[index]]->image->h - live->pixel_y;
+	SDL_BlitSurface(images[live->monster->image_index[index]]->image, &q, surface, &p);	
   }
 }
 
@@ -406,6 +486,21 @@ void initMonsters() {
   monsters[MONSTER_TORCH].start_speed_y = 1;
   monsters[MONSTER_TORCH].face_mod = 6;
   monsters[MONSTER_TORCH].harmless = 1;
+
+  // arrow trap
+  strcpy(monsters[MONSTER_ARROW].name, "arrow");
+  monsters[MONSTER_ARROW].moveMonster = moveArrow;
+  monsters[MONSTER_ARROW].start_speed_x = 1;
+  monsters[MONSTER_ARROW].start_speed_y = 1;
+  monsters[MONSTER_ARROW].face_mod = 1;
+
+  // fire
+  strcpy(monsters[MONSTER_FIRE].name, "fire");
+  monsters[MONSTER_FIRE].moveMonster = moveFire;
+  monsters[MONSTER_FIRE].drawMonster = drawFire;
+  monsters[MONSTER_FIRE].start_speed_x = 2;
+  monsters[MONSTER_FIRE].start_speed_y = 2;
+  monsters[MONSTER_FIRE].face_mod = 3;
 
   // add additional monsters here
 
