@@ -15,7 +15,7 @@ Image *images[256];
 int image_count;
 int img_brick, img_rock, img_back, img_key, img_door, img_door2, img_key, img_smash, img_smash2, img_smash3, img_smash4;
 int img_water, img_spring, img_spring2, img_spider, img_spider2;
-int img_balloon[3], img_gem[2], img_bullet[4];
+int img_balloon[3], img_gem[2], img_bullet[4], img_slide_left[3], img_slide_right[3];
 
 /**
    Store the image in an array or a named img buffer.
@@ -157,6 +157,24 @@ void doLoadImage(char *filename, char *name) {
 	  monster = MONSTER_ARROW;
 	} else if(!strcmp(name, "fire1") || !strcmp(name, "fire2") || !strcmp(name, "fire3")) {
 	  monster = MONSTER_FIRE;
+	} else if(!strcmp(name, "slide1")) {
+	  type = TYPE_SLIDE;
+	  img_slide_right[0] = image_count;
+	} else if(!strcmp(name, "slide2")) {
+	  type = TYPE_SLIDE;
+	  img_slide_right[1] = image_count;
+	} else if(!strcmp(name, "slide3")) {
+	  type = TYPE_SLIDE;
+	  img_slide_right[2] = image_count;
+	} else if(!strcmp(name, "slide4")) {
+	  type = TYPE_SLIDE;
+	  img_slide_left[0] = image_count;
+	} else if(!strcmp(name, "slide5")) {
+	  type = TYPE_SLIDE;
+	  img_slide_left[1] = image_count;
+	} else if(!strcmp(name, "slide6")) {
+	  type = TYPE_SLIDE;
+	  img_slide_left[2] = image_count;
 	}
 
 	// store the image

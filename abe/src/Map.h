@@ -65,10 +65,12 @@ typedef struct _map {
   int (*detectCollision) (int);
   void (*checkPosition) ();
   int (*detectLadder) ();
+  int (*detectSlide) ();
   void (*handleMapEvent) (SDL_Event*);
   int accelerate; // 1 for accelerated movement, 0 otherwise(default)
   int gravity; // 1 for gravity, 0 otherwise(default)
   int monsters; // 1 for active monsters, 0 otherwise(default)
+  int slides; // 1 for active slides, 0 otherwise(default)
   int redraw; // set to 1 to cause a full map repaint
   int top_left_x, top_left_y; // where is the tile top left corner of the map?
 } Map;
@@ -93,16 +95,23 @@ void repositionCursor(int tile_x, int tile_y);
 int moveLeft(int checkCollision);
 int moveRight(int checkCollision);
 int moveUp(int checkCollision, int platform);
-int moveDown(int checkCollision, int platform);
+int moveDown(int checkCollision, int platform, int slide);
 
 void lockMap();
 void unlockMap();
 
 int startJump();
 int startJumpN(int n);
+/**
+   Does the position contain a tile of this type?
+   Return 1 if it does, 0 otherwise.
+   Hack: no difference between returning index=0 vs. 0 (not found).
+ */
 int containsType(Position *p, int type);
 // like contains type, but returns the position of the object in ret.
 int containsTypeWhere(Position *p, Position *ret, int type);
+// like above but can specify a level (send NULL for *ret if not needed.)
+int containsTypeInLevel(Position *p, Position *ret, int type, int level);
 int onSolidGround(Position *p);
 
 #endif

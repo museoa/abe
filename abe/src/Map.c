@@ -679,7 +679,7 @@ int moveUp(int checkCollision, int platform) {
   return 0;
 }
 
-int moveDown(int checkCollision, int platform) {
+int moveDown(int checkCollision, int platform, int slide) {
   int move, old_pixel, old_pos, old_speed;
 
   old_speed = cursor.speed_y;
@@ -697,7 +697,7 @@ int moveDown(int checkCollision, int platform) {
 	  }
 	}
 	if(move && (!checkCollision ||
-				((platform || cursor.gravity || map.detectLadder()) && map.detectCollision(DIR_DOWN)))) {
+				((platform || cursor.gravity || map.detectLadder() || slide) && map.detectCollision(DIR_DOWN)))) {
 	  scrollMap(DIR_DOWN);	
 	  if(map.accelerate) {
 		if(cursor.speed_y < TILE_H) {
@@ -767,6 +767,31 @@ int moveJump() {
   return ret;
 }
 
+int moveSlide() {
+  int n;
+  int old_speed_x, old_speed_y;
+  if(!map.slides) return 0;
+
+  n = map.detectSlide();
+  if(!n) return 0;
+
+  old_speed_x = cursor.speed_x;
+  old_speed_y = cursor.speed_y;
+  cursor.speed_x = TILE_W;
+  cursor.speed_y = TILE_H;
+  if(n == img_slide_left[0] || n == img_slide_left[1] || n == img_slide_left[2]) {
+	moveLeft(0);	
+  } else if(n == img_slide_right[0] || n == img_slide_right[1] || n == img_slide_right[2]) {
+	moveRight(0);
+  }
+  moveDown(1, 0, 1);
+  
+  cursor.speed_x = old_speed_x;
+  cursor.speed_y = old_speed_y;
+  
+  return 1;
+}
+
 /**
    Drop down.
  */
@@ -778,7 +803,7 @@ void moveGravity() {
 	old_speed = cursor.speed_y;
 	cursor.speed_y = 10;
 	cursor.gravity = 1;
-	moveDown(1, 0);
+	moveDown(1, 0, 0);
 	cursor.gravity = 0;
 	cursor.speed_y = old_speed;
   }
@@ -806,7 +831,7 @@ int moveWithPlatform() {
 		old_speed = cursor.speed_y;
 		cursor.speed_y = abs(diff);
 		if(dir == DIR_UP) moveUp(1, 1);
-		else moveDown(1, 1);
+		else moveDown(1, 1, 0);
 		cursor.speed_y = old_speed;
 		break;
 	  } else {
@@ -814,7 +839,7 @@ int moveWithPlatform() {
 		old_speed = cursor.speed_y;
 		cursor.speed_y = TILE_H;
 		if(dir == DIR_UP) moveUp(1, 1);
-		else moveDown(1, 1);
+		else moveDown(1, 1, 0);
 		cursor.speed_y = old_speed;
 		//		if(cursor.pos_y == old_pos) break; // blocked
 	  }
@@ -853,7 +878,7 @@ void moveMap() {
 	  map.handleMapEvent(&event);
 	}
 	// jumping & platform
-	if(!moveJump() && !moveWithPlatform()) {
+	if(!moveJump() && !moveWithPlatform() && !moveSlide()) {
 	  // activate gravity
 	  moveGravity();
 	}
@@ -882,7 +907,7 @@ void moveMap() {
 	  moveUp(1, 0);
 	  break;
 	case DIR_DOWN:
-	  moveDown(1, 0);
+	  moveDown(1, 0, 0);
 	  break;
 	case DIR_UPDATE:
 	  cursor.dir = DIR_NONE;
@@ -1011,16 +1036,22 @@ int defaultDetectLadder() {
   return 1;
 }
 
+int defaultDetectSlide() {
+  return 0;
+}
+
 void resetMap() {
   int i;
 
   map.gravity = 0;
   map.accelerate = 0;
   map.monsters = 0;
+  map.slides = 0;
   map.beforeDrawToScreen = NULL;
   map.afterMainLevelDrawn = NULL;
   map.detectCollision = defaultDetectCollision;
   map.detectLadder = defaultDetectLadder;
+  map.detectSlide = defaultDetectSlide;
   map.handleMapEvent = NULL;
   map.delay = 25;
   map.redraw = 0;
@@ -1041,6 +1072,7 @@ int initMap(char *name, int w, int h) {
   map.gravity = 0;
   map.accelerate = 0;
   map.monsters = 0;
+  map.slides = 0;
   map.name = strdup(name);
   map.w = w;
   map.h = h;
@@ -1048,6 +1080,7 @@ int initMap(char *name, int w, int h) {
   map.afterMainLevelDrawn = NULL;
   map.detectCollision = defaultDetectCollision;
   map.detectLadder = defaultDetectLadder;
+  map.detectSlide = defaultDetectSlide;
   map.handleMapEvent = NULL;
   map.checkPosition = NULL;
   map.delay = 25;
@@ -1188,12 +1221,17 @@ void getGameCollisionCheck(GameCollisionCheck *check, Position *p) {
 /**
    Does the position contain a tile of this type?
    Return 1 if it does, 0 otherwise.
+   Hack: no difference between returning index=0 vs. 0 (not found).
  */
 int containsType(Position *p, int type) {
-  return containsTypeWhere(p, NULL, type);
+  return containsTypeInLevel(p, NULL, type, LEVEL_MAIN);
 }
 
 int containsTypeWhere(Position *p, Position *ret, int type) {
+  return containsTypeInLevel(p, ret, type, LEVEL_MAIN);
+}
+
+int containsTypeInLevel(Position *p, Position *ret, int type, int level) {
   GameCollisionCheck check;
   SDL_Rect rect;
   int x, y, n;
@@ -1202,7 +1240,7 @@ int containsTypeWhere(Position *p, Position *ret, int type) {
 
   for(y = check.start_y; y < check.end_y; y++) {
 	for(x = check.start_x; x < check.end_x;) {
-	  n = map.image_index[LEVEL_MAIN][x + (y * map.w)];
+	  n = map.image_index[level][x + (y * map.w)];
 	  if(n != EMPTY_MAP) {
 		if(type & images[n]->type) {
 		  rect.x = x;
@@ -1218,7 +1256,7 @@ int containsTypeWhere(Position *p, Position *ret, int type) {
 			  ret->w = rect.w;
 			  ret->h = rect.h;
 			}
-			return 1;
+			return n;
 		  }
 		}
 		x += images[n]->image->w / TILE_W;
@@ -1227,7 +1265,7 @@ int containsTypeWhere(Position *p, Position *ret, int type) {
 	  }
 	}
   }
-  return 0;
+  return 0;  
 }
 
 /**

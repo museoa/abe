@@ -327,6 +327,23 @@ int detectLadder() {
   return containsType(&pos, TYPE_LADDER);
 }
 
+int gameDetectSlide() {
+  Position pos;
+  if(game.balloonTimer) return 0; // With a balloon you can move where you want
+
+  pos.pos_x = cursor.pos_x;
+  pos.pos_y = cursor.pos_y;
+  pos.pixel_x = cursor.pixel_x;
+  pos.pixel_y = cursor.pixel_y;
+  pos.w = tom[0]->w / TILE_W;
+  pos.h = tom[0]->h / TILE_H;
+  // are we smack on top of a ladder? (extend checking to 1 row below Tom)
+  if(pos.pixel_y == 0 && pos.pos_y + pos.h >= map.h) {
+	pos.h++;
+  }  
+  return containsTypeInLevel(&pos, NULL, TYPE_SLIDE, LEVEL_FORE); 
+}
+
 void runMap() {
   resetMap();
   resetMonsters();
@@ -365,6 +382,7 @@ void runMap() {
   map.afterMainLevelDrawn = afterMainLevelDrawn;
   map.detectCollision = detectCollision;
   map.detectLadder = detectLadder;
+  map.detectSlide = gameDetectSlide;
   map.checkPosition = gameCheckPosition;
 
   // add our event handling
@@ -374,6 +392,7 @@ void runMap() {
   map.accelerate = 1;
   map.gravity = 1;
   map.monsters = 1;
+  map.slides = 1;
 
   // start the map main loop
   playGameMusic();
