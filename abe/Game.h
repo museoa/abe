@@ -12,7 +12,7 @@
 
 #define FACE_STEP 2
 
-#define GOD_MODE 1
+#define GOD_MODE 0
 
 typedef struct _game {
   int face;
