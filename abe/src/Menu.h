@@ -3,4 +3,6 @@
 
 #include "Main.h"
 
+void showSettings();
+
 #endif

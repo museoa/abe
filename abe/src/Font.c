@@ -46,3 +46,7 @@ void drawString(SDL_Surface *surface, int x, int y, char *str) {
 	xpos += (FONT_WIDTH + FONT_SPACE);
   }
 }
+
+int getFontPixelWidth(char *s, int start, int end) {
+  return (end - start) * (FONT_WIDTH + FONT_SPACE);
+}

@@ -47,7 +47,7 @@ void testModes() {
 int main(int argc, char *argv[]) {
   Uint32 flags = SDL_DOUBLEBUF;
   int i;
-  int width, height, bpp, n;
+  int w, h, bpp, n;
   int hw_mem = 1;
   int intro = 0;
   char *mapname;
@@ -56,8 +56,8 @@ int main(int argc, char *argv[]) {
 
   runmode = RUNMODE_SPLASH;  
 
-  width = 640;
-  height = 480;
+  w = 640;
+  h = 480;
   bpp = 16;
 
   if(SDL_Init(SDL_INIT_AUDIO|SDL_INIT_VIDEO) < 0) {
@@ -79,12 +79,19 @@ int main(int argc, char *argv[]) {
 	  intro = 1;
 	} else if(!strcmp(argv[i], "--game") || !strcmp(argv[i], "-g")) {
 	  runmode = RUNMODE_GAME;
-	} else if((!strcmp(argv[i], "--width") || !strcmp(argv[i], "-w")) && i < argc - 1) {
+	} else if(!strcmp(argv[i], "--size") && i < argc - 1) {
 	  n = atoi(argv[i + 1]);
-	  if(n >= 320 && n <= 800) width=n;
-	} else if((!strcmp(argv[i], "--height") || !strcmp(argv[i], "-h")) && i < argc - 1) {
-	  n = atoi(argv[i + 1]);
-	  if(n >= 200 && n <= 600) height=n;
+	  switch(n) {
+	  case 0: w = 320; h = 200; break;
+	  case 1: w = 320; h = 240; break;
+	  case 2: w = 640; h = 400; break;
+	  case 3: w = 640; h = 480; break;
+	  case 4: w = 800; h = 600; break;
+	  case 5: w = 1024; h = 768; break;
+	  case 6: w = 1280; h = 1024; break;
+	  case 7: w = 1600; h = 1200; break;
+	  default: w = 640; h = 480;
+	  }
 	} else if((!strcmp(argv[i], "--bpp") || !strcmp(argv[i], "-b")) && i < argc - 1) {
 	  n = atoi(argv[i + 1]);
 	  if(n == 15 || n == 16 || n == 24 || n == 32) bpp = n;
@@ -102,8 +109,8 @@ int main(int argc, char *argv[]) {
 	  printf("-g --game          Skip the splash screen and run the game.\n"); 
 	  printf("-t --test          Test video modes only.\n"); 
 	  printf("-s --system        Use system memory instead of video(default) memory.\n");
-	  printf("-w --width #       Use this width for the video mode.\n"); 
-	  printf("-h --height #      Use this height for the video mode.\n"); 
+	  printf("--size #           Use this width/height for the video mode.\n"); 
+	  printf("\tModes: 0-320/200 1-320/240 2-640/400 3-640/480 4-800/600 5-1024/768 6-1280/1024 7-1600/1200\n");
 	  printf("-b --bpp #         Use this bpp for the video mode.\n"); 
 	  printf("--nosound          Don't use sound.\n"); 
 	  printf("-? -h --help       Show this help message.\n");
@@ -129,11 +136,11 @@ int main(int argc, char *argv[]) {
   }
   if(!window) flags |= SDL_FULLSCREEN;
 
-  fprintf(stderr, "Attempting to set %dx%dx%d video mode.\n", width, height, bpp);
+  fprintf(stderr, "Attempting to set %dx%dx%d video mode.\n", w, h, bpp);
   fflush(stderr);
-  screen = SDL_SetVideoMode(width, height, bpp, flags);
+  screen = SDL_SetVideoMode(w, h, bpp, flags);
   if(screen == NULL) {
-	fprintf(stderr, "Unable to set %dx%dx%d video: %s\n", width, height, bpp, SDL_GetError());
+	fprintf(stderr, "Unable to set %dx%dx%d video: %s\n", w, h, bpp, SDL_GetError());
 	exit(1);
   }
   fprintf(stderr, "Success:\n");

@@ -131,6 +131,10 @@ void showIntro() {
 	  editMap();
 	  destroyMap();
 	  initIntroMap();
+	} else if(menu_y == 2 * FONT_HEIGHT) {
+	  destroyMap();
+	  showSettings();
+	  initIntroMap();
 	} else if(menu_y == 4 * FONT_HEIGHT) {
 	  return;
 	}
