@@ -54,6 +54,7 @@ typedef struct _monster {
   struct _monster *breeds; // creates this type of creature
   void (*breedMonster) (LiveMonster *live, SDL_Rect *pos);
   int max_children; // how many spawned children this creature can have active at once
+  int damage;
 } Monster;
 
 typedef struct _cursor {

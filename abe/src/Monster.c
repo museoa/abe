@@ -546,6 +546,7 @@ void initMonsters() {
 	monsters[i].allocCustom = NULL;
 	monsters[i].breeds = NULL;
 	monsters[i].breedMonster = defaultBreedMonster;
+	monsters[i].damage = 1;
   }
 
   // crab monster
@@ -563,6 +564,7 @@ void initMonsters() {
   monsters[MONSTER_SMASHER].drawMonster = drawSmasher;
   monsters[MONSTER_SMASHER].start_speed_x = 4;
   monsters[MONSTER_SMASHER].start_speed_y = 4;
+  monsters[MONSTER_SMASHER].damage = 2;
 
   // purple smasher
   strcpy(monsters[MONSTER_SMASHER2].name, "smasher2");
@@ -570,6 +572,7 @@ void initMonsters() {
   monsters[MONSTER_SMASHER2].drawMonster = drawSmasher;
   monsters[MONSTER_SMASHER2].start_speed_x = 4;
   monsters[MONSTER_SMASHER2].start_speed_y = 4;
+  monsters[MONSTER_SMASHER2].damage = 4;
 
   // demon monster
   strcpy(monsters[MONSTER_DEMON].name, "little demon");
@@ -578,6 +581,7 @@ void initMonsters() {
   monsters[MONSTER_DEMON].start_speed_y = 4;
   // animation 2x slower
   monsters[MONSTER_DEMON].face_mod = 4;
+  monsters[MONSTER_DEMON].damage = 2;
 
   // platforms
   strcpy(monsters[MONSTER_PLATFORM].name, "platform");
@@ -599,6 +603,7 @@ void initMonsters() {
   monsters[MONSTER_SPIDER].drawMonster = drawSmasher;
   monsters[MONSTER_SPIDER].start_speed_x = 2;
   monsters[MONSTER_SPIDER].start_speed_y = 2;
+  monsters[MONSTER_SPIDER].damage = 5;
 
   // bear monster
   strcpy(monsters[MONSTER_BEAR].name, "arctic cave bear");
@@ -607,6 +612,7 @@ void initMonsters() {
   monsters[MONSTER_BEAR].start_speed_y = 1;
   monsters[MONSTER_BEAR].face_mod = 8;
   monsters[MONSTER_BEAR].random_speed = 0;
+  monsters[MONSTER_BEAR].damage = 7;
 
   // torch
   strcpy(monsters[MONSTER_TORCH].name, "torch");
@@ -622,6 +628,7 @@ void initMonsters() {
   monsters[MONSTER_ARROW].start_speed_x = 1;
   monsters[MONSTER_ARROW].start_speed_y = 1;
   monsters[MONSTER_ARROW].face_mod = 1;
+  monsters[MONSTER_ARROW].damage = 1;
 
   // fire
   strcpy(monsters[MONSTER_FIRE].name, "fire");
@@ -632,6 +639,7 @@ void initMonsters() {
   monsters[MONSTER_FIRE].face_mod = 3;
   monsters[MONSTER_FIRE].detectMonster = detectFire;
   monsters[MONSTER_FIRE].allocCustom = allocFireCustom;
+  monsters[MONSTER_FIRE].damage = 4;
 
   // star
   strcpy(monsters[MONSTER_STAR].name, "star");
@@ -648,6 +656,7 @@ void initMonsters() {
   monsters[MONSTER_BULLET].start_speed_y = 4;
   monsters[MONSTER_BULLET].face_mod = 1;
   monsters[MONSTER_BULLET].random_speed = 0;
+  monsters[MONSTER_BULLET].damage = 10;
 
   // cannon
   strcpy(monsters[MONSTER_CANNON].name, "cannon");
@@ -669,6 +678,7 @@ void initMonsters() {
   monsters[MONSTER_BAT].start_speed_x = 6;
   monsters[MONSTER_BAT].start_speed_y = 4;
   monsters[MONSTER_BAT].face_mod = 3;
+  monsters[MONSTER_BAT].damage = 3;
 
   // add additional monsters here
 

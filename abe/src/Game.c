@@ -349,15 +349,16 @@ void gameMainLoop(SDL_Event *event) {
   setGameDir();
 }
 
-void handleDeath(char *killer) {
+void handleDeath(LiveMonster *live) {
   int i;
 
-  game.health-=(1 << game.difficoulty);
+  game.health-=(live->monster->damage * (game.difficoulty + 1));
   if(game.health > 0) return;
   game.health = MAX_HEALTH;
 
   playSound(DEATH_SOUND);
-  fprintf(stderr, "Player death! Killed by %s at x=%d y=%d pixelx=%d pixely=%d\n", killer, cursor.pos_x, cursor.pos_y, cursor.pixel_x, cursor.pixel_y);
+  fprintf(stderr, "Player death! Killed by %s at x=%d y=%d pixelx=%d pixely=%d\n", live->monster->name, 
+		  cursor.pos_x, cursor.pos_y, cursor.pixel_x, cursor.pixel_y);
   fflush(stderr);
 
   if(game.god_mode) return;
@@ -411,7 +412,7 @@ void gameCheckPosition() {
   // did we hit a monster?
   if(live) {
 	if(!live->monster->harmless) {
-	  handleDeath(live->monster->name);
+	  handleDeath(live);
 	} else if(live->monster->type == MONSTER_STAR) {
 	  if(game.lastSavePosX != live->pos_x && 
 		 game.lastSavePosX != live->pos_y) {
@@ -428,11 +429,12 @@ void gameCheckPosition() {
 	  }
 	}
   }
-  // did we hit a harmful field
-  if(containsType(&pos, TYPE_HARMFUL)) {
-	handleDeath("harmful field");
-	//	if(!game.god_mode) return 1;
-  }
+  // FIXME: implement better water stuff
+  //  // did we hit a harmful field
+  //  if(containsType(&pos, TYPE_HARMFUL)) {
+  //	handleDeath("harmful field");
+  //	//	if(!game.god_mode) return 1;
+  //  }
 
   // did we hit a platform?
   pos2.pos_x = cursor.pos_x;
