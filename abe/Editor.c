@@ -35,6 +35,31 @@ void editorMainLoop(SDL_Event *event) {
   case SDL_MOUSEMOTION:
 	editor_cursor.pos_x = event->motion.x / TILE_W;
 	editor_cursor.pos_y = event->motion.y / TILE_H;
+	if(event->motion.x <= TILE_W) {
+	  cursor.pos_x--;
+	  if(cursor.pos_x < 0) cursor.pos_x = 0;
+	  cursor.dir = DIR_NONE;
+	  map.redraw = 1;
+	} 
+	if(event->motion.x > screen->w - TILE_W) {
+	  cursor.pos_x++;
+	  if(cursor.pos_x >= map.w) cursor.pos_x = map.w - 1;
+	  cursor.dir = DIR_NONE;
+	  map.redraw = 1;
+	} 
+	if(event->motion.y <= TILE_H) {
+	  cursor.pos_y--;
+	  if(cursor.pos_y < 0) cursor.pos_y = 0;
+	  cursor.dir = DIR_NONE;
+	  map.redraw = 1;
+	} 
+	if(event->motion.y > screen->h -  EDIT_PANEL_HEIGHT - TILE_H) {
+	  cursor.pos_y++;
+	  if(cursor.pos_y >= map.h) cursor.pos_y = map.h - 1;
+	  cursor.dir = DIR_NONE;
+	  map.redraw = 1;
+	}
+	
 	break;
   case SDL_MOUSEBUTTONUP:
 	switch(event->button.button) {

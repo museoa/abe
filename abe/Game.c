@@ -289,8 +289,8 @@ void runMap(char *name, int w, int h) {
 	return;
   }
   // start outside
-  //  game.player_start_x = 20;
-  //  game.player_start_y = 28;
+  //game.player_start_x = 20;
+  //game.player_start_y = 28;
 
   game.player_start_x = 310;
   game.player_start_y = 8;
