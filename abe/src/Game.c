@@ -243,7 +243,7 @@ void gameBeforeDrawToScreen() {
 #endif
 
   // draw the balloon timer
-  if(game.balloonTimer > 0) {
+  if(game.balloonTimer > 0) { 
 	x = 5;
 	y = 94;
 	u = (double)269 / (double)BALLOON_RIDE_INTERVAL;

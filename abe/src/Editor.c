@@ -71,6 +71,23 @@ void drawSlide(int x1, int y1, int x2, int y2) {
   drawMap();
 }
 
+void drawRect(int x1, int y1, int x2, int y2) {
+  int x, y;
+  Position pos;
+  SDL_Surface *img;
+  
+  img = images[edit_panel.image_index]->image;
+  for(y = y1; y < y2; y+=img->h/TILE_H) {
+	for(x = x1; x < x2; x+=img->w/TILE_W) {
+	  pos.pos_x = x;
+	  pos.pos_y = y;
+	  setImagePosition(edit_panel.level, edit_panel.image_index, &pos);
+	}
+  }
+  showMapStatus("added rectangle");
+  drawMap();
+}
+
 /**
    Main editor event handling
 */
@@ -262,6 +279,14 @@ void editorMainLoop(SDL_Event *event) {
 	  } else {
 		showMapStatus("press q first!");
 	  }
+	  break;
+	case SDLK_e:
+	  if(slide_start_x > -1 && slide_start_y > -1) {
+		drawRect(slide_start_x, slide_start_y, map.top_left_x + editor_cursor.pos_x, map.top_left_y + editor_cursor.pos_y);
+	  } else {
+		showMapStatus("press q first!");
+	  }
+	  break;
 	default:
 	  break;
 	}
