@@ -66,6 +66,7 @@ typedef struct _map {
   void (*afterMainLevelDrawn)();
   int (*detectCollision) (int);
   void (*checkPosition) ();
+  // return: 0 - no ladder, 1 - on ladder, can only move down, 2 - on ladder can move up or down
   int (*detectLadder) ();
   int (*detectSlide) ();
   void (*handleMapEvent) (SDL_Event*);

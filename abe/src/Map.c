@@ -576,7 +576,7 @@ int moveUp(int checkCollision, int platform) {
 	  }
 	}
 	if(move && (!checkCollision || 
-				((platform || cursor.jump || interact.on_ladder || cursor.stepup) && map.detectCollision(DIR_UP)))) {
+				((platform || cursor.jump || interact.on_ladder == 2 || cursor.stepup) && map.detectCollision(DIR_UP)))) {
 	  scrollMap(DIR_UP);	
 	  if(map.accelerate) {
 		if(cursor.speed_y < SPEED_MAX_Y + map.max_speed_boost) {

@@ -5,7 +5,7 @@ int menu_y;
 #define BULLET_FACE_COUNT 4
 int face = 0, face_mod = 4;
 
-char text[] = "abes amazing adventure!! code and graphics by gabor torok music by alex clark special thanks to jay for lending his macos powerbook and to michal tomaszkiewicz for compiling under the beos 2003 april 14 happy birthday abraham!!";
+char text[] = "abes amazing adventure!! code and graphics by gabor music by alex testing by christie inspiration by abe and tom special thanks to jay for lending his macos x powerbook and to michal tomaszkiewicz for compiling under the beos    2003 april 14 happy birthday abraham!!";
 int text_pos = -10000;
 
 void drawScrollText() {

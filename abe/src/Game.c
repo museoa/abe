@@ -521,9 +521,12 @@ int detectCollision(int dir) {
   return !containsType(&pos, TYPE_WALL);
 }
 
+// return: 0 - no ladder, 1 - on ladder, can only move down, 2 - on ladder can move up or down
 int detectLadder() {
-  Position pos;
-  if(game.balloonTimer) return 1; // With a balloon you can move where you want
+  Position pos, where;
+  int ret;
+
+  if(game.balloonTimer) return 2; // With a balloon you can move where you want
 
   pos.pos_x = cursor.pos_x;
   pos.pos_y = cursor.pos_y;
@@ -535,7 +538,9 @@ int detectLadder() {
   if(pos.pixel_y == 0 && pos.pos_y + pos.h >= map.h) {
 	pos.h++;
   }
-  return containsType(&pos, TYPE_LADDER);
+  ret = containsTypeWhere(&pos, &where, TYPE_LADDER);
+  if(ret) return (where.pos_y >= pos.pos_y + (tom[0]->h / TILE_H) ? 1 : 2);
+  return 0;
 }
 
 int gameDetectSlide() {
