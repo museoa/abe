@@ -106,6 +106,8 @@ main(int argc, char *argv[])
     exit(1);
   }
 
+  atexit(SDL_Quit);
+
   for(i = 0; i < argc; i++) {
     if(!strcmp(argv[i], "--window")) {
       mainstruct.full_screen = 0;
@@ -257,8 +259,6 @@ main(int argc, char *argv[])
   } else {
     showIntro();
   }
-
-  atexit(SDL_Quit);
 
   return 0;
 }
