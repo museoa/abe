@@ -1,34 +1,96 @@
 #include "Game.h"
 #include <errno.h>
 
+#ifndef WIN32
+#include <pwd.h>
+#include <stdlib.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#endif
+
 Game game;
+
+// path_sprintf should not be used by other .c files, as it does not fit for them.
+static void
+path_sprintf(char *path, char *formatted_name, int version)
+{
+
+#ifndef WIN32
+  struct passwd *pwent;
+#endif
+  int len;
+
+  printf("path_sprintf (%p, %s, %d)\n", path, formatted_name, version);
+
+#ifdef WIN32
+  strcpy(path, SAVEGAME_DIR PATH_SEP);
+#else
+  pwent = getpwuid(getuid());
+  if(NULL == pwent) {
+    perror("getpwuid");
+    exit(EXIT_FAILURE);
+  }
+  sprintf(path, "%s%s", pwent->pw_dir, PATH_SEP SAVEGAME_DIR PATH_SEP);
+#endif
+
+  len = strlen(path);
+
+  if(1 == version) {
+    sprintf(path + len, formatted_name);
+  } else {
+    sprintf(path + len, formatted_name, version);
+  }
+
+}
 
 void
 deleteSavedGame()
 {
-  char path[300];
+  char path[PATH_SIZE];
   // version 2
-  sprintf(path, "%s%ssave%d.dat", SAVEGAME_DIR, PATH_SEP, (int) GAME_VERSION);
+  path_sprintf(path, "save%d.dat", GAME_VERSION);
   remove(path);
-  sprintf(path, "%s%ssavedmap%d.dat", SAVEGAME_DIR, PATH_SEP,
-          (int) GAME_VERSION);
+  path_sprintf(path, "savedmap%d.dat", GAME_VERSION);
   remove(path);
   // version 1
-  sprintf(path, "%s%ssave.dat", SAVEGAME_DIR, PATH_SEP);
+  path_sprintf(path, "save.dat", 1);
   remove(path);
-  sprintf(path, "%s%ssavedmap.dat", SAVEGAME_DIR, PATH_SEP);
+  path_sprintf(path, "savedmap.dat", 1);
   remove(path);
+}
+
+// MaKe Sure Directory Exists. Not msde to do not confuse with some M$ function.
+static void
+mksde()
+{
+#ifndef WIN32
+  char path[PATH_SIZE];
+  struct passwd *pwent;
+
+  pwent = getpwuid(getuid());
+  if(NULL == pwent) {
+    perror("getpwuid");
+    exit(EXIT_FAILURE);
+  }
+  sprintf(path, "%s%s", pwent->pw_dir, PATH_SEP SAVEGAME_DIR PATH_SEP);
+
+  if(mkdir(path, (mode_t) S_IFDIR | S_IRWXU)) {
+    perror(path);
+  }
+#endif
 }
 
 void
 saveGame()
 {
-  char path[300];
+  char path[PATH_SIZE];
   FILE *fp;
   char *err;
   SDL_RWops *rwop;
 
-  sprintf(path, "%s%ssave%d.dat", SAVEGAME_DIR, PATH_SEP, (int) GAME_VERSION);
+  mksde();
+
+  path_sprintf(path, "save%d.dat", GAME_VERSION);
 
   if(!(fp = fopen(path, "wb"))) {
     err = strerror(errno);
@@ -55,9 +117,8 @@ saveGame()
 
   SDL_RWclose(rwop);
 
-  // save the map in savegame/savedmap.dat
-  sprintf(path, "%s%ssavedmap%d.dat", SAVEGAME_DIR, PATH_SEP,
-          (int) GAME_VERSION);
+  // save the map
+  path_sprintf(path, "savedmap%d.dat", GAME_VERSION);
   saveMapPath(path);
 }
 
@@ -65,7 +126,7 @@ saveGame()
 int
 loadGame()
 {
-  char path[300];
+  char path[PATH_SIZE];
   FILE *fp;
   //char *err;
   SDL_RWops *rwop;
@@ -73,8 +134,8 @@ loadGame()
 
   version = (int) GAME_VERSION;
 
-  // load the map from savegame/savedmap.dat
-  sprintf(path, "%s%ssavedmap%d.dat", SAVEGAME_DIR, PATH_SEP, version);
+  // load the map
+  path_sprintf(path, "savedmap%d.dat", GAME_VERSION);
   if(!loadMapPath(path, 0)) {
     // if can't find saved map load static map
     fprintf(stderr,
@@ -90,9 +151,9 @@ loadGame()
   // try to find a saved game of any version
   while(version > 0) {
     if(version > 1) {
-      sprintf(path, "%s%ssave%d.dat", SAVEGAME_DIR, PATH_SEP, version);
-    } else {
-      sprintf(path, "%s%ssave.dat", SAVEGAME_DIR, PATH_SEP);
+      path_sprintf(path, "save%d.dat", version);
+    } else {                    // By Pedro: version==1
+      path_sprintf(path, "save.dat", version);
     }
     fprintf(stderr, "Trying to load saved game: %s\n", path);
     fflush(stderr);
@@ -264,7 +325,7 @@ gameBeforeDrawToScreen()
   sprintf(s, "d %d f %d t %d b %d h2o %d", map.delta, map.fps_override,
           (1000 / FPS_THROTTLE), map.max_speed_boost, game.in_water);
   drawString(screen, 0, screen->h - 20, s);
-  /*  sprintf(s, "pos %d %d", cursor.pos_x, cursor.pos_y);
+  /* sprintf(s, "pos %d %d", cursor.pos_x, cursor.pos_y);
      drawString(screen, 0, screen->h - 60, s);
      sprintf(s, "pixel %d %d", cursor.pixel_x, cursor.pixel_y);
      drawString(screen, 0, screen->h - 40, s);
@@ -318,7 +379,7 @@ gameMainLoop(SDL_Event * event)
 
   switch (event->type) {
   case SDL_KEYDOWN:
-    //  printf("The %s key was pressed! scan=%d\n", SDL_GetKeyName(event->key.keysym.sym), event->key.keysym.scancode);
+    // printf("The %s key was pressed! scan=%d\n", SDL_GetKeyName(event->key.keysym.sym), event->key.keysym.scancode);
     switch (event->key.keysym.sym) {
     case SDLK_LEFT:
       if(!game.end_game) {
@@ -394,19 +455,19 @@ gameMainLoop(SDL_Event * event)
     switch (event->key.keysym.sym) {
     case SDLK_LEFT:
       cursor.dir &= 15 - DIR_LEFT;
-      //    if(cursor.dir == DIR_LEFT) cursor.dir = DIR_UPDATE;
+      //   if(cursor.dir == DIR_LEFT) cursor.dir = DIR_UPDATE;
       break;
     case SDLK_RIGHT:
       cursor.dir &= 15 - DIR_RIGHT;
-      //    if(cursor.dir == DIR_RIGHT) cursor.dir = DIR_UPDATE;
+      //   if(cursor.dir == DIR_RIGHT) cursor.dir = DIR_UPDATE;
       break;
     case SDLK_UP:
       cursor.dir &= 15 - DIR_UP;
-      //    if(cursor.dir == DIR_UP) cursor.dir = DIR_UPDATE;
+      //   if(cursor.dir == DIR_UP) cursor.dir = DIR_UPDATE;
       break;
     case SDLK_DOWN:
       cursor.dir &= 15 - DIR_DOWN;
-      //    if(cursor.dir == DIR_DOWN) cursor.dir = DIR_UPDATE;
+      //   if(cursor.dir == DIR_DOWN) cursor.dir = DIR_UPDATE;
       break;
     default:
       break;

@@ -1,6 +1,7 @@
 #ifndef GAME_H
 #define GAME_H
 
+#include "Directories.h"
 #include "Main.h"
 
 #define FACE_STILL 1
@@ -18,8 +19,6 @@
 #define BALLOON_RIDE_INTERVAL 500
 
 #define SPRING_JUMP 30
-
-#define SAVEGAME_DIR "savegame"
 
 #define MAX_HEALTH 100
 
