@@ -93,7 +93,7 @@ void repositionCursor(int tile_x, int tile_y);
 int moveLeft(int checkCollision);
 int moveRight(int checkCollision);
 int moveUp(int checkCollision);
-int moveDown();
+int moveDown(int checkCollision);
 
 void lockMap();
 void unlockMap();

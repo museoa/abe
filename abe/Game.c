@@ -47,7 +47,7 @@ void gameBeforeDrawToScreen() {
   sprintf(s, "life %d score %d keys %d balloons %d", game.lives, game.score, game.keys, game.balloons);
   drawString(screen, 5, 5, s);
   if(GOD_MODE) {
-	sprintf(s, "x %d y %d px %d py %d god mode %s", cursor.pos_x, cursor.pos_y, cursor.pixel_x, cursor.pixel_y, (game.god_mode ? "true" : "false"));
+	sprintf(s, "x %d y %d god mode %s", cursor.pos_x, cursor.pos_y, (game.god_mode ? "true" : "false"));
     drawString(screen, 5, 5 + FONT_HEIGHT, s);
   }
 }

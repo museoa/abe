@@ -15,8 +15,8 @@ struct _monster;
 
 // The extra number of tiles around the screen 
 // ,.where monsters are still active
-#define MONSTER_EXTRA_X 40
-#define MONSTER_EXTRA_Y 30
+#define MONSTER_EXTRA_X 80
+#define MONSTER_EXTRA_Y 60
 
 // The max amount of speed change
 #define MAX_RANDOM_SPEED 6.0

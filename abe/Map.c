@@ -676,7 +676,7 @@ int moveUp(int checkCollision) {
   return 0;
 }
 
-int moveDown() {
+int moveDown(int checkCollision) {
   int move, old_pixel, old_pos, old_speed;
 
   old_speed = cursor.speed_y;
@@ -693,8 +693,8 @@ int moveDown() {
 		move = 0;
 	  }
 	}
-	if(move && 
-	   ((cursor.gravity || map.detectLadder()) && map.detectCollision(DIR_DOWN))) {
+	if(move && (!checkCollision ||
+				((cursor.gravity || map.detectLadder()) && map.detectCollision(DIR_DOWN)))) {
 	  scrollMap(DIR_DOWN);	
 	  if(map.accelerate) {
 		if(cursor.speed_y < TILE_H) {
@@ -775,7 +775,7 @@ void moveGravity() {
 	old_speed = cursor.speed_y;
 	cursor.speed_y = 10;
 	cursor.gravity = 1;
-	moveDown();
+	moveDown(1);
 	cursor.gravity = 0;
 	cursor.speed_y = old_speed;
   }
@@ -788,23 +788,22 @@ int moveWithPlatform() {
   // move up or down if needed.
   old_speed = cursor.speed_y;
   old_dir = cursor.dir;
-  diff = (cursor.platform->pos_y + cursor.platform->pixel_y) - 
-	(cursor.pos_y + (tom[0]->h / TILE_H) + cursor.pixel_y);
-  if(diff > 0) {
-	fprintf(stderr, "down\n", diff);
-	cursor.speed_y = diff;
-	cursor.dir = DIR_DOWN;
-	moveDown();
-  } else if(diff < 0) {
-	fprintf(stderr, "up\n", diff);
-	cursor.speed_y = -diff;
-	cursor.dir = DIR_UP;
-	moveUp(0);
+  diff = (cursor.platform->pos_y * TILE_H + cursor.platform->pixel_y) - 
+	(cursor.pos_y * TILE_H + tom[0]->h + cursor.pixel_y);
+  if(diff != 0) {
+	if(cursor.platform->pos_y == cursor.pos_y + (tom[0]->h / TILE_H)) {
+	  cursor.speed_y = abs(diff);
+	  cursor.dir = DIR_UP;
+	  moveUp(0);
+	} else {
+	  cursor.speed_y = abs(diff);
+	  cursor.dir = DIR_DOWN;
+	  moveDown(0);
+	}
+	fflush(stderr);
   }
   cursor.speed_y = old_speed;
   cursor.dir = old_dir;
-  fprintf(stderr, "diff=%d\n", diff);
-  fflush(stderr);
   
   // move with the platform
   old_speed = cursor.speed_x;
@@ -862,7 +861,7 @@ void moveMap() {
 	  moveUp(1);
 	  break;
 	case DIR_DOWN:
-	  moveDown();
+	  moveDown(1);
 	  break;
 	case DIR_UPDATE:
 	  cursor.dir = DIR_NONE;
