@@ -183,6 +183,9 @@ void drawSmasher(SDL_Rect *pos, LiveMonster *live, SDL_Surface *surface, SDL_Sur
   int y;
   SDL_Rect p, q;
   Position position;
+  int first_image;
+
+  first_image = live->monster->image_index[0];
 
   p.x = pos->x;
   //  p.y = (pos->y / TILE_H) * TILE_H - TILE_H;
@@ -199,7 +202,7 @@ void drawSmasher(SDL_Rect *pos, LiveMonster *live, SDL_Surface *surface, SDL_Sur
 
   while(position.pos_y >= 0 && 
 		!containsType(&position, TYPE_WALL | TYPE_DOOR)) {
-	SDL_BlitSurface(images[img_smash2]->image, NULL, surface, &p);
+	SDL_BlitSurface(images[first_image == img_smash || first_image == img_smash2 ? img_smash2 : img_smash4]->image, NULL, surface, &p);
 	// HACK part 1: if p->y is reset to 0 the image was cropped.
 	y = p.y;
 	if(!y) break;
@@ -217,10 +220,10 @@ void drawSmasher(SDL_Rect *pos, LiveMonster *live, SDL_Surface *surface, SDL_Sur
 	p.y -= live->pixel_y;
 	p.w = pos->w;
 	p.h = pos->h;
-	SDL_BlitSurface(images[img_smash2]->image, NULL, surface, &p);
+	SDL_BlitSurface(images[first_image == img_smash || first_image == img_smash2 ? img_smash2 : img_smash4]->image, NULL, surface, &p);
   }
 
-  SDL_BlitSurface(img, NULL, surface, pos);
+  SDL_BlitSurface(images[first_image == img_smash || first_image == img_smash2 ? img_smash : img_smash3]->image, NULL, surface, pos);
 }
 
 /**
@@ -244,12 +247,12 @@ void initMonsters() {
 	monsters[i].moveMonster = defaultMoveMonster;
 	monsters[i].drawMonster = defaultDrawMonster;
 	monsters[i].face_mod = 1;
+	monsters[i].type = i;
   }
 
   // crab monster
   strcpy(monsters[MONSTER_CRAB].name, "dungenous crab");
   monsters[MONSTER_CRAB].moveMonster = moveCrab;
-  monsters[MONSTER_CRAB].type = MONSTER_CRAB;
   monsters[MONSTER_CRAB].start_speed_x = 4;
   monsters[MONSTER_CRAB].start_speed_y = 4;
   // animation 2x slower
@@ -259,14 +262,18 @@ void initMonsters() {
   strcpy(monsters[MONSTER_SMASHER].name, "smasher");
   monsters[MONSTER_SMASHER].moveMonster = moveSmasher;
   monsters[MONSTER_SMASHER].drawMonster = drawSmasher;
-  monsters[MONSTER_SMASHER].type = MONSTER_SMASHER;
   monsters[MONSTER_SMASHER].start_speed_x = 8;
   monsters[MONSTER_SMASHER].start_speed_y = 8;
+
+  strcpy(monsters[MONSTER_SMASHER2].name, "smasher2");
+  monsters[MONSTER_SMASHER2].moveMonster = moveSmasher;
+  monsters[MONSTER_SMASHER2].drawMonster = drawSmasher;
+  monsters[MONSTER_SMASHER2].start_speed_x = 8;
+  monsters[MONSTER_SMASHER2].start_speed_y = 8;
 
   // demon monster
   strcpy(monsters[MONSTER_DEMON].name, "little demon");
   monsters[MONSTER_DEMON].moveMonster = moveDemon;
-  monsters[MONSTER_DEMON].type = MONSTER_CRAB;
   monsters[MONSTER_DEMON].start_speed_x = 4;
   monsters[MONSTER_DEMON].start_speed_y = 4;
   // animation 2x slower

@@ -7,7 +7,8 @@
 #define MONSTER_CRAB 0
 #define MONSTER_SMASHER 1
 #define MONSTER_DEMON 2
-#define MONSTER_COUNT 3
+#define MONSTER_SMASHER2 3
+#define MONSTER_COUNT 4
 
 struct _monster;
 
