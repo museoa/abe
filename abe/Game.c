@@ -220,8 +220,6 @@ void runMap(char *name, int w, int h) {
 	fflush(stderr);
 	return;
   }
-  fprintf(stderr, "starting game\n");
-  fflush(stderr);
   // start outside
   //  game.player_start_x = 20;
   //  game.player_start_y = 28;
@@ -258,11 +256,7 @@ void runMap(char *name, int w, int h) {
   map.monsters = 1;
 
   // start the map main loop
-  fprintf(stderr, "drawing map\n");
-  fflush(stderr);
   drawMap();
-  fprintf(stderr, "running game\n");
-  fflush(stderr);
   moveMap();
 }
 

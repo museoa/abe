@@ -174,18 +174,23 @@ void drawSmasher(SDL_Rect *pos, LiveMonster *live, SDL_Surface *surface, SDL_Sur
   while(position.pos_y >= 0 && 
 		!containsType(&position, TYPE_WALL | TYPE_DOOR)) {
 	SDL_BlitSurface(images[img_smash2]->image, NULL, surface, &p);
+	p.x = pos->x;
 	p.y -= TILE_H;
+	p.w = pos->w;
+	p.h = pos->h;
 	position.pos_y--;	
   }
 
   if(live->pixel_y) {
+	p.x = pos->x;
 	p.y = pos->y - live->pixel_y;
+	p.w = pos->w;
+	p.h = pos->h;
 	q.x = q.y = 0;
 	q.w = p.w;
 	q.h = live->pixel_y;
 	SDL_BlitSurface(images[img_smash2]->image, &q, surface, &p);
   }
-
   SDL_BlitSurface(img, NULL, surface, pos);
 }
 
@@ -296,8 +301,8 @@ void removeLiveMonster(int live_monster_index) {
    Here rect is in pixels where 0, 0 is the screen's left top corner.
    Returns 0 for false and non-0 for true.
  */
-int isOnScreen(SDL_Rect rect) {
-  return intersects(&rect, &extended_screen_rect);
+int isOnScreen(SDL_Rect *rect) {
+  return intersects(rect, &extended_screen_rect);
 }
 
 /**
@@ -320,7 +325,7 @@ void drawLiveMonsters(SDL_Surface *surface, int start_x, int start_y) {
 	pos.w = img->w;
 	pos.h = img->h;
 
-	if(!isOnScreen(pos)) {
+	if(!isOnScreen(&pos)) {
 	  removeLiveMonster(i);
 	} else {
 	  live_monsters[i].monster->drawMonster(&pos, &live_monsters[i], surface, img);
