@@ -107,6 +107,11 @@ void doLoadImage(char *filename, char *name) {
 	  monster = MONSTER_PLATFORM;
 	} else if(!strcmp(name, "platform2")) {
 	  monster = MONSTER_PLATFORM2;
+	} else if(!strcmp(name, "spider")) {
+	  monster = MONSTER_SPIDER;
+	  img_spider = image_count;
+	} else if(!strcmp(name, "spider2")) {
+	  img_spider2 = image_count;
 	}
 
 	// store the image

@@ -100,20 +100,21 @@ int stepMonsterDown(LiveMonster *live) {
   Position pos;
   int fail = 0;
   LiveMonster old;
+
   memcpy(&old, live, sizeof(LiveMonster));
+  
   live->pixel_y += live->speed_y;
   if(live->pixel_y >= TILE_H) {
 	live->pos_y++;
 	live->pixel_y = live->pixel_y - TILE_H;
-	if(live->pos_y >= map.h) {
-	  fail = 1;
-	}
+	if(live->pos_y >= map.h) fail = 1;
   }
   // collision detection
   if(!fail) {
 	initMonsterPos(&pos, live);
 	if(containsType(&pos, TYPE_WALL | TYPE_DOOR)) fail = 1;
   }
+  
   if(fail) {
 	memcpy(live, &old, sizeof(LiveMonster));
 	return 0;
@@ -221,9 +222,15 @@ void drawSmasher(SDL_Rect *pos, LiveMonster *live, SDL_Surface *surface, SDL_Sur
   int y;
   SDL_Rect p, q;
   Position position;
-  int first_image;
+  int first_image, first, second;
 
   first_image = live->monster->image_index[0];
+  first = (first_image == img_smash || first_image == img_smash2 ? img_smash : 
+		   (first_image == img_smash3 || first_image == img_smash4 ? img_smash3 :
+			img_spider));
+  second = (first == img_smash ? img_smash2 : 
+		   (first == img_smash3 ? img_smash4 :
+			img_spider2));
 
   p.x = pos->x;
   //  p.y = (pos->y / TILE_H) * TILE_H - TILE_H;
@@ -240,7 +247,7 @@ void drawSmasher(SDL_Rect *pos, LiveMonster *live, SDL_Surface *surface, SDL_Sur
 
   while(position.pos_y >= 0 && 
 		!containsType(&position, TYPE_WALL | TYPE_DOOR)) {
-	SDL_BlitSurface(images[first_image == img_smash || first_image == img_smash2 ? img_smash2 : img_smash4]->image, NULL, surface, &p);
+	SDL_BlitSurface(images[second]->image, NULL, surface, &p);
 	// HACK part 1: if p->y is reset to 0 the image was cropped.
 	y = p.y;
 	if(!y) break;
@@ -258,10 +265,15 @@ void drawSmasher(SDL_Rect *pos, LiveMonster *live, SDL_Surface *surface, SDL_Sur
 	p.y -= live->pixel_y;
 	p.w = pos->w;
 	p.h = pos->h;
-	SDL_BlitSurface(images[first_image == img_smash || first_image == img_smash2 ? img_smash2 : img_smash4]->image, NULL, surface, &p);
+	
+	q.x = 0;
+	q.y = TILE_H - live->pixel_y;
+	q.w = p.w;
+	q.h = images[second]->image->h - q.y;
+	SDL_BlitSurface(images[second]->image, &q, surface, &p);
   }
 
-  SDL_BlitSurface(images[first_image == img_smash || first_image == img_smash2 ? img_smash : img_smash3]->image, NULL, surface, pos);
+  SDL_BlitSurface(images[first]->image, NULL, surface, pos);
 }
 
 /**
@@ -332,6 +344,13 @@ void initMonsters() {
   monsters[MONSTER_PLATFORM2].start_speed_x = 4;
   monsters[MONSTER_PLATFORM2].start_speed_y = 4;
   monsters[MONSTER_PLATFORM2].harmless = 1;
+
+  // spider
+  strcpy(monsters[MONSTER_SPIDER].name, "spider");
+  monsters[MONSTER_SPIDER].moveMonster = moveSmasher;
+  monsters[MONSTER_SPIDER].drawMonster = drawSmasher;
+  monsters[MONSTER_SPIDER].start_speed_x = 8;
+  monsters[MONSTER_SPIDER].start_speed_y = 8;
 
 
   // add additional monsters here
