@@ -203,9 +203,11 @@ void showSplashScreen() {
   // start the game
   clearScreen(title_x, title_y);
   free(splash_back);
-  switch(mode) {
-  case 1: startEditor(); break;
-  case 2: startGame(); break;
-  default: return;
-  }
+
+  //  switch(mode) {
+  //  case 1: startEditor(); break;
+  //  case 2: startGame(); break;
+  //  default: return;
+  //  }
+  showMenu();
 }

@@ -12,9 +12,17 @@
 
 #define FACE_STEP 2
 
+#define GOD_MODE 1
+
 typedef struct _game {
   int face;
   int dir;
+  int player_start_x, player_start_y;
+  int lives;
+  int score;
+  int draw_player;
+  int keys;
+  int balloons;
 } Game;
 Game game;
 

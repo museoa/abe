@@ -33,7 +33,7 @@ int stepMonsterLeft(LiveMonster *live) {
   // collision detection
   if(!fail) {
 	initMonsterPos(&pos, live);
-	if(containsType(&pos, TYPE_WALL) || !onSolidGround(&pos)) fail = 1;
+	if(containsType(&pos, TYPE_WALL | TYPE_DOOR) || !onSolidGround(&pos)) fail = 1;
   }
   if(fail) {
 	memcpy(live, &old, sizeof(LiveMonster));
@@ -58,7 +58,7 @@ int stepMonsterRight(LiveMonster *live) {
   // collision detection
   if(!fail) {
 	initMonsterPos(&pos, live);
-	if(containsType(&pos, TYPE_WALL) || !onSolidGround(&pos)) fail = 1;
+	if(containsType(&pos, TYPE_WALL | TYPE_DOOR) || !onSolidGround(&pos)) fail = 1;
   }
   if(fail) {
 	memcpy(live, &old, sizeof(LiveMonster));
@@ -92,6 +92,7 @@ void moveCrab(LiveMonster *live_monster) {
 void initMonsters() {
   int i;
 
+  move_monsters = 1;
   live_monster_count = 0;
 
   // init the screen rectangle.
@@ -122,6 +123,10 @@ void initMonsters() {
 	fprintf(stderr, "Added monster: %s.\n", monsters[i].name);
   }
   fflush(stderr);
+}
+
+void resetMonsters() {
+  live_monster_count = 0;
 }
 
 void addMonsterImage(int monster_index, int image_index) {
@@ -194,7 +199,8 @@ void drawLiveMonsters(SDL_Surface *surface, int start_x, int start_y) {
   int i;
 
   for(i = 0; i < live_monster_count; i++) {
-	live_monsters[i].monster->moveMonster(&live_monsters[i]);
+	if(move_monsters)
+	  live_monsters[i].monster->moveMonster(&live_monsters[i]);
 
 	img = images[live_monsters[i].monster->image_index[getLiveMonsterFace(&live_monsters[i])]]->image;
 	pos.x = live_monsters[i].pos_x * TILE_W - start_x + live_monsters[i].pixel_x;
@@ -212,4 +218,28 @@ void drawLiveMonsters(SDL_Surface *surface, int start_x, int start_y) {
 
 int getLiveMonsterFace(LiveMonster *live) {
   return live->face / live->monster->face_mod;
+}
+
+/**
+   Return 1 if there's a live monster at position pos,
+   0 otherwise.
+ */
+int detectMonster(Position *pos) {
+  int i;
+  SDL_Rect monster, check;
+  SDL_Surface *img;
+
+  check.x = pos->pos_x;
+  check.y = pos->pos_y;
+  check.w = pos->w + (pos->pixel_x > 0 ? 1 : 0);
+  check.h = pos->h + (pos->pixel_y > 0 ? 1 : 0);
+  for(i = 0; i < live_monster_count; i++) {
+	img = images[live_monsters[i].monster->image_index[getLiveMonsterFace(&live_monsters[i])]]->image;
+	monster.x = live_monsters[i].pos_x;
+	monster.y = live_monsters[i].pos_y;
+	monster.w = (img->w / TILE_W) + (live_monsters[i].pixel_x > 0 ? 1 : 0);
+	monster.h = (img->h / TILE_H) + (live_monsters[i].pixel_y > 0 ? 1 : 0);
+	if(intersects(&check, &monster)) return 1;
+  }
+  return 0;
 }

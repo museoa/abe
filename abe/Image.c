@@ -55,6 +55,24 @@ void doLoadImage(char *filename, char *name) {
 	  img_rock = image_count;
 	} else if(!strcmp(name, "back")) {
 	  img_back = image_count;
+	} else if(!strcmp(name, "door")) {
+	  img_door = image_count;
+	  type = TYPE_DOOR;
+	} else if(!strcmp(name, "door2")) {
+	  img_door2 = image_count;
+	  type = TYPE_DOOR;
+	} else if(!strcmp(name, "key")) {
+	  type = TYPE_OBJECT;
+	  img_key = image_count;
+	} else if(!strcmp(name, "balloon")) {
+	  type = TYPE_OBJECT;
+	  img_balloon[0] = image_count;
+	} else if(!strcmp(name, "balloon2")) {
+	  type = TYPE_OBJECT;
+	  img_balloon[1] = image_count;
+	} else if(!strcmp(name, "balloon3")) {
+	  type = TYPE_OBJECT;
+	  img_balloon[2] = image_count;
 	} else if(!strcmp(name, "ladder")) {
 	  type = TYPE_LADDER;
 	} else if(!strcmp(name, "crab1") || !strcmp(name, "crab2")) {

@@ -13,13 +13,15 @@ SDL_Surface *tom[6];
 void loadImages();
 void loadImagesFromTar();
 
-#define TYPE_WALL 0
-#define TYPE_LADDER 1
+#define TYPE_WALL 1
+#define TYPE_LADDER 2
+#define TYPE_OBJECT 4
+#define TYPE_DOOR 8
 
 typedef struct image {
   char *name;
   SDL_Surface *image;
-  int type;
+  Uint16 type;
   int monster_index;
 } Image;
 
@@ -27,6 +29,7 @@ Image *images[256];
 int image_count;
 
 // known image indexes
-int img_brick, img_rock, img_back;
+int img_brick, img_rock, img_back, img_key, img_door, img_door2, img_key;
+int img_balloon[3];
 
 #endif

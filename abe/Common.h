@@ -7,4 +7,10 @@
 #define PATH_SEP "/"
 #endif
 
+typedef struct _position {
+  int pos_x, pos_y; // in tiles
+  int pixel_x, pixel_y; // in pixels
+  int w, h; // in tiles
+} Position;
+
 #endif

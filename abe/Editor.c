@@ -40,6 +40,30 @@ void editorMainLoop(SDL_Event *event) {
 	case SDLK_DOWN: 
 	  cursor.dir = DIR_DOWN;
 	  break;
+	case SDLK_PAGEDOWN:
+	  cursor.pos_y += screen->h / TILE_H;
+	  if(cursor.pos_y >= map.h) cursor.pos_y = map.h - 1;
+	  cursor.dir = DIR_NONE;
+	  map.redraw = 1;
+	  break;
+	case SDLK_PAGEUP:
+	  cursor.pos_y -= screen->h / TILE_H;
+	  if(cursor.pos_y < 0) cursor.pos_y = 0;
+	  cursor.dir = DIR_NONE;
+	  map.redraw = 1;
+	  break;
+	case SDLK_END:
+	  cursor.pos_x += screen->w / TILE_W;
+	  if(cursor.pos_x >= map.w) cursor.pos_x = map.w - 1;
+	  cursor.dir = DIR_NONE;
+	  map.redraw = 1;
+	  break;
+	case SDLK_HOME:
+	  cursor.pos_x -= screen->w / TILE_H;
+	  if(cursor.pos_x < 0) cursor.pos_x = 0;
+	  cursor.dir = DIR_NONE;
+	  map.redraw = 1;
+	  break;
 	case SDLK_RETURN: 
 	  setImage(edit_panel.level, edit_panel.image_index);
 	  break;
@@ -89,25 +113,6 @@ void editorMainLoop(SDL_Event *event) {
 	break;
   }
 }
-
-/*
-void freeMap() {
-  if(map) {
-	// stop the thread
-	cursor.dir = DIR_QUIT;
-	SDL_WaitThread(thread, NULL);
-
-	saveMap();
-	free(map.name);
-	int i;
-	for(i = 0; i < LEVEL_COUNT; i++) {
-	  free(map.image_index[i]);
-	  SDL_FreeSurface(map.level[i]);
-	}
-	free(map);
-  }  
-}
-*/
 
 void drawEditPanel() {
   SDL_Rect rect;
@@ -175,24 +180,31 @@ void resetEditPanel() {
   edit_panel.image_index = 0;
 }
 
-int allocMap(char *name, int w, int h) {
+void initEditor() {
+  //  map = NULL;
+  if(!(edit_panel.image = SDL_CreateRGBSurface(SDL_HWSURFACE, 
+											   screen->w, EDIT_PANEL_HEIGHT, 
+											   screen->format->BitsPerPixel, 
+											   0, 0, 0, 0))) {
+	fprintf(stderr, "Error creating surface: %s\n", SDL_GetError());
+	fflush(stderr);
+	return;
+  }
+}
+
+void editMap(char *name, int w, int h) {
   int level, i, x, y;
   int step_x, step_y;
   Image *img;
 
-  if(!initMap(name, w, h)) {
-	return 0;
-  }
-  
+  resetMap();
+
   // set our painting events
   map.beforeDrawToScreen = beforeDrawToScreen;
-
+  
   // our event handling
   map.handleMapEvent = editorMainLoop;
-
-  // fill the map
-
-
+  
   // add some tiles in the background
   img = images[img_back];
   step_x = img->image->w / TILE_W;
@@ -207,65 +219,17 @@ int allocMap(char *name, int w, int h) {
 	  }
 	}
   }
-
-  /*
-  // fill the LEVEL_MAIN with rock tiles.
-  img = images[img_rock];
-  step_x = img->image->w / TILE_W;
-  step_y = img->image->h / TILE_H;
-  int r;
-  for(y = 0; y < map.h; y += step_y) {
-	for(x = 0; x < map.w; ) {
-	  r = (int)(8.0 * rand() / (RAND_MAX + 1.0));
-	  if(r) {
-		x++;
-	  } else {
-		i = x + (y * map.w);
-		map.image_index[LEVEL_MAIN][i] = img_rock;
-		x += step_x;
-	  }
-	}
-  }
-  */
-
+  
   // reset the cursor
   resetCursor();
-
+  
   // initialize the edit panel
   resetEditPanel();
-
+  
   // try to load an existing map
   loadMap(0);
   drawMap();
 
   // start the map's main loop
   moveMap();
-
-  return 1;
-}
-
-void initEditor() {
-  //  map = NULL;
-  if(!(edit_panel.image = SDL_CreateRGBSurface(SDL_HWSURFACE, 
-											   screen->w, EDIT_PANEL_HEIGHT, 
-											   screen->format->BitsPerPixel, 
-											   0, 0, 0, 0))) {
-	fprintf(stderr, "Error creating surface: %s\n", SDL_GetError());
-	fflush(stderr);
-	return;
-  }
-}
-
-void editMap(char *name, int w, int h) {
-  // save the current map
-  // freeMap();
-
-  // create a new one
-  if(!allocMap(name, w, h)) return;
-
-  // try to load it
-  loadMap(1);
-
-  // show it
-  drawMap();
 }

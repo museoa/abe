@@ -65,6 +65,7 @@ typedef struct _map {
   int accelerate; // 1 for accelerated movement, 0 otherwise(default)
   int gravity; // 1 for gravity, 0 otherwise(default)
   int monsters; // 1 for active monsters, 0 otherwise(default)
+  int redraw; // set to 1 to cause a full map repaint
 } Map;
 
 // TODO: reuse Position inside Cursor.
@@ -79,12 +80,6 @@ typedef struct _cursor {
   int stepup;
 } Cursor;
 
-typedef struct _position {
-  int pos_x, pos_y; // in tiles
-  int pixel_x, pixel_y; // in pixels
-  int w, h; // in tiles
-} Position;
-
 Cursor cursor;
 Map map;
 
@@ -95,10 +90,12 @@ void drawMap();
 void setImage(int level, int index);
 void setImageNoCheck(int level, int x, int y, int image_index);
 int initMap(char *name, int w, int h);
+void resetMap();
 void destroyMap();
 void saveMap();
 int loadMap(int drawMap);
 void resetCursor();
+void repositionCursor(int tile_x, int tile_y);
 
 // return 1 or 0 if movement in that direction is possible
 int moveLeft(int checkCollision);
@@ -122,6 +119,8 @@ void decompressMap(int *data);
 
 void startJump();
 int containsType(Position *p, int type);
+// like contains type, but returns the position of the object in ret.
+int containsTypeWhere(Position *p, Position *ret, int type);
 int onSolidGround(Position *p);
 
 #endif

@@ -1,37 +1,5 @@
 #include "Main.h"
 
-#define RUNMODE_SPLASH 0
-#define RUNMODE_EDITOR 1
-#define RUNMODE_GAME 2
-
-void startEditor() {
-  initEditor();
-  editMap("default", 1000, 1000);
-}
-
-void startGame() {
-  initGame();
-  runMap("default", 1000, 1000);
-}
-
-/**
-   Main event handling.
-*/
-void mainLoop(int runmode) {
-  SDL_Event event;
-
-  switch(runmode) {
-  case RUNMODE_EDITOR:
-	startEditor();
-	break;
-  case RUNMODE_GAME:
-	startGame();
-	break;
-  default:
-	showSplashScreen();
-  }
-}
-
 void testModesInFormat(SDL_PixelFormat *format) {
   SDL_Rect **modes;
   int i, t;
@@ -72,11 +40,12 @@ void testModes() {
 }
 
 int main(int argc, char *argv[]) {
-  int runmode = RUNMODE_SPLASH;
   Uint32 flags = SDL_DOUBLEBUF;
   int i;
   int width, height, bpp, n;
   int hw_mem = 1;
+
+  runmode = RUNMODE_SPLASH;
 
   width = 640;
   height = 480;
@@ -149,7 +118,15 @@ int main(int argc, char *argv[]) {
 
   loadImages();
 
-  mainLoop(runmode);
+  initEditor();
+
+  initGame();
+
+  if(!initMap("default", 1000, 1000)) {
+	SDL_Quit();
+  }
+
+  showSplashScreen();  
   
   atexit(SDL_Quit);
   

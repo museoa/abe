@@ -10,9 +10,9 @@
 struct _monster;
 
 // The extra number of tiles around the screen 
-// where monsters are still active
-#define MONSTER_EXTRA_X 20
-#define MONSTER_EXTRA_Y 20
+// ,.where monsters are still active
+#define MONSTER_EXTRA_X 40
+#define MONSTER_EXTRA_Y 30
 
 /**
    A monster instance currently on screen.
@@ -46,12 +46,16 @@ typedef struct _monster {
 Monster monsters[256];
 LiveMonster live_monsters[256];
 int live_monster_count;
+int move_monsters;
 
 void initMonsters();
+void resetMonsters();
 void addMonsterImage(int monster_index, int image_index);
 int isMonsterImage(int image_index);
 
 void addLiveMonster(int monster_index, int image_index, int x, int y);
 void drawLiveMonsters(SDL_Surface *surface, int start_x, int start_y);
+
+int detectMonster(Position *pos);
 
 #endif

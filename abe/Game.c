@@ -20,22 +20,18 @@ void afterMainLevelDrawn() {
 	game.face++;
 	if(game.face >= FACE_COUNT * FACE_STEP) game.face = 0;
   }
-  SDL_BlitSurface(tom[(game.dir == GAME_DIR_LEFT ? 
-					   (game.face / FACE_STEP) : 
-					   (game.face / FACE_STEP) + FACE_COUNT)], 
-				  NULL, screen, &pos);
+  if(game.draw_player) {
+	SDL_BlitSurface(tom[(game.dir == GAME_DIR_LEFT ? 
+						 (game.face / FACE_STEP) : 
+						 (game.face / FACE_STEP) + FACE_COUNT)], 
+					NULL, screen, &pos);
+  }
 }
 
 void gameBeforeDrawToScreen() {
   char s[80];
-  sprintf(s, "x%d y%d", cursor.pos_x, cursor.pos_y);
+  sprintf(s, "life %d score %d keys %d balloons %d", game.lives, game.score, game.keys, game.balloons);
   drawString(screen, 5, 5, s);
-  sprintf(s, "px%d py%d", cursor.pixel_x, cursor.pixel_y);
-  drawString(screen, 5, 5 + FONT_HEIGHT, s);
-  sprintf(s, "spx%d spy%d", cursor.speed_x, cursor.speed_y);
-  drawString(screen, 5, 5 + FONT_HEIGHT * 2, s);
-  sprintf(s, "dir%d", cursor.dir);
-  drawString(screen, 5, 5 + FONT_HEIGHT * 3, s);
 }
 
 /**
@@ -94,61 +90,79 @@ void gameMainLoop(SDL_Event *event) {
   }
 }
 
-/*
-GameCollisionCheck getGameCollisionCheck() {
-  GameCollisionCheck check;
-  check.start_x = cursor.pos_x - EXTRA_X;
-  if(check.start_x < 0) check.start_x = 0;
-  check.start_y = cursor.pos_y - EXTRA_Y;
-  if(check.start_y < 0) check.start_y = 0;
-  check.end_x = cursor.pos_x + (tom[0]->w / TILE_W) + (cursor.pixel_x > 0 ? 1 : 0);
-  if(check.end_x >= map.w) check.end_x = map.w;
-  check.end_y = cursor.pos_y + (tom[0]->h / TILE_H) + (cursor.pixel_y > 0 ? 1 : 0);
-  if(check.end_y >= map.h) check.end_y = map.h;
-  // tom's rect
-  // FIXME: known issue, doesn't work near map's edge.
-  check.rect.x = check.start_x + EXTRA_X;
-  check.rect.y = check.start_y + EXTRA_Y;
-  check.rect.w = tom[0]->w / TILE_W + (cursor.pixel_x > 0 ? 1 : 0);
-  check.rect.h = tom[0]->h / TILE_H + (cursor.pixel_y > 0 ? 1 : 0);
-  return check;
-}
+void handleDeath() {
+  int i;
 
-int containsType(GameCollisionCheck *check, int type) {
-  SDL_Rect rect;
-  int x, y, n;
-  for(y = check->start_y; y < check->end_y; y++) {
-	for(x = check->start_x; x < check->end_x;) {
-	  n = map.image_index[LEVEL_MAIN][x + (y * map.w)];
-	  if(n > -1) {
-		if(images[n]->type == type) {
-		  rect.x = x;
-		  rect.y = y;
-		  rect.w = images[n]->image->w / TILE_W;
-		  rect.h = images[n]->image->h / TILE_H;
-		  if(intersects(&rect, &check->rect)) {
-			return 1;
-		  }
-		}
-		x += images[n]->image->w / TILE_W;
-	  } else {
-		x++;
-	  }
-	}
+  fprintf(stderr, "Player death!\n");
+  fflush(stderr);
+
+  game.lives--;
+  if(game.lives <= 0) exit(0); // FIXME!
+
+  // Flash player. Don't move monsters during this.
+  move_monsters = 0;
+  for(i = 0; i < 5; i++) {
+	game.draw_player = 0;
+	drawMap();
+	SDL_Delay(200);
+	game.draw_player = 1;
+	drawMap();
+	SDL_Delay(200);
   }
-  return 0;
+  move_monsters = 1;
+  
+  repositionCursor(game.player_start_x, game.player_start_y);
+  cursor.speed_x = 0;
+  cursor.speed_y = 0;
+  drawMap();
 }
-*/
 
 // return a 1 to proceed, 0 to stop
 int detectCollision(int dir) {
-  Position pos;
+  int n;
+  Position pos, key;
+
   pos.pos_x = cursor.pos_x;
   pos.pos_y = cursor.pos_y;
   pos.pixel_x = cursor.pixel_x;
   pos.pixel_y = cursor.pixel_y;
   pos.w = tom[0]->w / TILE_W;
   pos.h = tom[0]->h / TILE_H;
+
+  // did we hit a monster?
+  if(!GOD_MODE && detectMonster(&pos)) {
+	handleDeath();
+	return 1;
+  }
+
+  // did we hit an object? 
+  // FIXME: this fails if there many objects close together.
+  // maybe it should return a NULL terminated array of positions.
+  if(containsTypeWhere(&pos, &key, TYPE_OBJECT)) {
+	// remove from map
+	n = map.image_index[LEVEL_MAIN][key.pos_x + (key.pos_y * map.w)];
+	if(n == img_key) {
+	  game.keys++;
+	} else if(n == img_balloon[0] || n == img_balloon[1] || n == img_balloon[2]) {
+	  game.balloons++;
+	}
+	map.image_index[LEVEL_MAIN][key.pos_x + (key.pos_y * map.w)] = -1;
+	map.redraw = 1;
+  }
+
+  // did we hit a door?
+  if(containsTypeWhere(&pos, &key, TYPE_DOOR)) {
+	if(game.keys > 0) {
+	  // open door
+	  map.image_index[LEVEL_MAIN][key.pos_x + (key.pos_y * map.w)] = -1;
+	  map.image_index[LEVEL_FORE][key.pos_x + (key.pos_y * map.w)] = img_door2;
+	  game.keys--;
+	  map.redraw = 1;
+	  return 1;
+	} else {
+	  return 0;
+	}
+  }
   
   // are we in a wall?
   return !containsType(&pos, TYPE_WALL);
@@ -170,24 +184,34 @@ int detectLadder() {
 }
 
 void runMap(char *name, int w, int h) {
-  if(!initMap(name, w, h)) return;
+  resetMap();
+  resetMonsters();
+
   // try to load the map and quit if you can't find it.
   if(!loadMap(0)) {
 	fprintf(stderr, "Can't find map file: %s\n", name);
 	fflush(stderr);
-	exit(0);
+	return;
   }
   // start outside
   //  cursor.pos_x = 177;
   //  cursor.pos_y = 44;
 
+  game.player_start_x = 20;
+  game.player_start_y = 28;
+  game.lives = 5;
+  game.score = 0;
+  game.draw_player = 1;
+  game.keys = 0;
+  game.balloons = 0;
+
   // start inside
-  //  cursor.pos_x = 20;
-  //  cursor.pos_y = 28;
+  cursor.pos_x = game.player_start_x;
+  cursor.pos_y = game.player_start_y;
 
   // monster testing
-  cursor.pos_x = 35;
-  cursor.pos_y = 44;
+  //  cursor.pos_x = 35;
+  //  cursor.pos_y = 44;
 
   cursor.speed_x = 8;
   cursor.speed_y = 8;

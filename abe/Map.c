@@ -830,6 +830,12 @@ void moveMap() {
 	// update the screen
 	finishDrawMap();
 
+	// update the map?
+	if(map.redraw) {
+	  map.redraw = 0;
+	  drawMap();
+	}
+
 	if(cursor.wait) {
 	  cursor.wait = 0;
 	  delay = map.delay;
@@ -930,6 +936,28 @@ int defaultDetectLadder() {
   return 1;
 }
 
+void resetMap() {
+  int i;
+
+  map.gravity = 0;
+  map.accelerate = 0;
+  map.monsters = 0;
+  map.beforeDrawToScreen = NULL;
+  map.afterMainLevelDrawn = NULL;
+  map.detectCollision = defaultDetectCollision;
+  map.detectLadder = defaultDetectLadder;
+  map.handleMapEvent = NULL;
+  map.delay = 25;
+  map.redraw = 0;
+
+  // clean map
+  for(i = 0; i < (map.w * map.h); i++) {
+	map.image_index[LEVEL_BACK][i] = -1;
+	map.image_index[LEVEL_MAIN][i] = -1;
+	map.image_index[LEVEL_FORE][i] = -1;
+  }
+}
+
 int initMap(char *name, int w, int h) {
   int i;
   int hw_surface;
@@ -947,6 +975,7 @@ int initMap(char *name, int w, int h) {
   map.detectLadder = defaultDetectLadder;
   map.handleMapEvent = NULL;
   map.delay = 25;
+  map.redraw = 0;
   for(i = LEVEL_BACK; i < LEVEL_COUNT; i++) {
 	if(!(map.image_index[i] = (int*)malloc(sizeof(int) * w * h))) {
 	  fprintf(stderr, "Out of memory.\n");
@@ -1020,8 +1049,12 @@ void destroyMap() {
 }
 
 void resetCursor() {
-  cursor.pos_x = 0;
-  cursor.pos_y = 0;
+  repositionCursor(0, 0);
+}
+
+void repositionCursor(int tile_x, int tile_y) {
+  cursor.pos_x = tile_x;
+  cursor.pos_y = tile_y;
   cursor.pixel_x = 0;
   cursor.pixel_y = 0;
   cursor.speed_x = TILE_W;
@@ -1206,6 +1239,10 @@ void getGameCollisionCheck(GameCollisionCheck *check, Position *p) {
    Return 1 if it does, 0 otherwise.
  */
 int containsType(Position *p, int type) {
+  return containsTypeWhere(p, NULL, type);
+}
+
+int containsTypeWhere(Position *p, Position *ret, int type) {
   GameCollisionCheck check;
   SDL_Rect rect, pos;
   int x, y, n;
@@ -1216,12 +1253,20 @@ int containsType(Position *p, int type) {
 	for(x = check.start_x; x < check.end_x;) {
 	  n = map.image_index[LEVEL_MAIN][x + (y * map.w)];
 	  if(n > -1) {
-		if(images[n]->type == type) {
+		if(type & images[n]->type) {
 		  rect.x = x;
 		  rect.y = y;
 		  rect.w = images[n]->image->w / TILE_W;
 		  rect.h = images[n]->image->h / TILE_H;
 		  if(intersects(&rect, &check.rect)) {
+			if(ret) {
+			  ret->pos_x = x;
+			  ret->pos_y = y;
+			  ret->pixel_x = 0;
+			  ret->pixel_y = 0;
+			  ret->w = rect.w;
+			  ret->h = rect.h;
+			}
 			return 1;
 		  }
 		}
@@ -1245,8 +1290,8 @@ int onSolidGround(Position *p) {
   
   getGameCollisionCheck(&check, p);
 
-  check.rect.h++;
-  if(check.rect.y + check.rect.h >= map.h) return 0;
+  //check.rect.h++;
+  //if(check.rect.y + check.rect.h >= map.h) return 0;
 
   y = check.end_y;
   for(x = check.rect.x; x < check.end_x; x++) {
@@ -1258,7 +1303,7 @@ int onSolidGround(Position *p) {
 		rect.y = y;
 		rect.w = images[n]->image->w / TILE_W;
 		rect.h = images[n]->image->h / TILE_H;
-		if(contains(&rect, x, check.rect.y + check.rect.h)) {
+		if(contains(&rect, x, y)) {
 		  //		if(intersects(&rect, &check.rect)) {
 		  found = 1;
 		  break;
