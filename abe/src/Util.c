@@ -281,7 +281,8 @@ void processShimmer() {
 	  for(x = 0; x < count; x++) {
 		if(size[r][x] > 0) {
 		  pos.x = fx_rect.x + row[r][x] - (size[r][x] / 2);
-		  pos.y = fx_rect.y + fx_y - (size[r][x] / 2);
+		  if(effect == SHIMMER_EFFECT) pos.y = fx_rect.y + fx_rect.h - (fx_y - (size[r][x] / 2));
+		  else pos.y = fx_rect.y + fx_y - (size[r][x] / 2);
 		  pos.w = size[r][x];
 		  pos.h = size[r][x];
 		  SDL_FillRect(fx_surface, &pos, color[r][x]);	  
