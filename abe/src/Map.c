@@ -719,7 +719,7 @@ int moveSlide() {
 void moveGravity() {
   int old_speed;
     
-  if(!map.gravity || map.detectLadder()) {
+  if(!map.gravity || map.detectLadder() || cursor.platform) {
 	return;
   }
 	
@@ -749,6 +749,15 @@ int moveWithPlatform() {
 	diff = py - (cursor.pos_y * TILE_H + tom[0]->h + cursor.pixel_y);
 	dir = (diff > 0 ? DIR_DOWN : DIR_UP);
 	if(diff) {
+
+	  old_speed = cursor.speed_y;
+	  cursor.speed_y = (abs(diff) < TILE_H ? abs(diff) : TILE_H);
+	  if(dir == DIR_UP) moveUp(1, 1);
+	  else moveDown(1, 1, 0);
+	  cursor.speed_y = old_speed;
+	  break;
+
+	  /*
 	  if(abs(diff) < TILE_H) {
 		old_speed = cursor.speed_y;
 		cursor.speed_y = abs(diff);
@@ -765,6 +774,7 @@ int moveWithPlatform() {
 		cursor.speed_y = old_speed;
 		//		if(cursor.pos_y == old_pos) break; // blocked
 	  }
+	  */
 	} else {
 	  break;
 	}
@@ -857,6 +867,9 @@ void moveMap() {
 		// update the screen
 		finishDrawMap(!map.redraw);
 	  }
+
+	  // uncomment to test slow machine game speed
+	  //SDL_Delay(30);
 
 	  // if the video is too slow to display FPS_THROTTLE then remove the constraint.
 	  map.delta = SDL_GetTicks() - curr_time;
