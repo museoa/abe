@@ -164,6 +164,25 @@ void movePlatform(LiveMonster *live_monster) {
   }
 }
 
+void movePlatform2(LiveMonster *live_monster) {
+  // increment the face to display
+  live_monster->face++;
+  if(live_monster->face >= 
+	 live_monster->monster->image_count * live_monster->monster->face_mod) 
+	live_monster->face = 0;
+
+  // move up and down
+  if(live_monster->dir == DIR_DOWN) {
+	if(!stepMonsterDown(live_monster)) {
+	  live_monster->dir = DIR_UP;
+	}
+  } else {
+	if(!stepMonsterUp(live_monster)) {
+	  live_monster->dir = DIR_DOWN;
+	}
+  }
+}
+
 void moveCrab(LiveMonster *live_monster) {
   // increment the face to display
   live_monster->face++;
@@ -306,6 +325,14 @@ void initMonsters() {
   monsters[MONSTER_PLATFORM].start_speed_x = 4;
   monsters[MONSTER_PLATFORM].start_speed_y = 4;
   monsters[MONSTER_PLATFORM].harmless = 1;
+
+  // platform2
+  strcpy(monsters[MONSTER_PLATFORM2].name, "platform2");
+  monsters[MONSTER_PLATFORM2].moveMonster = movePlatform2;
+  monsters[MONSTER_PLATFORM2].start_speed_x = 4;
+  monsters[MONSTER_PLATFORM2].start_speed_y = 4;
+  monsters[MONSTER_PLATFORM2].harmless = 1;
+
 
   // add additional monsters here
 

@@ -105,6 +105,8 @@ void doLoadImage(char *filename, char *name) {
 	  monster = MONSTER_DEMON;
 	} else if(!strcmp(name, "platform")) {
 	  monster = MONSTER_PLATFORM;
+	} else if(!strcmp(name, "platform2")) {
+	  monster = MONSTER_PLATFORM2;
 	}
 
 	// store the image

@@ -658,7 +658,8 @@ int moveUp(int checkCollision) {
 	  }
 	}
 	if(move && (!checkCollision || 
-				((cursor.jump || map.detectLadder() || cursor.stepup) && map.detectCollision(DIR_UP)))) {
+				(((cursor.platform && cursor.platform->monster->type == MONSTER_PLATFORM2) || 
+				  cursor.jump || map.detectLadder() || cursor.stepup) && map.detectCollision(DIR_UP)))) {
 	  scrollMap(DIR_UP);	
 	  if(map.accelerate) {
 		if(cursor.speed_y < TILE_H) {
@@ -694,7 +695,8 @@ int moveDown(int checkCollision) {
 	  }
 	}
 	if(move && (!checkCollision ||
-				((cursor.gravity || map.detectLadder()) && map.detectCollision(DIR_DOWN)))) {
+				(((cursor.platform && cursor.platform->monster->type == MONSTER_PLATFORM2) || 
+				  cursor.gravity || map.detectLadder()) && map.detectCollision(DIR_DOWN)))) {
 	  scrollMap(DIR_DOWN);	
 	  if(map.accelerate) {
 		if(cursor.speed_y < TILE_H) {
@@ -784,8 +786,9 @@ void moveGravity() {
 int moveWithPlatform() {
   int old_speed, old_dir, diff;
   if(!cursor.platform) return 0;
-  
+
   // move up or down if needed.
+  //  if(cursor.platform->monster->type == MONSTER_PLATFORM) {
   old_speed = cursor.speed_y;
   old_dir = cursor.dir;
   diff = (cursor.platform->pos_y * TILE_H + cursor.platform->pixel_y) - 
@@ -804,13 +807,24 @@ int moveWithPlatform() {
   }
   cursor.speed_y = old_speed;
   cursor.dir = old_dir;
-  
+  //  }
+
   // move with the platform
-  old_speed = cursor.speed_x;
-  cursor.speed_x = cursor.platform->speed_x;
-  if(cursor.platform->dir == DIR_LEFT) moveLeft(1);
-  else moveRight(1);
-  cursor.speed_x = old_speed;
+  if(cursor.platform->monster->type == MONSTER_PLATFORM) {
+	old_speed = cursor.speed_x;
+	cursor.speed_x = cursor.platform->speed_x;
+	if(cursor.platform->dir == DIR_LEFT) moveLeft(1);
+	else moveRight(1);
+	cursor.speed_x = old_speed;
+  } else {
+	old_speed = cursor.speed_y;
+	cursor.speed_y = cursor.platform->speed_y;
+	if(cursor.platform->dir == DIR_UP) moveUp(1);
+	else moveDown(1);
+	cursor.speed_y = old_speed;
+  }
+  
+  fflush(stderr);
   return 1;
 }
 

@@ -197,7 +197,8 @@ void gameCheckPosition() {
   pos2.w = tom[0]->w / TILE_W;
   pos2.h = 1;
   live = detectMonster(&pos2);
-  if(live && live->monster->type == MONSTER_PLATFORM) {
+  if(live && 
+	 (live->monster->type == MONSTER_PLATFORM || live->monster->type == MONSTER_PLATFORM2)) {
 	cursor.platform = live;
   } else {
 	cursor.platform = NULL;
@@ -291,8 +292,8 @@ void runMap(char *name, int w, int h) {
   //  game.player_start_x = 20;
   //  game.player_start_y = 28;
 
-  game.player_start_x = 269;
-  game.player_start_y = 44;
+  game.player_start_x = 310;
+  game.player_start_y = 8;
 
   game.lives = 5;
   game.score = 0;

@@ -9,7 +9,8 @@
 #define MONSTER_DEMON 2
 #define MONSTER_SMASHER2 3
 #define MONSTER_PLATFORM 4
-#define MONSTER_COUNT 5
+#define MONSTER_PLATFORM2 5
+#define MONSTER_COUNT 6
 
 struct _monster;
 
