@@ -180,6 +180,7 @@ void moveSmasher(LiveMonster *live_monster) {
 }
 
 void drawSmasher(SDL_Rect *pos, LiveMonster *live, SDL_Surface *surface, SDL_Surface *img) {
+  int y;
   SDL_Rect p, q;
   Position position;
 
@@ -199,14 +200,18 @@ void drawSmasher(SDL_Rect *pos, LiveMonster *live, SDL_Surface *surface, SDL_Sur
   while(position.pos_y >= 0 && 
 		!containsType(&position, TYPE_WALL | TYPE_DOOR)) {
 	SDL_BlitSurface(images[img_smash2]->image, NULL, surface, &p);
+	// HACK part 1: if p->y is reset to 0 the image was cropped.
+	y = p.y;
+	if(!y) break;
 	p.x = pos->x;
 	p.y -= TILE_H;
 	p.w = pos->w;
 	p.h = pos->h;
 	position.pos_y--;	
   }
-  // draw the top one
-  if(live->pixel_y) {
+  // draw the top one.
+  // HACK part 1: if y is 0 the image was cropped, don't draw
+  if(y && live->pixel_y) {
 	p.x = pos->x;
 	p.y += TILE_H;
 	p.y -= live->pixel_y;

@@ -46,8 +46,8 @@ void gameBeforeDrawToScreen() {
   char s[80];
   sprintf(s, "life %d score %d keys %d balloons %d", game.lives, game.score, game.keys, game.balloons);
   drawString(screen, 5, 5, s);
-  sprintf(s, "x %d y %d pixel %d %d", cursor.pos_x, cursor.pos_y, cursor.pixel_x, cursor.pixel_y);
-  drawString(screen, 5, 5 + FONT_HEIGHT, s);
+  //  sprintf(s, "x %d y %d pixel %d %d", cursor.pos_x, cursor.pos_y, cursor.pixel_x, cursor.pixel_y);
+  //  drawString(screen, 5, 5 + FONT_HEIGHT, s);
 }
 
 /**
