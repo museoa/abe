@@ -142,7 +142,6 @@ void showSplashScreen() {
   while(1) {
 
 	// handle events
-	// handle events.
 	while(SDL_PollEvent(&event)) {
 	  if(event.type == SDL_KEYDOWN) {
 		switch(event.key.keysym.sym) {
@@ -150,6 +149,9 @@ void showSplashScreen() {
 		  mode = 1;
 		  break;
 		case SDLK_SPACE:
+		  mode = 2;
+		  break;
+		case SDLK_ESCAPE:
 		  mode = 2;
 		  break;
 		}

@@ -1230,8 +1230,10 @@ void getGameCollisionCheck(GameCollisionCheck *check, Position *p) {
   // FIXME: known issue, doesn't work near map's edge.
   check->rect.x = check->start_x + EXTRA_X;
   check->rect.y = check->start_y + EXTRA_Y;
-  check->rect.w = tom[0]->w / TILE_W + (p->pixel_x > 0 ? 1 : 0);
-  check->rect.h = tom[0]->h / TILE_H + (p->pixel_y > 0 ? 1 : 0);
+  //  check->rect.w = tom[0]->w / TILE_W + (p->pixel_x > 0 ? 1 : 0);
+  //  check->rect.h = tom[0]->h / TILE_H + (p->pixel_y > 0 ? 1 : 0);
+  check->rect.w = p->w + (p->pixel_x > 0 ? 1 : 0);
+  check->rect.h = p->h + (p->pixel_y > 0 ? 1 : 0);
 }
 
 /**

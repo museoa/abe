@@ -77,7 +77,7 @@ int stepMonsterRight(LiveMonster *live) {
   LiveMonster old;
   memcpy(&old, live, sizeof(LiveMonster));
   live->pixel_x += live->speed_x;
-  if(live->pixel_x > TILE_W) {
+  if(live->pixel_x >= TILE_W) {
 	live->pos_x++;
 	live->pixel_x = live->pixel_x - TILE_W;
 	if(live->pos_x >= map.w) {
@@ -102,7 +102,7 @@ int stepMonsterDown(LiveMonster *live) {
   LiveMonster old;
   memcpy(&old, live, sizeof(LiveMonster));
   live->pixel_y += live->speed_y;
-  if(live->pixel_y > TILE_H) {
+  if(live->pixel_y >= TILE_H) {
 	live->pos_y++;
 	live->pixel_y = live->pixel_y - TILE_H;
 	if(live->pos_y >= map.h) {
@@ -145,16 +145,18 @@ void moveSmasher(LiveMonster *live_monster) {
   if(live_monster->dir == DIR_DOWN) {
 	if(!stepMonsterDown(live_monster)) {
 	  live_monster->dir = DIR_UP;
+	  live_monster->speed_y = 2;
 	}
   } else {
 	if(!stepMonsterUp(live_monster)) {
 	  live_monster->dir = DIR_DOWN;
+	  live_monster->speed_y = 8;
 	}
   }
 }
 
 void drawSmasher(SDL_Rect *pos, LiveMonster *live, SDL_Surface *surface, SDL_Surface *img) {
-  SDL_Rect p;
+  SDL_Rect p, q;
   Position position;
 
   p.x = pos->x;
@@ -166,20 +168,22 @@ void drawSmasher(SDL_Rect *pos, LiveMonster *live, SDL_Surface *surface, SDL_Sur
   position.pos_y = live->pos_y - 1;
   position.pixel_x = 0;
   position.pixel_y = 0;
-  position.w = p.w;
-  position.h = p.h;
+  position.w = p.w / TILE_W;
+  position.h = p.h / TILE_H;
 
   while(position.pos_y >= 0 && 
-		(!containsType(&position, TYPE_WALL | TYPE_DOOR))) {
+		!containsType(&position, TYPE_WALL | TYPE_DOOR)) {
 	SDL_BlitSurface(images[img_smash2]->image, NULL, surface, &p);
 	p.y -= TILE_H;
-	position.pos_y--;
+	position.pos_y--;	
   }
 
   if(live->pixel_y) {
-	p.y = (pos->y / TILE_H) * TILE_H - TILE_H + live->pixel_y;
-	p.h = TILE_H - live->pixel_y;
-	SDL_BlitSurface(images[img_smash2]->image, NULL, surface, &p);
+	p.y = pos->y - live->pixel_y;
+	q.x = q.y = 0;
+	q.w = p.w;
+	q.h = live->pixel_y;
+	SDL_BlitSurface(images[img_smash2]->image, &q, surface, &p);
   }
 
   SDL_BlitSurface(img, NULL, surface, pos);
@@ -222,8 +226,8 @@ void initMonsters() {
   monsters[MONSTER_SMASHER].moveMonster = moveSmasher;
   monsters[MONSTER_SMASHER].drawMonster = drawSmasher;
   monsters[MONSTER_SMASHER].type = MONSTER_SMASHER;
-  monsters[MONSTER_SMASHER].start_speed_x = 1;
-  monsters[MONSTER_SMASHER].start_speed_y = 1;
+  monsters[MONSTER_SMASHER].start_speed_x = 8;
+  monsters[MONSTER_SMASHER].start_speed_y = 8;
 
   // add additional monsters here
 
