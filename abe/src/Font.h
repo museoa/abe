@@ -3,8 +3,8 @@
 
 #include "Main.h"
 
-#define FONT_WIDTH 22
-#define FONT_HEIGHT 40
+#define FONT_WIDTH 18
+#define FONT_HEIGHT 20
 #define FONT_SPACE -3
 
 extern SDL_Surface *fonts;

@@ -33,7 +33,7 @@ void drawLetter(SDL_Surface *surface, int x, int y, char letter) {
 
   from.x = getLetterOffset(letter);
   from.y = 0;
-  from.w = FONT_WIDTH;
+  from.w = FONT_WIDTH - 1;
   from.h = fonts->h;
   SDL_BlitSurface(fonts, &from, surface, &pos);
 }

@@ -62,12 +62,12 @@ void gameBeforeDrawToScreen() {
   // draw score board
   SDL_BlitSurface(score_image, NULL, screen, NULL);
   sprintf(s, "%d", game.keys);
-  drawString(screen, 125, 0, s);
+  drawString(screen, 125, 5, s);
   sprintf(s, "%d", game.balloons);
-  drawString(screen, 185, 0, s);
+  drawString(screen, 185, 5, s);
   sprintf(s, "%d", game.lives);
-  drawString(screen, 250, 0, s);
-  sprintf(s, "%d", game.score);
+  drawString(screen, 250, 5, s);
+  sprintf(s, "score %d", game.score);
   drawString(screen, 100, 40, s);
   if(GOD_MODE) {
 	drawString(screen, 255, 40, (game.god_mode ? "t" : "f"));
