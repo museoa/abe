@@ -30,19 +30,15 @@ void editorMainLoop(SDL_Event *event) {
 	switch(event->key.keysym.sym) {
 	case SDLK_LEFT: 
 	  cursor.dir = DIR_LEFT;
-	  signalMapMoveThread();
 	  break;
 	case SDLK_RIGHT: 
 	  cursor.dir = DIR_RIGHT;
-	  signalMapMoveThread();
 	  break;
 	case SDLK_UP: 
 	  cursor.dir = DIR_UP;
-	  signalMapMoveThread();
 	  break;
 	case SDLK_DOWN: 
 	  cursor.dir = DIR_DOWN;
-	  signalMapMoveThread();
 	  break;
 	case SDLK_RETURN: 
 	  setImage(edit_panel.level, edit_panel.image_index);
@@ -82,12 +78,14 @@ void editorMainLoop(SDL_Event *event) {
 	case SDLK_s: 
 	  saveMap();
 	  break;
+	case SDLK_ESCAPE: 
+	  cursor.dir = DIR_QUIT;
+	  break;
 	}
 	break;
   case SDL_KEYUP: 
 	//printf("The %s key was released! scan=%d\n", SDL_GetKeyName(event->key.keysym.sym), event->key.keysym.scancode);
 	cursor.dir = DIR_NONE; 
-	signalMapMoveThread();
 	break;
   }
 }
@@ -182,6 +180,9 @@ void allocMap(char *name, int w, int h) {
   // set our painting events
   map.beforeDrawToScreen = beforeDrawToScreen;
 
+  // our event handling
+  map.handleMapEvent = editorMainLoop;
+
   // fill the map
   int level, i, x, y;
 
@@ -227,7 +228,8 @@ void allocMap(char *name, int w, int h) {
   // initialize the edit panel
   resetEditPanel();
 
-  startMapMoveThread();
+  // start the map's main loop
+  moveMap();
 }
 
 void initEditor() {

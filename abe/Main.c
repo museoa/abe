@@ -37,38 +37,37 @@ mainLoop(int runmode) {
 	break;
   default:
 	showSplashScreen();
-  }
-
-  while(1) {
-	SDL_WaitEvent(&event);
-	if(state == STATE_EDIT_LOOP) {
-	  editorMainLoop(&event);
-	} else if(state == STATE_GAME_LOOP) {
-	  gameMainLoop(&event);
-	} else if(state == STATE_MENU) {
-	  menuMainLoop(&event);
-	}
-	// some global events
-	switch(event.type) {
-	case SDL_KEYDOWN:
-	  if(event.key.keysym.sym == SDLK_ESCAPE) {
-		if(state == STATE_SPLASH_SCREEN) hideSplashScreen();
-		return;
-	  } else if(event.key.keysym.sym == SDLK_SPACE && state == STATE_SPLASH_SCREEN) {
-		hideSplashScreen();
-		state = STATE_MAIN_LOOP;
-		startGame();
-	  } else if(event.key.keysym.sym == SDLK_RETURN && state == STATE_SPLASH_SCREEN) {
-		hideSplashScreen();
-		//		showMenu();
-		//		state = STATE_MENU;
-		state = STATE_MAIN_LOOP;
-		startEditor();
+	while(1) {
+	  SDL_WaitEvent(&event);
+	  if(state == STATE_EDIT_LOOP) {
+		editorMainLoop(&event);
+	  } else if(state == STATE_GAME_LOOP) {
+		gameMainLoop(&event);
+	  } else if(state == STATE_MENU) {
+		menuMainLoop(&event);
 	  }
-	  break;
-	case SDL_QUIT:
-	  cleanUpAndExit();
-	  return;
+	  // some global events
+	  switch(event.type) {
+	  case SDL_KEYDOWN:
+		if(event.key.keysym.sym == SDLK_ESCAPE) {
+		  if(state == STATE_SPLASH_SCREEN) hideSplashScreen();
+		  return;
+		} else if(event.key.keysym.sym == SDLK_SPACE && state == STATE_SPLASH_SCREEN) {
+		  hideSplashScreen();
+		  state = STATE_MAIN_LOOP;
+		  startGame();
+		} else if(event.key.keysym.sym == SDLK_RETURN && state == STATE_SPLASH_SCREEN) {
+		  hideSplashScreen();
+		  //		showMenu();
+		  //		state = STATE_MENU;
+		  state = STATE_MAIN_LOOP;
+		  startEditor();
+		}
+		break;
+	  case SDL_QUIT:
+		cleanUpAndExit();
+		return;
+	  }
 	}
   }
 }

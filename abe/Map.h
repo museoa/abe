@@ -44,7 +44,6 @@ typedef struct _map {
   int w, h;
   int *image_index[LEVEL_COUNT];
   SDL_Surface *level[LEVEL_COUNT];
-  SDL_Thread *thread;
   int delay;
   // set this to 1 to kill the movement thread. (by calling: stopMapMoveThread())
   int stopThread;
@@ -52,8 +51,7 @@ typedef struct _map {
   void (*beforeDrawToScreen)();
   void (*afterMainLevelDrawn)();
   int (*detectCollision) (int);
-  SDL_cond *move_cond;
-  SDL_mutex *move_cond_mutex;
+  void (*handleMapEvent) (SDL_Event*);
   int accelerate; // 1 for accelerated movement, 0 otherwise
   int gravity; // 1 for gravity, 0 otherwise(default)
 } Map;
@@ -72,9 +70,6 @@ Map map;
 
 void drawMap();
 void setImage(int level, int index);
-void startMapMoveThread();
-void stopMapMoveThread();
-void signalMapMoveThread();
 void initMap(char *name, int w, int h);
 void destroyMap();
 void saveMap();

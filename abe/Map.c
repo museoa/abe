@@ -580,24 +580,6 @@ int moveDown() {
   return 0;
 }
 
-void lockMap() {
-  // lock
-  if(SDL_mutexP(map.move_cond_mutex) == -1){
-	fprintf(stderr, "Couldn't lock mutex\n");
-	fflush(stderr);
-	exit(-1);
-  }
-}
-
-void unlockMap() {
-  // lock
-  if(SDL_mutexV(map.move_cond_mutex) == -1){
-	fprintf(stderr, "Couldn't unlock mutex\n");
-	fflush(stderr);
-	exit(-1);
-  }
-}
-
 /**
    Is there ground beneath tom?
    if so, return 1, 0 otherwise
@@ -680,13 +662,18 @@ void moveGravity() {
 }
 
 /**
-   Move in the dir direction.
-   This could be optimized by blitting the screen 1 tile unit in the 
-   opposite direction and only drawing the new column.
+   The main thread loop
  */
-int moveMap(void *data) {
+int moveMap() {
+  SDL_Event event;
   int delay;
   while(!map.stopThread) {
+
+	// handle events.
+	while(SDL_PollEvent(&event)) {
+	  map.handleMapEvent(&event);
+	}
+	
 	// activate gravity
 	moveGravity();
 	// a direction change
@@ -703,7 +690,7 @@ int moveMap(void *data) {
 	}
 	switch(cursor.dir) {
 	case DIR_QUIT:
-	  return 0;
+	  return;
 	case DIR_LEFT:
 	  if(!moveLeft(1, 1)) {
 		// try to step up onto the obsticle
@@ -731,19 +718,8 @@ int moveMap(void *data) {
 	  moveDown();
 	  break;
 	case DIR_UPDATE:
-	  finishDrawMap();
 	  cursor.dir = DIR_NONE;
 	  break;
-	case DIR_NONE:
-	  // wait until there's movement.
-	  lockMap();
-	  if(SDL_CondWait(map.move_cond, map.move_cond_mutex) == -1) {
-		fprintf(stderr, "Couldn't wait on condition\n");
-		fflush(stderr);
-		exit(-1);
-	  }
-	  // no need to unlock mutex, wait, etc.
-	  continue; 
 	}
 
 	// update the screen
@@ -757,15 +733,6 @@ int moveMap(void *data) {
 	}
 	SDL_Delay(delay);
   }
-}
-
-/**
-   A lame way to detect that the move thread has
-   finished painting. FIXME.
- */
-void waitUntilPaintingStops() {
-  cursor.dir = DIR_NONE;
-  SDL_Delay(map.delay + 10); // wait for the thread to stop painting
 }
 
 void finishDrawMap() {
@@ -849,10 +816,8 @@ void initMap(char *name, int w, int h) {
   map.beforeDrawToScreen = NULL;
   map.afterMainLevelDrawn = NULL;
   map.detectCollision = defaultDetectCollision;
+  map.handleMapEvent = NULL;
   map.delay = 25;
-  map.thread = NULL;
-  map.move_cond = NULL;
-  map.move_cond_mutex = NULL;
   int i;
   for(i = LEVEL_BACK; i < LEVEL_COUNT; i++) {
 	if(!(map.image_index[i] = malloc(sizeof(int) * w * h))) {
@@ -890,62 +855,11 @@ void initMap(char *name, int w, int h) {
 }
 
 void destroyMap() {
-  stopMapMoveThread();
   free(map.name);
   int i;
   for(i = LEVEL_BACK; i < LEVEL_COUNT; i++) {
 	SDL_FreeSurface(map.level[i]);
 	free(map.image_index[i]);
-  }
-}
-
-void startMapMoveThread() {
-  // Create the cond
-  if(!map.thread) {
-	if(!(map.move_cond = SDL_CreateCond())) {
-	  fprintf(stderr, "Unable to create condition variable: %s\n", SDL_GetError());
-	  fflush(stderr);
-	  exit(0);
-	}
-	// Create the mutex
-	if(!(map.move_cond_mutex = SDL_CreateMutex())) {
-	  fprintf(stderr, "Unable to create mutex: %s\n", SDL_GetError());
-	  fflush(stderr);
-	  exit(0);
-	}
-	// start the thread
-	map.stopThread = 0;
-	if(!(map.thread = SDL_CreateThread(moveMap, NULL))) {
-	  fprintf(stderr, "Unable to create thread: %s\n", SDL_GetError());
-	  fflush(stderr);
-	  exit(0);
-	}
-  }
-}
-
-void stopMapMoveThread() {
-  if(map.thread) {
-	map.stopThread == 1;
-	SDL_WaitThread(map.thread, NULL);
-	// kill the condition var
-	SDL_DestroyCond(map.move_cond);
-	// kill the mutex
-	SDL_DestroyMutex(map.move_cond_mutex);
-	map.thread = NULL;
-	map.move_cond = NULL;
-	map.move_cond_mutex = NULL;
-  }
-}
-
-/**
-   You must call this method if previously the cursor's direction was DIR_NONE.
-   This wakes up the movement thread.
- */
-void signalMapMoveThread() {
-  if(SDL_CondSignal(map.move_cond) == -1) {
-	fprintf(stderr, "Couldn't signal on condition\n");
-	fflush(stderr);
-	exit(-1);
   }
 }
 

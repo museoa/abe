@@ -48,63 +48,31 @@ void gameMainLoop(SDL_Event *event) {
 	  cursor.dontMove = (cursor.dir == DIR_RIGHT ? 1 : 0);
 	  game.dir = GAME_DIR_LEFT;
 	  cursor.dir = DIR_LEFT;
-	  signalMapMoveThread();
 	  break;
 	case SDLK_RIGHT: 
 	  cursor.dontMove = (cursor.dir == DIR_LEFT ? 1 : 0);
 	  game.dir = GAME_DIR_RIGHT;
 	  cursor.dir = DIR_RIGHT;
-	  signalMapMoveThread();
 	  break;
 	case SDLK_UP: 
 	  cursor.dir = DIR_UP;
-	  signalMapMoveThread();
 	  break;
 	case SDLK_DOWN: 
 	  cursor.dir = DIR_DOWN; 
-	  signalMapMoveThread();
 	  break;
 	case SDLK_SPACE: 
 	  drawMap();
 	  break;
+	case SDLK_ESCAPE:
+	  cursor.dir = DIR_QUIT;
+	  break;
 	}
-	break;
+	break;	
   case SDL_KEYUP: 
 	cursor.dir = DIR_UPDATE; 
-	signalMapMoveThread();
 	break;
   }
 }
-
-/**
-   When moving left/right we can step up onto max 1 tile height obsticles.
-   This method checks and if possible, jumps up on it.
-   It returns 1 on success and 0 otherwise.
- */
-/*
-int canStepUp(int pos_x, int pos_y, int original_dir) {
-  // Can we step up?
-  int start_y = pos_y - 1 - (tom[0]->h / TILE_H);
-  if(start_y < 0) return 0;
-  int x, y, n;
-  for(y = start_y; y < start_y + (tom[0]->h / TILE_H) && y < map.h; y++) {
-	for(x = pos_x; x < pos_x + (tom[0]->w / TILE_W) && x < map.w; x++) {
-	  n = map.image_index[LEVEL_MAIN][x + (y * map.w)];
-	  if(n > -1) {
-		if(images[n]->type == TYPE_WALL) {
-		  return 0;
-		}
-	  }
-	}
-  }
-  // if yes, step up
-  cursor.dir = DIR_UP;
-  cursor.speed_y = TILE_H;
-  moveUp(0);
-  cursor.dir = original_dir;
-  return 1;
-}
-*/
 
 GameCollisionCheck getGameCollisionCheck() {
   GameCollisionCheck check;
@@ -175,11 +143,14 @@ void runMap(char *name, int w, int h) {
   map.beforeDrawToScreen = gameBeforeDrawToScreen;
   map.afterMainLevelDrawn = afterMainLevelDrawn;
   map.detectCollision = detectCollision;
+  // add our event handling
+  map.handleMapEvent = gameMainLoop;
   // activate gravity and accelerated movement
   map.accelerate = 1;
   map.gravity = 1;
-  // start the move thread
-  startMapMoveThread();
+
+  // start the map main loop
+  moveMap();
 }
 
 void initGame() {
