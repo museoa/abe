@@ -50,20 +50,15 @@ void editorMainLoop(SDL_Event *event) {
 	  break;
 	case SDLK_1: 
 	  waitUntilPaintingStops();
-	  edit_panel.level = LEVEL_BACK2;
+	  edit_panel.level = LEVEL_BACK;
 	  drawMap();
 	  break;
 	case SDLK_2: 
 	  waitUntilPaintingStops();
-	  edit_panel.level = LEVEL_BACK1;
-	  drawMap();
-	  break;
-	case SDLK_3: 
-	  waitUntilPaintingStops();
 	  edit_panel.level = LEVEL_MAIN;
 	  drawMap();
 	  break;
-	case SDLK_4: 
+	case SDLK_3: 
 	  waitUntilPaintingStops();
 	  edit_panel.level = LEVEL_FORE;
 	  drawMap();
@@ -128,7 +123,7 @@ void drawEditPanel() {
 
   // draw which level is being drawn
   int level;
-  for(level = LEVEL_BACK2; level < LEVEL_COUNT; level++) {
+  for(level = LEVEL_BACK; level < LEVEL_COUNT; level++) {
 	rect.x = 10 + (level * 40);
 	rect.y = 10;
 	rect.w = 20;
@@ -148,7 +143,7 @@ void drawEditPanel() {
 				  edit_panel.image, &rect);
 
   // draw some instructions
-  drawString(edit_panel.image, 10, 35, "change level 1234");
+  drawString(edit_panel.image, 10, 35, "change level 123");
   drawString(edit_panel.image, 10, 35 + FONT_HEIGHT, "change image 56");
   drawString(edit_panel.image, 400, 5, "editor");
   drawString(edit_panel.image, 400, 5 + FONT_HEIGHT, "draw enter");
@@ -188,34 +183,28 @@ void allocMap(char *name, int w, int h) {
   map.beforeDrawToScreen = beforeDrawToScreen;
 
   // fill the map
-  // step 1, fill up map with -1-s.
-  int level, i;
-  for(level = LEVEL_BACK2; level < LEVEL_COUNT; level++) {
-	for(i = 0; i < map.h * map.w; i++) {
-	  map.image_index[level][i] = -1;
-	}
-  }
+  int level, i, x, y;
 
-  // step 2, fill the LEVEL_BACK2 with background tiles.
-  int x, y;
+
+  // add some tiles in the background
   Image *img = images[img_back];
   int step_x = img->image->w / TILE_W;
-  int step_y = img->image->h / TILE_H;
+  int step_y = img->image->h / TILE_H; 
   for(y = 0; y < map.h; y += step_y) {
 	for(x = 0; x < map.w; x += step_x) {
 	  i = x + (y * map.w);
-	  map.image_index[LEVEL_BACK2][i] = img_back;
+	  map.image_index[LEVEL_BACK][i] = img_back;
 	}
   }
 
-  // step 3, fill the LEVEL_MAIN with rock tiles.
+  // fill the LEVEL_MAIN with rock tiles.
   img = images[img_rock];
   step_x = img->image->w / TILE_W;
   step_y = img->image->h / TILE_H;
   int r;
   for(y = 0; y < map.h; y += step_y) {
 	for(x = 0; x < map.w; ) {
-	  r = (int)(5.0 * rand() / (RAND_MAX + 1.0));
+	  r = (int)(8.0 * rand() / (RAND_MAX + 1.0));
 	  if(r) {
 		x++;
 	  } else {
@@ -225,7 +214,7 @@ void allocMap(char *name, int w, int h) {
 	  }
 	}
   }
-  
+
   // reset the cursor
   resetCursor();
 

@@ -1,8 +1,6 @@
 #ifndef MAP_H 
 #define MAP_H 
 
-#include <sys/types.h>
-#include <dirent.h>
 #include "Main.h"
 
 // Tile sizes
@@ -10,11 +8,10 @@
 #define TILE_H 20
 
 // The layers of the map
-#define LEVEL_BACK2 0
-#define LEVEL_BACK1 1
-#define LEVEL_MAIN 2
-#define LEVEL_FORE 3
-#define LEVEL_COUNT 4
+#define LEVEL_BACK 0
+#define LEVEL_MAIN 1
+#define LEVEL_FORE 2
+#define LEVEL_COUNT 3
 
 // Movement directions
 #define DIR_QUIT -1

@@ -42,14 +42,14 @@ void drawMap() {
 
   // draw the map
   int x, y, level;
-  for(level = LEVEL_BACK2; level < LEVEL_COUNT; level++) {
+  for(level = LEVEL_BACK; level < LEVEL_COUNT; level++) {
 
 	// erase the screen
 	pos.x = 0;
 	pos.y = 0;
 	pos.w = map.level[level]->w;
 	pos.h = map.level[level]->h;
-	if(level == LEVEL_BACK2) {
+	if(level == LEVEL_BACK) {
 	  SDL_FillRect(map.level[level], &pos, SDL_MapRGBA(screen->format, 0x20, 0x20, 0x20, 0x00));
 	} else {
 	  SDL_FillRect(map.level[level], &pos, SDL_MapRGBA(screen->format, 0x0, 0x0, 0x0, 0x00));
@@ -86,7 +86,7 @@ void finishDrawMap() {
   // draw on screen
   SDL_Rect pos;
   int level;
-  for(level = LEVEL_BACK2; level < LEVEL_COUNT; level++) {
+  for(level = LEVEL_BACK; level < LEVEL_COUNT; level++) {
 	pos.x = -(EXTRA_X * TILE_W);
 	pos.y = -(EXTRA_Y * TILE_H);
 	pos.w = map.level[level]->w;
@@ -149,7 +149,7 @@ void scrollMap(int dir) {
   case DIR_LEFT:
 
 	// scroll the virtual screens right row by row
-	for(level = LEVEL_BACK2; level < LEVEL_COUNT; level++) {
+	for(level = LEVEL_BACK; level < LEVEL_COUNT; level++) {
 	  if(SDL_LockSurface(map.level[level]) == -1) {
 		fprintf(stderr, "Unable to lock surface for scrolling: %s\n", SDL_GetError());
 		fflush(stderr);
@@ -169,8 +169,8 @@ void scrollMap(int dir) {
 	pos.y = 0;
 	pos.w = TILE_W;
 	pos.h = map.level[0]->h;
-	for(level = LEVEL_BACK2; level < LEVEL_COUNT; level++) {
-	  if(level == LEVEL_BACK2) {
+	for(level = LEVEL_BACK; level < LEVEL_COUNT; level++) {
+	  if(level == LEVEL_BACK) {
 		SDL_FillRect(map.level[level], &pos, SDL_MapRGBA(screen->format, 0x20, 0x20, 0x20, 0x00));
 	  } else {
 		SDL_FillRect(map.level[level], &pos, SDL_MapRGBA(screen->format, 0x00, 0x00, 0x00, 0x00));
@@ -182,7 +182,7 @@ void scrollMap(int dir) {
 
 	if(start_x >= 0) {
 	  // redraw the left edge of the screen
-	  for(level = LEVEL_BACK2; level < LEVEL_COUNT; level++) {
+	  for(level = LEVEL_BACK; level < LEVEL_COUNT; level++) {
 		for(y = start_y; y < end_y; y++) {
 		  x = start_x;
 		  n = (map.image_index[level][x + (y * map.w)]);
@@ -331,7 +331,7 @@ void initMap(char *name, int w, int h) {
   map.beforeDrawToScreen = NULL;
   map.delay = 25;
   int i;
-  for(i = 0; i < LEVEL_COUNT; i++) {
+  for(i = LEVEL_BACK; i < LEVEL_COUNT; i++) {
 	if(!(map.image_index[i] = malloc(sizeof(int) * w * h))) {
 	  fprintf(stderr, "Out of memory.\n");
 	  fflush(stderr);
@@ -347,9 +347,15 @@ void initMap(char *name, int w, int h) {
 	  return;
 	}
 	// set black as the transparent color key
-	if(i > LEVEL_BACK2) {
+	if(i > LEVEL_BACK) {
 	  SDL_SetColorKey(map.level[i], SDL_SRCCOLORKEY, SDL_MapRGBA(map.level[i]->format, 0x00, 0x00, 0x00, 0xff));
 	}
+  }
+  // clean map
+  for(i = 0; i < (w * h); i++) {
+	map.image_index[LEVEL_BACK][i] = -1;
+	map.image_index[LEVEL_MAIN][i] = -1;
+	map.image_index[LEVEL_FORE][i] = -1;
   }
 }
 
