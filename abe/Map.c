@@ -484,19 +484,34 @@ void scrollMap(int dir) {
 
 
   case DIR_UP:
-
-	// scroll the virtual screens down
-	for(level = LEVEL_BACK; level < LEVEL_COUNT; level++) {
-	  if(SDL_LockSurface(map.level[level]) == -1) {
-		fprintf(stderr, "Unable to lock surface for scrolling: %s\n", SDL_GetError());
-		fflush(stderr);
-		exit(0);	
+	if(screen->flags & SDL_HWSURFACE) {
+	  for(level = LEVEL_BACK; level < LEVEL_COUNT; level++) {
+		SDL_FillRect(map.transfer, NULL, SDL_MapRGBA(screen->format, 0x00, 0x00, 0x00, 0x00));
+		pos.x = 0;
+		pos.y = 0;
+		pos.w = map.level[level]->w;
+		pos.h = map.level[level]->h - cursor.speed_y;
+		SDL_BlitSurface(map.level[level], &pos, map.transfer, NULL);
+		pos.x = 0;
+		pos.y = cursor.speed_y;
+		pos.w = map.level[level]->w;
+		pos.h = map.level[level]->h - cursor.speed_y;
+		SDL_BlitSurface(map.transfer, NULL, map.level[level], &pos);
 	  }
-	  skipped = (long)map.level[level]->pitch * (long)cursor.speed_y;
-	  memmove((Uint8*)((Uint8*)(map.level[level]->pixels) + skipped), 
-			  (Uint8*)(map.level[level]->pixels),
-			  (long)(map.level[level]->pitch * map.level[level]->h - skipped));
-	  SDL_UnlockSurface(map.level[level]);
+	} else {
+	  // scroll the virtual screens down
+	  for(level = LEVEL_BACK; level < LEVEL_COUNT; level++) {
+		if(SDL_LockSurface(map.level[level]) == -1) {
+		  fprintf(stderr, "Unable to lock surface for scrolling: %s\n", SDL_GetError());
+		  fflush(stderr);
+		  exit(0);	
+		}
+		skipped = (long)map.level[level]->pitch * (long)cursor.speed_y;
+		memmove((Uint8*)((Uint8*)(map.level[level]->pixels) + skipped), 
+				(Uint8*)(map.level[level]->pixels),
+				(long)(map.level[level]->pitch * map.level[level]->h - skipped));
+		SDL_UnlockSurface(map.level[level]);
+	  }
 	}
 
 	// draw only the new left edge
@@ -507,18 +522,34 @@ void scrollMap(int dir) {
 
   case DIR_DOWN:
 
-	// scroll the virtual screens up
-	for(level = LEVEL_BACK; level < LEVEL_COUNT; level++) {
-	  if(SDL_LockSurface(map.level[level]) == -1) {
-		fprintf(stderr, "Unable to lock surface for scrolling: %s\n", SDL_GetError());
-		fflush(stderr);
-		exit(0);	
+	if(screen->flags & SDL_HWSURFACE) {
+	  for(level = LEVEL_BACK; level < LEVEL_COUNT; level++) {
+		SDL_FillRect(map.transfer, NULL, SDL_MapRGBA(screen->format, 0x00, 0x00, 0x00, 0x00));
+		pos.x = 0;
+		pos.y = cursor.speed_y;
+		pos.w = map.level[level]->w;
+		pos.h = map.level[level]->h - cursor.speed_y;
+		SDL_BlitSurface(map.level[level], &pos, map.transfer, NULL);
+		pos.x = 0;
+		pos.y = 0;
+		pos.w = map.level[level]->w;
+		pos.h = map.level[level]->h - cursor.speed_y;
+		SDL_BlitSurface(map.transfer, NULL, map.level[level], &pos);
 	  }
-	  skipped = (long)map.level[level]->pitch * (long)cursor.speed_y;
-	  memmove((Uint8*)(map.level[level]->pixels), 
-			  (Uint8*)((Uint8*)(map.level[level]->pixels) + skipped),
-			  (long)(map.level[level]->pitch * map.level[level]->h - skipped));
-	  SDL_UnlockSurface(map.level[level]);
+	} else {
+	  // scroll the virtual screens up
+	  for(level = LEVEL_BACK; level < LEVEL_COUNT; level++) {
+		if(SDL_LockSurface(map.level[level]) == -1) {
+		  fprintf(stderr, "Unable to lock surface for scrolling: %s\n", SDL_GetError());
+		  fflush(stderr);
+		  exit(0);	
+		}
+		skipped = (long)map.level[level]->pitch * (long)cursor.speed_y;
+		memmove((Uint8*)(map.level[level]->pixels), 
+				(Uint8*)((Uint8*)(map.level[level]->pixels) + skipped),
+				(long)(map.level[level]->pitch * map.level[level]->h - skipped));
+		SDL_UnlockSurface(map.level[level]);
+	  }
 	}
 
 	// draw only the new left edge

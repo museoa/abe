@@ -1,3 +1,4 @@
+# Generated automatically from Makefile.in by configure.
 # Makefile.in generated automatically by automake 1.4-p6 from Makefile.am
 
 # Copyright (C) 1994, 1995-8, 1999, 2001 Free Software Foundation, Inc.
@@ -15,7 +16,6 @@ SHELL = /bin/sh
 
 srcdir = .
 top_srcdir = .
-
 prefix = /usr/local
 exec_prefix = ${prefix}
 
@@ -45,10 +45,10 @@ AUTOCONF = autoconf
 AUTOMAKE = automake-1.4
 AUTOHEADER = autoheader
 
-INSTALL = /usr/bin/install -c
+INSTALL = /usr//bin/install -c
 INSTALL_PROGRAM = ${INSTALL} $(AM_INSTALL_PROGRAM_FLAGS)
 INSTALL_DATA = ${INSTALL} -m 644
-INSTALL_SCRIPT = ${INSTALL}
+INSTALL_SCRIPT = ${INSTALL_PROGRAM}
 transform = s,x,x,
 
 NORMAL_INSTALL = :
@@ -57,15 +57,15 @@ POST_INSTALL = :
 NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
-host_alias = 
-host_triplet = i686-pc-linux-gnu
+host_alias = i386-mingw32msvc
+host_triplet = i386-pc-mingw32msvc
 CC = gcc
 MAKEINFO = makeinfo
-MATHLIB = -lm
+MATHLIB = 
 PACKAGE = SDL_tests
-SDL_CFLAGS = -I/usr/include/SDL -D_REENTRANT
-SDL_CONFIG = /usr/bin/sdl-config
-SDL_LIBS = -L/usr/lib -Wl,-rpath,/usr/lib -lSDL -lpthread
+SDL_CFLAGS = -I/usr/local/cross-tools/i386-mingw32msvc/include/SDL -Dmain=SDL_main
+SDL_CONFIG = /usr/local/cross-tools/i386-mingw32msvc/bin/sdl-config
+SDL_LIBS = -L/usr/local/cross-tools/i386-mingw32msvc/lib -lmingw32 -lSDLmain -lSDL -mwindows
 VERSION = 1.2.3
 
 AUTOMAKE_OPTIONS = no-dependencies
@@ -75,26 +75,26 @@ noinst_PROGRAMS = \
 
 
 abe_SOURCES = Main.c Image.c Trans.c Splash.c Editor.c Font.c Util.c Menu.c Map.c Game.c Monster.c
-abe_LDADD = -lm
+abe_LDADD = 
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_CLEAN_FILES = 
 PROGRAMS =  $(noinst_PROGRAMS)
 
 
-DEFS = -DPACKAGE_NAME=\"\" -DPACKAGE_TARNAME=\"\" -DPACKAGE_VERSION=\"\" -DPACKAGE_STRING=\"\" -DPACKAGE_BUGREPORT=\"\" -DPACKAGE=\"SDL_tests\" -DVERSION=\"1.2.3\"  -I. -I$(srcdir) 
+DEFS =  -DPACKAGE=\"SDL_tests\" -DVERSION=\"1.2.3\"  -I. -I$(srcdir) 
 CPPFLAGS = 
 LDFLAGS = 
-LIBS =  -L/usr/lib -Wl,-rpath,/usr/lib -lSDL -lpthread
-X_CFLAGS =  -I/usr/X11R6/include
-X_LIBS =  -L/usr/X11R6/lib
+LIBS =  -L/usr/local/cross-tools/i386-mingw32msvc/lib -lmingw32 -lSDLmain -lSDL -mwindows
+X_CFLAGS = 
+X_LIBS = 
 X_EXTRA_LIBS = 
-X_PRE_LIBS =  -lSM -lICE
+X_PRE_LIBS = 
 abe_OBJECTS =  Main.o Image.o Trans.o Splash.o Editor.o Font.o Util.o \
 Menu.o Map.o Game.o Monster.o
 abe_DEPENDENCIES = 
 abe_LDFLAGS = 
-CFLAGS = -g -O2  -I/usr/X11R6/include -I/usr/include/SDL -D_REENTRANT
+CFLAGS = -g -O2 -I/usr/local/cross-tools/i386-mingw32msvc/include/SDL -Dmain=SDL_main
 COMPILE = $(CC) $(DEFS) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
 LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(LDFLAGS) -o $@

@@ -171,8 +171,8 @@ void runMap(char *name, int w, int h) {
 	fflush(stderr);
 	exit(0);
   }
-  cursor.pos_x = 20;
-  cursor.pos_y = 28;
+  cursor.pos_x = 177;
+  cursor.pos_y = 44;
   cursor.speed_x = 8;
   cursor.speed_y = 8;
   drawMap();
