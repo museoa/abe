@@ -59,13 +59,13 @@ void initAudio() {
   }
 
   intro_music = game_music = NULL;
-  sprintf(path, "%s%sintro.xm", SOUND_DIR, PATH_SEP);
+  sprintf(path, "%s%sintro.ogg", SOUND_DIR, PATH_SEP);
   intro_music = Mix_LoadMUS(path);
   if(!intro_music) {
     printf("Mix_LoadMUS(\"intro\"): %s\n", Mix_GetError());
   }
 
-  sprintf(path, "%s%sgame.xm", SOUND_DIR, PATH_SEP);
+  sprintf(path, "%s%sgame.ogg", SOUND_DIR, PATH_SEP);
   game_music = Mix_LoadMUS(path);
   if(!game_music) {
     printf("Mix_LoadMUS(\"game\"): %s\n", Mix_GetError());
