@@ -408,6 +408,12 @@ gameMainLoop(SDL_Event * event)
         drawMap();
       }
       break;
+    // Pedro: ALT+TAB minimize.
+    case SDLK_TAB:
+      if((KMOD_LALT==event->key.keysym.mod)||(KMOD_RALT==event->key.keysym.mod)) {
+        SDL_WM_IconifyWindow();
+      }
+    break;
     default:
       break;
     }
