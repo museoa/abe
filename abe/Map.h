@@ -50,7 +50,7 @@ Cursor cursor;
 Map map;
 
 void drawMap();
-void scrollMap(int dir);
+//void scrollMap(int dir);
 void setImage(int level, int index);
 void startMapMoveThread();
 void stopMapMoveThread();

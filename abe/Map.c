@@ -155,6 +155,64 @@ void drawMapLeftEdge() {
 }
 
 /**
+   Draw only the top first row of the map.
+   This is the first row which is displayed on the virtual screens
+   given that the cursor is in the middle of the screen. Note that this
+   row will be off-screen since the virtual screens extend offscreen to
+   the left and top by EXTRA_X and EXTRA_Y tiles.
+ */
+void drawMapTopEdge() {
+  // compute what to draw
+  MapDrawParams params;
+  getMapDrawParams(&params);
+
+  // override the top edge param
+  params.start_y = (cursor.pos_y - screen_center_y) - EXTRA_Y;
+
+  SDL_Rect pos;
+  int n, row, level, x, y;
+  // erase the edge
+  pos.x = 0;
+  pos.y = 0;
+  pos.w = map.level[0]->w;
+  pos.h = TILE_W;
+  for(level = LEVEL_BACK; level < LEVEL_COUNT; level++) {
+	if(level == LEVEL_BACK) {
+	  SDL_FillRect(map.level[level], &pos, SDL_MapRGBA(screen->format, 0x20, 0x20, 0x20, 0x00));
+	} else {
+	  SDL_FillRect(map.level[level], &pos, SDL_MapRGBA(screen->format, 0x00, 0x00, 0x00, 0x00));
+	}
+  }
+   
+  if(params.start_y >= 0) {
+	// redraw the left edge of the screen
+	for(level = LEVEL_BACK; level < LEVEL_COUNT; level++) {
+	  y = params.start_y;
+	  for(x = params.start_x; x < params.end_x;) {
+		n = (map.image_index[level][x + (y * map.w)]);
+		if(n > -1) {
+		  // Draw the image
+		  // should be some check here in case images[n] points to la-la-land.
+		  pos.x = (params.offset_x + (x - params.start_x)) * TILE_W;
+		  pos.y = 0;
+		  pos.w = images[n]->image->w;
+		  pos.h = images[n]->image->h;
+		  
+		  // compensate for extra area
+		  pos.x += EXTRA_X * TILE_W;
+		  //pos.y += EXTRA_Y * TILE_H;		  
+		  SDL_BlitSurface(images[n]->image, NULL, map.level[level], &pos);
+		  // skip ahead
+		  x += images[n]->image->w / TILE_W;
+		} else {
+		  x++;
+		}
+	  }
+	}
+  }
+}
+
+/**
    Draw only the right last column of the map.
    This is the last column which is displayed on the virtual screens
    given that the cursor is in the middle of the screen.
@@ -202,6 +260,64 @@ void drawMapRightEdge() {
 		  // compensate for extra area
 		  //pos.x += EXTRA_X * TILE_W;
 		  pos.y += EXTRA_Y * TILE_H;
+		  SDL_BlitSurface(images[n]->image, NULL, map.level[level], &pos);
+		  // skip ahead
+		  x += images[n]->image->w / TILE_W;
+		} else {
+		  x++;
+		}
+	  }
+	}
+  }
+}
+
+/**
+   Draw only the right last column of the map.
+   This is the last column which is displayed on the virtual screens
+   given that the cursor is in the middle of the screen.
+ */
+void drawMapBottomEdge() {
+  // compute what to draw
+  MapDrawParams params;
+  getMapDrawParams(&params);
+
+  // override the bottom edge param
+  params.end_y = (cursor.pos_y - screen_center_y) + screen_h;
+
+  SDL_Rect pos;
+  int n, row, level, x, y;
+  // erase the edge
+  pos.x = 0;
+  pos.y = map.level[0]->h - TILE_H;
+  pos.w = map.level[0]->w;
+  pos.h = TILE_H;
+  for(level = LEVEL_BACK; level < LEVEL_COUNT; level++) {
+	if(level == LEVEL_BACK) {
+	  SDL_FillRect(map.level[level], &pos, SDL_MapRGBA(screen->format, 0x20, 0x20, 0x20, 0x00));
+	} else {
+	  SDL_FillRect(map.level[level], &pos, SDL_MapRGBA(screen->format, 0x00, 0x00, 0x00, 0x00));
+	}
+  }
+   
+  // redraw the left edge of the screen
+  for(level = LEVEL_BACK; level < LEVEL_COUNT; level++) {
+	// here we have to draw more than 1 column b/c images
+	// extend from right_edge-EXTRA_X on. 
+	for(y = params.end_y - EXTRA_Y; y < params.end_y; y++) {
+	  if(params.end_y >= map.h) break;
+	  for(x = params.start_x; x < params.end_x;) {
+		n = (map.image_index[level][x + (y * map.w)]);
+		if(n > -1) {
+		  // Draw the image
+		  // should be some check here in case images[n] points to la-la-land.
+		  pos.x = (params.offset_x + (x - params.start_x)) * TILE_W;
+		  pos.y = map.level[level]->h - ((params.end_y - y) * TILE_H);
+		  pos.w = images[n]->image->w;
+		  pos.h = images[n]->image->h;
+		  
+		  // compensate for extra area
+		  pos.x += EXTRA_X * TILE_W;
+		  //pos.y += EXTRA_Y * TILE_H;
 		  SDL_BlitSurface(images[n]->image, NULL, map.level[level], &pos);
 		  // skip ahead
 		  x += images[n]->image->w / TILE_W;
@@ -264,6 +380,50 @@ void scrollMap(int dir) {
 
 	// draw only the new left edge
 	drawMapRightEdge();
+
+	break;
+
+
+  case DIR_UP:
+
+	// scroll the virtual screens down
+	for(level = LEVEL_BACK; level < LEVEL_COUNT; level++) {
+	  if(SDL_LockSurface(map.level[level]) == -1) {
+		fprintf(stderr, "Unable to lock surface for scrolling: %s\n", SDL_GetError());
+		fflush(stderr);
+		exit(0);	
+	  }
+	  long skipped = (long)map.level[level]->w * (long)TILE_H;
+	  memmove((Uint16*)((Uint16*)(map.level[level]->pixels) + skipped), 
+			  (Uint16*)(map.level[level]->pixels),
+			  (long)(map.level[level]->w * map.level[level]->h - skipped) * (long)sizeof(Uint16));
+	  SDL_UnlockSurface(map.level[level]);
+	}
+
+	// draw only the new left edge
+	drawMapTopEdge();
+
+	break;
+
+
+  case DIR_DOWN:
+
+	// scroll the virtual screens up
+	for(level = LEVEL_BACK; level < LEVEL_COUNT; level++) {
+	  if(SDL_LockSurface(map.level[level]) == -1) {
+		fprintf(stderr, "Unable to lock surface for scrolling: %s\n", SDL_GetError());
+		fflush(stderr);
+		exit(0);	
+	  }
+	  long skipped = (long)map.level[level]->w * (long)TILE_H;
+	  memmove((Uint16*)(map.level[level]->pixels), 
+			  (Uint16*)((Uint16*)(map.level[level]->pixels) + skipped),
+			  (long)(map.level[level]->w * map.level[level]->h - skipped) * (long)sizeof(Uint16));
+	  SDL_UnlockSurface(map.level[level]);
+	}
+
+	// draw only the new left edge
+	drawMapBottomEdge();
 
 	break;
 
