@@ -285,7 +285,7 @@ void gameMainLoop(SDL_Event *event) {
 void handleDeath(char *killer) {
   int i;
 
-  game.health--;
+  game.health-=(1 << game.difficoulty);
   if(game.health > 0) return;
   game.health = MAX_HEALTH;
 
@@ -556,4 +556,5 @@ void initGame() {
   game.lastSavePosX = 0;
   game.lastSavePosY = 0;
   game.health = MAX_HEALTH;
+  game.difficoulty = 1;
 }

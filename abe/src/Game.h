@@ -34,6 +34,7 @@ typedef struct _game {
   int lastSavePosX;
   int lastSavePosY;
   int health;
+  int difficoulty;
 } Game;
 extern Game game;
 

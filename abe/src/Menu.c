@@ -6,6 +6,7 @@
 #define SOUND_ENABLED 0
 #define MUSIC_ENABLED 1
 #define FULLSCREEN_ENABLED 2
+#define GAME_DIFFICOULTY 3
 
 typedef struct _settingEntry {
   char title[80];
@@ -17,6 +18,7 @@ SettingEntry entries[] = {
   { "sound", 2, { "on", "off" }, 0 },
   { "music", 2, { "on", "off" }, 0 },
   { "full screen", 2, { "on", "off" }, 0 },
+  { "game", 3, { "easy", "normal", "hard" }, 0 },
   { "", 0, { "" }, 0 }
 };
 int entry_count;
@@ -99,12 +101,14 @@ void saveSettings() {
   if(old_screen != full_screen) {
 	SDL_WM_ToggleFullScreen(screen);
   }
+  game.difficoulty = entries[GAME_DIFFICOULTY].selected;
 }
 
 void loadSettings() {
   entries[SOUND_ENABLED].selected = (sound_loaded && sound_enabled ? 0 : 1);
   entries[MUSIC_ENABLED].selected = (sound_loaded && music_enabled ? 0 : 1);
   entries[FULLSCREEN_ENABLED].selected = (full_screen ? 0 : 1);
+  entries[GAME_DIFFICOULTY].selected = game.difficoulty;
 }
 
 void paintScreen() {
@@ -113,6 +117,8 @@ void paintScreen() {
   saveSettings();
   SDL_BlitSurface(back, NULL, screen, NULL);
   drawString(screen, 0, 0, "abe!! settings");
+  drawString(screen, 0, screen->h - 40, "arrows to navigate");
+  drawString(screen, 0, screen->h - 20, "space to toggle");
   drawSettings();
 
   // draw cursor
