@@ -5,6 +5,7 @@
 
 #define SOUND_ENABLED 0
 #define MUSIC_ENABLED 1
+#define FULLSCREEN_ENABLED 2
 
 typedef struct _settingEntry {
   char title[80];
@@ -15,7 +16,7 @@ typedef struct _settingEntry {
 SettingEntry entries[] = {
   { "sound", 2, { "on", "off" }, 0 },
   { "music", 2, { "on", "off" }, 0 },
-  { "screen", 2, { "fullscreen", "window" }, 0 },
+  { "full screen", 2, { "on", "off" }, 0 },
   { "", 0, { "" }, 0 }
 };
 int entry_count;
@@ -80,7 +81,11 @@ int isEnabled(int n) {
 }
 
 void saveSettings() {
-  int old_music = music_enabled;
+  int old_screen, old_music;
+
+  old_screen = full_screen;
+  old_music = music_enabled;
+
   sound_enabled = !(entries[SOUND_ENABLED].selected);
   music_enabled = !(entries[MUSIC_ENABLED].selected);
   if(old_music != music_enabled) {
@@ -90,11 +95,16 @@ void saveSettings() {
 	  stopMusic();
 	}
   }
+  full_screen = !(entries[FULLSCREEN_ENABLED].selected);
+  if(old_screen != full_screen) {
+	SDL_WM_ToggleFullScreen(screen);
+  }
 }
 
 void loadSettings() {
   entries[SOUND_ENABLED].selected = (sound_loaded && sound_enabled ? 0 : 1);
   entries[MUSIC_ENABLED].selected = (sound_loaded && music_enabled ? 0 : 1);
+  entries[FULLSCREEN_ENABLED].selected = (full_screen ? 0 : 1);
 }
 
 void paintScreen() {

@@ -4,6 +4,7 @@ int runmode;
 
 SDL_Surface *screen;
 int state;
+int full_screen;
 
 void testModesInFormat(SDL_PixelFormat *format) {
   SDL_Rect **modes;
@@ -52,9 +53,9 @@ int main(int argc, char *argv[]) {
   int intro = 0;
   char *mapname;
   int mapwidth, mapheight;
-  int window = 0;
 
   runmode = RUNMODE_SPLASH;  
+  full_screen = 1;
 
   w = 640;
   h = 480;
@@ -67,7 +68,7 @@ int main(int argc, char *argv[]) {
 
   for(i = 0; i < argc; i++) {
 	if(!strcmp(argv[i], "--window")) {
-	  window = 1;
+	  full_screen = 0;
 	} else if(!strcmp(argv[i], "--system") || !strcmp(argv[i], "-s")) {
 	  hw_mem = 0;
 	} else if(!strcmp(argv[i], "--editor") || !strcmp(argv[i], "-e")) {
@@ -134,7 +135,9 @@ int main(int argc, char *argv[]) {
   } else {
 	flags |= SDL_SWSURFACE;
   }
-  if(!window) flags |= SDL_FULLSCREEN;
+  if(full_screen) {
+	flags |= SDL_FULLSCREEN;
+  }
 
   fprintf(stderr, "Attempting to set %dx%dx%d video mode.\n", w, h, bpp);
   fflush(stderr);
@@ -149,6 +152,8 @@ int main(int argc, char *argv[]) {
   fprintf(stderr, "\tSDL_DOUBLEBUF =%s\n", (screen->flags & SDL_DOUBLEBUF ? "true" : "false"));
   fprintf(stderr, "\tw=%d h=%d bpp=%d pitch=%d\n", screen->w, screen->h, screen->format->BitsPerPixel, screen->pitch);
   fflush(stderr);
+
+  SDL_WM_SetCaption("Abe's Amazing Adventure!!", (const char *)NULL);
 
   SDL_ShowCursor(0);
 

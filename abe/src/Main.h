@@ -29,6 +29,7 @@ extern int runmode;
 
 extern SDL_Surface *screen;
 extern int state;
+extern int full_screen;
 
 void startEditor();
 void startGame();
