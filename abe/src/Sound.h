@@ -1,9 +1,8 @@
-#ifndef SOUND_H
+#ifndef SOUND_H 
 #define SOUND_H
 
+#include "Directories.h"
 #include "Main.h"
-
-#define SOUND_DIR "sounds"
 
 #define DOOR_SOUND 0
 #define OBJECT_SOUND 1
