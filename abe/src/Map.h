@@ -39,8 +39,8 @@
 #define SPEED_INC_Y 1
 
 // the max speed
-#define SPEED_MAX_X 12
-#define SPEED_MAX_Y 12
+#define SPEED_MAX_X 10
+#define SPEED_MAX_Y 10
 
 // the minimum (starting) speed in accelerated mode
 #define START_SPEED_X 6
@@ -48,7 +48,7 @@
 
 // how many units is in a jump?
 #define JUMP_LENGTH 10
-#define JUMP_SPEED 14
+#define JUMP_SPEED 12
 
 #define GRAVITY_SPEED 10
 
