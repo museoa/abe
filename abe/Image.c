@@ -4,6 +4,11 @@
  */
 #include "Image.h"
 
+#define TAR_BLOCK_SIZE 512
+#define TAR_NAME_SIZE 100
+#define TAR_SIZE_SIZE 12
+#define TAR_SIZE_OFFSET 124
+
 /**
    Store the image in an array or a named img buffer.
  */
@@ -77,6 +82,9 @@ char *getImageName(char *s) {
    Load every bmp file from the ./images directory.
  */
 void loadImages() {
+  loadImagesFromTar();
+
+  /*
   image_count = 0;
 
   fprintf(stderr, "Looking for images in %s \n", IMAGES_DIR);
@@ -102,4 +110,98 @@ void loadImages() {
 	}
 	free(namelist);
   }
+  */
+}
+
+void loadImagesFromTar() {
+  image_count = 0;
+
+  char tmp_path[300];
+  sprintf(tmp_path, "%s/%s", IMAGES_DIR, "tmp.bmp");
+  FILE *tmp;
+
+  char path[300];
+  sprintf(path, "%s/%s", IMAGES_DIR, "images.tar");
+  fprintf(stderr, "Opening %s for reading.\n", path);
+  fflush(stderr);
+  FILE *fp = fopen(path, "rb");
+  if(!fp) {
+	fprintf(stderr, "Can't open tar file.\n");
+	fflush(stderr);
+	exit(-1);
+  }
+  char buff[TAR_BLOCK_SIZE]; // a tar block
+  int end = 0;
+  int i;
+  int mode = 0; // 0-header, 1-file
+  char name[TAR_NAME_SIZE + 1], size[TAR_SIZE_SIZE + 1];
+  long filesize;
+  int found;
+  int blocks_read;
+  int block = 0;
+  while(1) {
+	if(fread(buff, 1, TAR_BLOCK_SIZE, fp) < TAR_BLOCK_SIZE) break; // EOF or error
+	if(!mode) {
+	  // are we at the end?
+	  found = 0;
+	  for(i = 0; i < TAR_BLOCK_SIZE; i++) {
+		if(buff[i]) {
+		  found = 1;
+		  break;
+		}
+	  }	
+	  if(!found) {
+		end++;
+		// a tar file ends with 2 NULL blocks
+		if(end >= 2) break;
+	  } else {
+		// Get the name
+		memcpy(name, buff, TAR_NAME_SIZE);
+		// add a NUL if needed
+		found = 0;
+		for(i = 0; i < TAR_NAME_SIZE; i++) {
+		  if(!name[i]) {
+			found = 1;
+			break;
+		  }
+		}
+		if(!found) name[TAR_NAME_SIZE] = '\0';
+		// Remove the .tmp
+		*(name + strlen(name) - 4) = 0;
+		// Get the size
+		memcpy(size, buff + TAR_SIZE_OFFSET, TAR_SIZE_SIZE);
+		size[TAR_SIZE_SIZE] = '\0';
+		filesize = strtol(size, NULL, 8);
+		blocks_read = filesize / TAR_BLOCK_SIZE + (filesize % TAR_BLOCK_SIZE ? 1 : 0);
+		fprintf(stderr, "Found: >%s< size=>%ld< blocks=>%d<\n", name, filesize, blocks_read);
+		fflush(stderr);
+		mode = 1;
+
+		// open a temp file to extract this image to
+		if(!(tmp = fopen(tmp_path, "wb"))) {
+		  fprintf(stderr, "Cannot open temp file for writing: %s\n", tmp_path);
+		  fflush(stderr);
+		  exit(0);
+		}
+	  }
+	} else {
+	  blocks_read--;
+
+	  // write to temp file
+	  fwrite(buff, (!blocks_read ? filesize % TAR_BLOCK_SIZE : TAR_BLOCK_SIZE), 1, tmp);
+
+	  if(!blocks_read) {
+		mode = 0;
+		fclose(tmp);
+		
+		// load the image
+		doLoadImage(tmp_path, name);
+	  }
+	}
+	block++;
+  }
+  fclose(fp);
+
+  // remove the tmp file
+  remove(tmp_path);
 }

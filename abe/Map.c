@@ -611,7 +611,7 @@ void unlockMap() {
    to check if we can step onto the object.
    Returns 1 on success, 0 on failure.
  */
-int canStepUp(int test_pos_x, int test_pos_y, int dir) {
+int canStepUp(int dir) {
   // Take an unchecked step into the wall and don't scroll the screen.
   // This is so after stepping up, gravity won't pull us back down.
   // TILE_W b/c we always stop on pixel_x==0			
@@ -673,26 +673,13 @@ int moveMap(void *data) {
 	case DIR_LEFT:
 	  if(!moveLeft(1, 1)) {
 		// try to step up onto the obsticle
-		/*
-		for(x = 1; x <= EXTRA_X; x++) {
-		  if(canStepUp(cursor.pos_x - x, 
-					   cursor.pos_y + (tom[0]->h / TILE_H) - 1 + (cursor.pixel_y > 0 ? 1 : 0)), 
-			 DIR_LEFT) {
-			break;
-		  }
-		}
-		*/
-		canStepUp(cursor.pos_x - 1, 
-				  cursor.pos_y + (tom[0]->h / TILE_H) - 1 + (cursor.pixel_y > 0 ? 1 : 0), 
-				  DIR_LEFT);
+		canStepUp(DIR_LEFT);
 	  }
 	  break;	
 	case DIR_RIGHT:
 	  if(!moveRight(1, 1)) {
 		// try to step up onto the obsticle
-		canStepUp(cursor.pos_x + (tom[0]->w / TILE_W), 
-				  cursor.pos_y + (tom[0]->h / TILE_H) - 1 + (cursor.pixel_y > 0 ? 1 : 0),
-				  DIR_RIGHT);
+		canStepUp(DIR_RIGHT);
 	  }
 	  break;	
 	case DIR_UP:

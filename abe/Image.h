@@ -11,6 +11,7 @@ SDL_Surface *title;
 SDL_Surface *tom[6];
 
 void loadImages();
+void loadImagesFromTar();
 
 #define TYPE_WALL 0
 #define TYPE_LADDER 1
