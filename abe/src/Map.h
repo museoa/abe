@@ -66,6 +66,7 @@ typedef struct _map {
   int delay;
   // painting callbacks
   void (*beforeDrawToScreen)();
+  void (*afterScreenFlipped)();
   void (*afterMainLevelDrawn)();
   int (*detectCollision) (int);
   void (*checkPosition) ();

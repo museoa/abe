@@ -20,5 +20,6 @@ void initEditor();
 void editMap();
 void editorMainLoop(SDL_Event *event);
 void drawEditPanel();
+void editorAfterScreenFlipped();
 
 #endif

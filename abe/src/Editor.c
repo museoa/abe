@@ -1,17 +1,67 @@
 #include "Editor.h"
 
-
+int make_map = 0;
 int slide_start_x = -1;
 int slide_start_y = -1;
 EditPanel edit_panel;
 Cursor editor_cursor;
+SDL_Surface *map_screen;
+#define SAVE_X 260
+#define SAVE_Y 0
+#define SAVE_WIDTH 550
+#define SAVE_HEIGHT 550
 
 /**
    The editor-specific map drawing event.
    This is called before the map is sent to the screen.
  */
+void makeMap() {
+  if(!(map_screen = SDL_CreateRGBSurface(SDL_SWSURFACE, 
+										 (SAVE_WIDTH - SAVE_X) * TILE_W, 
+										 SAVE_HEIGHT * TILE_H, 
+										 screen->format->BitsPerPixel, 
+										 0, 0, 0, 0))) {
+	fprintf(stderr, "Error creating surface: %s\n", SDL_GetError());
+	fflush(stderr);
+	return;
+  }
+  cursor.pos_x = SAVE_X;
+  cursor.pos_y = SAVE_Y;
+  make_map = 1;
+  drawMap();
+}
+
 void beforeDrawToScreen() {
   SDL_Rect pos;
+
+  // save map images
+  if(make_map) {
+	if(cursor.pos_y >= SAVE_HEIGHT) {
+	  make_map = 0;	  
+	  SDL_Flip(map_screen);
+	  fprintf(stderr, "saving map.bmp\n");
+	  SDL_SaveBMP(map_screen, "map.bmp");
+	  fprintf(stderr, "done saving map.bmp\n");
+	  SDL_FreeSurface(map_screen);
+	} else {
+	  pos.x = (cursor.pos_x - SAVE_X) * TILE_W;
+	  pos.y = cursor.pos_y * TILE_H;
+	  pos.w = screen->w;
+	  pos.h = screen->h;
+	  SDL_BlitSurface(screen, NULL, map_screen, &pos);
+	  SDL_Flip(map_screen);
+
+	  cursor.dir = DIR_UPDATE;
+	  map.redraw = 1;
+	  fprintf(stderr, "x=%d y=%d\n", cursor.pos_x, cursor.pos_y);
+	  if(cursor.pos_x < SAVE_WIDTH) {
+		cursor.pos_x += screen->w / TILE_W;
+	  } else {
+		cursor.pos_x = SAVE_X;
+		cursor.pos_y += screen->h / TILE_H;
+	  }
+	}
+  }
 
   // draw the cursor
   int screen_center_x = (screen->w / TILE_W) / 2;
@@ -30,6 +80,9 @@ void beforeDrawToScreen() {
   
   // draw the edit panel
   drawEditPanel();
+}
+
+void editorAfterScreenFlipped() {
 }
 
 void drawSlide(int x1, int y1, int x2, int y2) {
@@ -262,6 +315,9 @@ void editorMainLoop(SDL_Event *event) {
 	case SDLK_l: 
 	  loadMap(1);
 	  break;
+	case SDLK_m: 
+	  makeMap();
+	  break;
 	case SDLK_s: 
 	  saveMap();
 	  break;
@@ -378,6 +434,7 @@ void initEditor() {
 	return;
   }
   editor_cursor.pos_x = editor_cursor.pos_y = 0;
+  make_map = 0;
 }
 
 void editMap() {
@@ -389,6 +446,7 @@ void editMap() {
 
   // set our painting events
   map.beforeDrawToScreen = beforeDrawToScreen;
+  map.afterScreenFlipped = editorAfterScreenFlipped;
   
   // our event handling
   map.handleMapEvent = editorMainLoop;

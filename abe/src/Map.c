@@ -1000,6 +1000,8 @@ void finishDrawMap() {
 	drawString(screen, screen->w / 2, 5, map.status);  
   }
   SDL_Flip(screen);
+
+  if(map.afterScreenFlipped) map.afterScreenFlipped();
 }
 
 void setImage(int level, int index) {
@@ -1117,6 +1119,8 @@ int initMap(char *name, int w, int h) {
   map.w = w;
   map.h = h;
   map.beforeDrawToScreen = NULL;
+  map.afterScreenFlipped = NULL;
+  map.afterScreenFlipped = NULL;
   map.afterMainLevelDrawn = NULL;
   map.detectCollision = defaultDetectCollision;
   map.detectLadder = defaultDetectLadder;
