@@ -88,11 +88,7 @@ void drawMap() {
 	pos.y = 0;
 	pos.w = map.level[level]->w;
 	pos.h = map.level[level]->h;
-	if(level == LEVEL_BACK) {
-	  SDL_FillRect(map.level[level], &pos, SDL_MapRGBA(screen->format, 0x20, 0x20, 0x20, 0x00));
-	} else {
-	  SDL_FillRect(map.level[level], &pos, SDL_MapRGBA(screen->format, 0x0, 0x0, 0x0, 0x00));
-	}
+	SDL_FillRect(map.level[level], &pos, SDL_MapRGBA(screen->format, 0x0, 0x0, 0x0, 0x00));
 
 	for(y = params.start_y; y < params.end_y; y++) {
 	  for(x = params.start_x; x < params.end_x;) {
@@ -146,11 +142,7 @@ void drawMapLeftEdge() {
   pos.w = cursor.speed_x;
   pos.h = map.level[0]->h;
   for(level = LEVEL_BACK; level < LEVEL_COUNT; level++) {
-	if(level == LEVEL_BACK) {
-	  SDL_FillRect(map.level[level], &pos, SDL_MapRGBA(screen->format, 0x20, 0x20, 0x20, 0x00));
-	} else {
-	  SDL_FillRect(map.level[level], &pos, SDL_MapRGBA(screen->format, 0x00, 0x00, 0x00, 0x00));
-	}
+	SDL_FillRect(map.level[level], &pos, SDL_MapRGBA(screen->format, 0x00, 0x00, 0x00, 0x00));
   }
 
   // compute what to draw
@@ -215,11 +207,7 @@ void drawMapTopEdge() {
   pos.w = map.level[0]->w;
   pos.h = cursor.speed_y;
   for(level = LEVEL_BACK; level < LEVEL_COUNT; level++) {
-	if(level == LEVEL_BACK) {
-	  SDL_FillRect(map.level[level], &pos, SDL_MapRGBA(screen->format, 0x20, 0x20, 0x20, 0x00));
-	} else {
-	  SDL_FillRect(map.level[level], &pos, SDL_MapRGBA(screen->format, 0x00, 0x00, 0x00, 0x00));
-	}
+	SDL_FillRect(map.level[level], &pos, SDL_MapRGBA(screen->format, 0x00, 0x00, 0x00, 0x00));
   }
 
   // compute what to draw
@@ -280,11 +268,7 @@ void drawMapRightEdge() {
   pos.w = cursor.speed_x;
   pos.h = map.level[0]->h;
   for(level = LEVEL_BACK; level < LEVEL_COUNT; level++) {
-	if(level == LEVEL_BACK) {
-	  SDL_FillRect(map.level[level], &pos, SDL_MapRGBA(screen->format, 0x20, 0x20, 0x20, 0x00));
-	} else {
-	  SDL_FillRect(map.level[level], &pos, SDL_MapRGBA(screen->format, 0x00, 0x00, 0x00, 0x00));
-	}
+	SDL_FillRect(map.level[level], &pos, SDL_MapRGBA(screen->format, 0x00, 0x00, 0x00, 0x00));
   }
 
   // compute what to draw
@@ -347,11 +331,7 @@ void drawMapBottomEdge() {
   pos.w = map.level[0]->w;
   pos.h = cursor.speed_y;
   for(level = LEVEL_BACK; level < LEVEL_COUNT; level++) {
-	if(level == LEVEL_BACK) {
-	  SDL_FillRect(map.level[level], &pos, SDL_MapRGBA(screen->format, 0x20, 0x20, 0x20, 0x00));
-	} else {
-	  SDL_FillRect(map.level[level], &pos, SDL_MapRGBA(screen->format, 0x00, 0x00, 0x00, 0x00));
-	}
+	SDL_FillRect(map.level[level], &pos, SDL_MapRGBA(screen->format, 0x00, 0x00, 0x00, 0x00));
   }
 
   // compute what to draw
@@ -897,19 +877,19 @@ void finishDrawMap() {
 
   getMapDrawParams(&params);
 
+  pos.x = -((cursor.pos_x * TILE_W + cursor.pixel_x) % (TILE_W * 4)) / 2;
+  pos.y = -((cursor.pos_y * TILE_H + cursor.pixel_y) % (TILE_H * 4)) / 2;
+  pos.w = test_back->w;
+  pos.h = test_back->h;
+  SDL_BlitSurface(test_back, NULL, screen, &pos);
+
   // draw on screen
   for(level = LEVEL_BACK; level < LEVEL_COUNT; level++) {
+	pos.x = -(EXTRA_X * TILE_W);
+	pos.y = -(EXTRA_Y * TILE_H);
 	pos.w = map.level[level]->w;
 	pos.h = map.level[level]->h;
-	if(level == LEVEL_BACK) {
-	  pos.x = -((cursor.pos_x * TILE_W + cursor.pixel_x) % (TILE_W * 4)) / 2;
-	  pos.y = -((cursor.pos_y * TILE_H + cursor.pixel_y) % (TILE_H * 4)) / 2;
-	  SDL_BlitSurface(test_back, NULL, screen, &pos);
-	} else {
-	  pos.x = -(EXTRA_X * TILE_W);
-	  pos.y = -(EXTRA_Y * TILE_H);
-	  SDL_BlitSurface(map.level[level], NULL, screen, &pos);
-	}
+	SDL_BlitSurface(map.level[level], NULL, screen, &pos);
 	// make a callback if it exists
 	if(level == LEVEL_MAIN) {	  
 	  // draw creatures
@@ -1089,9 +1069,7 @@ int initMap(char *name, int w, int h) {
 	}
 
 	// set black as the transparent color key
-	if(i > LEVEL_BACK) {
-	  SDL_SetColorKey(map.level[i], SDL_SRCCOLORKEY, SDL_MapRGBA(map.level[i]->format, 0x00, 0x00, 0x00, 0xff));
-	}
+	SDL_SetColorKey(map.level[i], SDL_SRCCOLORKEY, SDL_MapRGBA(map.level[i]->format, 0x00, 0x00, 0x00, 0xff));
   }
 
   // init the transfer area

@@ -60,7 +60,7 @@ int loadMapPath(char *path, int draw_map) {
   int count_read;
   char *err;
   SDL_RWops *rwop;
-  int x, y, i;
+  int x, y, i, level;
 
   printf("Loading map %s\n", path);  
   fflush(stdout);
