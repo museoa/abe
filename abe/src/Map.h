@@ -6,6 +6,9 @@
 // Where to store the map files (no ending /)
 #define MAPS_DIR "maps"
 
+// Throttle the game speed at 25 fps (for fast machines)
+#define FPS_THROTTLE 25
+
 // Tile sizes
 #define TILE_W 20
 #define TILE_H 20

@@ -872,7 +872,7 @@ void moveMap() {
   SDL_Event event;
   int delay;
   Uint32 curr_time, next_time = 0;
-  Uint32 TICK_AMOUNT = 40; // 25 fps
+  Uint32 TICK_AMOUNT = 1000 / FPS_THROTTLE; // 25 fps
 
   while(1) {
 
