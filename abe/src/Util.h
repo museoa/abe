@@ -32,5 +32,5 @@ int intersectsBy(SDL_Rect *a, SDL_Rect *b, int value);
 //int decompress(Uint16 *buff, size_t nmemb, FILE *fp);
 int compress(Uint16 *buff, size_t nmemb, SDL_RWops *rwop);
 int decompress(Uint16 *buff, size_t nmemb, SDL_RWops *rwop);
-
+void createBack(SDL_Surface **back_surface);
 #endif

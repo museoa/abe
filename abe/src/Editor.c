@@ -33,6 +33,7 @@ void beforeDrawToScreen() {
    Main editor event handling
 */
 void editorMainLoop(SDL_Event *event) {
+  int n;
   Position pos;
   switch(event->type) {
   case SDL_MOUSEMOTION:
@@ -77,10 +78,14 @@ void editorMainLoop(SDL_Event *event) {
 	  setImagePosition(edit_panel.level, EMPTY_MAP, &pos);
 	  break;
 	case SDL_BUTTON_RIGHT:
+	  n = selectIcon();
+	  if(n > -1) edit_panel.image_index = n;
+	  /*
 	  edit_panel.image_index++;
 	  if(edit_panel.image_index >= image_count) {
 		edit_panel.image_index = 0;
 	  }
+	  */
 	  drawMap();
 	  break;
 	default:
@@ -156,6 +161,11 @@ void editorMainLoop(SDL_Event *event) {
 	  break;
 	case SDLK_RETURN: 
 	  setImage(edit_panel.level, edit_panel.image_index);
+	  break;
+	case SDLK_i:
+	  n = selectIcon();
+	  if(n > -1) edit_panel.image_index = n;
+	  drawMap();
 	  break;
 	case SDLK_DELETE: case SDLK_BACKSPACE: 
 	  setImage(edit_panel.level, EMPTY_MAP);

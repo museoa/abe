@@ -54,6 +54,7 @@ typedef struct _cursor {
   int jump;
   int gravity;
   int stepup;
+  int slide;
   LiveMonster *platform;
 } Cursor;
 

@@ -129,8 +129,8 @@ noinst_PROGRAMS = \
 
 
 abe_SOURCES = src/Main.c src/Image.c src/Trans.c src/Splash.c \
-src/Editor.c src/Font.c src/Util.c src/Menu.c src/Map.c src/MapIO.c \
-src/Sound.c src/Game.c src/Monster.c
+src/Icons.c src/Editor.c src/Font.c src/Util.c src/Menu.c src/Map.c \
+src/MapIO.c src/Sound.c src/Game.c src/Monster.c
 
 
 abe_LDADD = @MATHLIB@ -lSDL_mixer
@@ -142,10 +142,10 @@ noinst_PROGRAMS = abe$(EXEEXT)
 PROGRAMS = $(noinst_PROGRAMS)
 
 am_abe_OBJECTS = src/Main.$(OBJEXT) src/Image.$(OBJEXT) \
-	src/Trans.$(OBJEXT) src/Splash.$(OBJEXT) src/Editor.$(OBJEXT) \
-	src/Font.$(OBJEXT) src/Util.$(OBJEXT) src/Menu.$(OBJEXT) \
-	src/Map.$(OBJEXT) src/MapIO.$(OBJEXT) src/Sound.$(OBJEXT) \
-	src/Game.$(OBJEXT) src/Monster.$(OBJEXT)
+	src/Trans.$(OBJEXT) src/Splash.$(OBJEXT) src/Icons.$(OBJEXT) \
+	src/Editor.$(OBJEXT) src/Font.$(OBJEXT) src/Util.$(OBJEXT) \
+	src/Menu.$(OBJEXT) src/Map.$(OBJEXT) src/MapIO.$(OBJEXT) \
+	src/Sound.$(OBJEXT) src/Game.$(OBJEXT) src/Monster.$(OBJEXT)
 abe_OBJECTS = $(am_abe_OBJECTS)
 abe_DEPENDENCIES =
 abe_LDFLAGS =
@@ -193,6 +193,7 @@ src/Main.$(OBJEXT): src/Main.c src/.dirstamp
 src/Image.$(OBJEXT): src/Image.c src/.dirstamp
 src/Trans.$(OBJEXT): src/Trans.c src/.dirstamp
 src/Splash.$(OBJEXT): src/Splash.c src/.dirstamp
+src/Icons.$(OBJEXT): src/Icons.c src/.dirstamp
 src/Editor.$(OBJEXT): src/Editor.c src/.dirstamp
 src/Font.$(OBJEXT): src/Font.c src/.dirstamp
 src/Util.$(OBJEXT): src/Util.c src/.dirstamp
@@ -211,6 +212,7 @@ mostlyclean-compile:
 	-rm -f src/Editor.$(OBJEXT)
 	-rm -f src/Font.$(OBJEXT)
 	-rm -f src/Game.$(OBJEXT)
+	-rm -f src/Icons.$(OBJEXT)
 	-rm -f src/Image.$(OBJEXT)
 	-rm -f src/Main.$(OBJEXT)
 	-rm -f src/Map.$(OBJEXT)
@@ -254,6 +256,12 @@ src/Splash.o: src/Splash.c
 
 src/Splash.obj: src/Splash.c
 	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o src/Splash.obj `if test -f 'src/Splash.c'; then $(CYGPATH_W) 'src/Splash.c'; else $(CYGPATH_W) '$(srcdir)/src/Splash.c'`
+
+src/Icons.o: src/Icons.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o src/Icons.o `test -f 'src/Icons.c' || echo '$(srcdir)/'`src/Icons.c
+
+src/Icons.obj: src/Icons.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o src/Icons.obj `if test -f 'src/Icons.c'; then $(CYGPATH_W) 'src/Icons.c'; else $(CYGPATH_W) '$(srcdir)/src/Icons.c'`
 
 src/Editor.o: src/Editor.c
 	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o src/Editor.o `test -f 'src/Editor.c' || echo '$(srcdir)/'`src/Editor.c

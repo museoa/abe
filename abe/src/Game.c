@@ -4,6 +4,10 @@ Game game;
 
 int getGameFace() {
   // change the face
+  if(cursor.jump || cursor.slide) {
+	game.face = (game.dir == GAME_DIR_LEFT ? 8 : 9);
+	return game.face;
+  }
   if(game.balloonTimer) {
 	game.face = (game.dir == GAME_DIR_LEFT ? 6 : 7);
 	game.balloonTimer--;
@@ -14,11 +18,11 @@ int getGameFace() {
 	} else {
 	  return game.face;
 	}
-  }
+  } 
   if(cursor.dir == DIR_LEFT || cursor.dir == DIR_RIGHT) {
 	game.face++;
-	if(game.face >= FACE_COUNT * FACE_STEP) game.face = 0;
   }
+  if(game.face >= FACE_COUNT * FACE_STEP) game.face = 0;
   return (game.dir == GAME_DIR_LEFT ? 
 		  (game.face / FACE_STEP) : 
 		  (game.face / FACE_STEP) + FACE_COUNT);

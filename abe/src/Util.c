@@ -179,3 +179,29 @@ int decompress(Uint16 *buff, size_t size, SDL_RWops *rwop) {
   return real_size * sizeof(Uint16);
 #endif
 }
+
+void createBack(SDL_Surface **back_surface) {
+  int x, y;
+  SDL_Rect pos;
+  SDL_Surface *img = images[img_back]->image;
+
+  if(!(*back_surface = SDL_CreateRGBSurface(SDL_HWSURFACE, 
+										   screen->w, 
+										   screen->h, 
+										   screen->format->BitsPerPixel, 
+										   0, 0, 0, 0))) {
+	fprintf(stderr, "Error creating surm_face: %s\n", SDL_GetError());
+	fflush(stderr);
+	return;
+  }
+
+  for(y = 0; y < screen->h / TILE_H; y+=img->w/TILE_H) {
+	for(x = 0; x < screen->w / TILE_W; x+=img->h/TILE_W) {
+	  pos.x = x * TILE_W;
+	  pos.y = y * TILE_H;
+	  pos.w = img->w;
+	  pos.h = img->h;
+	  SDL_BlitSurface(img, NULL, *back_surface, &pos);
+	}
+  }
+}

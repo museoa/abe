@@ -770,10 +770,14 @@ int moveJump() {
 int moveSlide() {
   int n;
   int old_speed_x, old_speed_y;
+
+  cursor.slide = 0;
   if(!map.slides) return 0;
 
   n = map.detectSlide();
   if(!n) return 0;
+  
+  cursor.slide = 1;
 
   old_speed_x = cursor.speed_x;
   old_speed_y = cursor.speed_y;
@@ -797,16 +801,17 @@ int moveSlide() {
  */
 void moveGravity() {
   int old_speed;
-
-  if(map.gravity) {
-	if(map.detectLadder()) return;
-	old_speed = cursor.speed_y;
-	cursor.speed_y = 10;
-	cursor.gravity = 1;
-	moveDown(1, 0, 0);
-	cursor.gravity = 0;
-	cursor.speed_y = old_speed;
+    
+  if(!map.gravity || map.detectLadder()) {
+	return;
   }
+	
+  old_speed = cursor.speed_y;
+  cursor.speed_y = 10;
+  cursor.gravity = 1;
+  cursor.gravity = moveDown(1, 0, 0);
+  cursor.gravity = 0;
+  cursor.speed_y = old_speed;  
 }
 
 int moveWithPlatform() {
@@ -1177,6 +1182,7 @@ void repositionCursor(int tile_x, int tile_y) {
   cursor.jump = 0;
   cursor.gravity = 0;
   cursor.stepup = 0;
+  cursor.slide = 0;
   cursor.platform = NULL;
 }
 
