@@ -2,6 +2,7 @@
 
 void waitUntilPaintingStops();
 void finishDrawMap();
+int last_dir = -1;
 
 // some private global variables used to draw the map
 int screen_center_x, screen_center_y; // the screen's center in tiles
@@ -72,8 +73,8 @@ void drawMap() {
 	  SDL_FillRect(map.level[level], &pos, SDL_MapRGBA(screen->format, 0x0, 0x0, 0x0, 0x00));
 	}
 
-	for(y = params.start_y; y < params.end_y; y++) {
-	  for(x = params.start_x; x < params.end_x;) {
+	for(y = params.start_y; y <= params.end_y && params.end_y < map.h; y++) {
+	  for(x = params.start_x; x <= params.end_x && params.end_x < map.w;) {
 		n = (map.image_index[level][x + (y * map.w)]);
 		if(n > -1) {
 		  // Draw the image
@@ -84,8 +85,8 @@ void drawMap() {
 		  pos.h = images[n]->image->h;
 		  
 		  // compensate for extra area
-		  pos.x += EXTRA_X * TILE_W;
-		  pos.y += EXTRA_Y * TILE_H;		  
+		  pos.x += (EXTRA_X * TILE_W) - cursor.pixel_x;
+		  pos.y += (EXTRA_Y * TILE_H) - cursor.pixel_y;
 		  SDL_BlitSurface(images[n]->image, NULL, map.level[level], &pos);
 
 		  // skip ahead
@@ -107,19 +108,12 @@ void drawMap() {
    the left and top by EXTRA_X and EXTRA_Y tiles.
  */
 void drawMapLeftEdge() {
-  // compute what to draw
-  MapDrawParams params;
-  getMapDrawParams(&params);
-
-  // override the left edge param
-  params.start_x = (cursor.pos_x - screen_center_x) - EXTRA_X;
-
+  // erase the edge
   SDL_Rect pos;
   int n, row, level, x, y;
-  // erase the edge
   pos.x = 0;
   pos.y = 0;
-  pos.w = TILE_W;
+  pos.w = cursor.speed_x;
   pos.h = map.level[0]->h;
   for(level = LEVEL_BACK; level < LEVEL_COUNT; level++) {
 	if(level == LEVEL_BACK) {
@@ -128,26 +122,39 @@ void drawMapLeftEdge() {
 	  SDL_FillRect(map.level[level], &pos, SDL_MapRGBA(screen->format, 0x00, 0x00, 0x00, 0x00));
 	}
   }
+
+  // compute what to draw
+  MapDrawParams params;
+  getMapDrawParams(&params);
+
+  // override the left edge param
+  params.start_x = (cursor.pos_x - screen_center_x) - EXTRA_X;
    
+  
+  // redraw the left edge of the screen
   if(params.start_x >= 0) {
-	// redraw the left edge of the screen
 	for(level = LEVEL_BACK; level < LEVEL_COUNT; level++) {
 	  for(y = params.start_y; y < params.end_y; y++) {
-		x = params.start_x;
-		n = (map.image_index[level][x + (y * map.w)]);
-		if(n > -1) {
-		  // Draw the image
-		  // should be some check here in case images[n] points to la-la-land.
-		  //pos.x = (offset_x + (x - start_x)) * TILE_W;
-		  pos.x = 0;
-		  pos.y = (params.offset_y + (y - params.start_y)) * TILE_H;
-		  pos.w = images[n]->image->w;
-		  pos.h = images[n]->image->h;
-		  
-		  // compensate for extra area
-		  //pos.x += EXTRA_X * TILE_W;
-		  pos.y += EXTRA_Y * TILE_H;		  
-		  SDL_BlitSurface(images[n]->image, NULL, map.level[level], &pos);
+		for(x = params.start_x; x <= params.start_x + 1;) {
+		  n = (map.image_index[level][x + (y * map.w)]);
+		  if(n > -1) {
+			// Draw the image
+			// should be some check here in case images[n] points to la-la-land.
+			//pos.x = (offset_x + (x - start_x)) * TILE_W;
+			pos.x = ((x - params.start_x) * TILE_W) - cursor.pixel_x;
+			pos.y = (params.offset_y + (y - params.start_y)) * TILE_H;
+			pos.w = images[n]->image->w;
+			pos.h = images[n]->image->h;
+			
+			// compensate for extra area
+			//pos.x += (EXTRA_X * TILE_W) - cursor.pixel_x;
+			pos.y += (EXTRA_Y * TILE_H) - cursor.pixel_y;
+			SDL_BlitSurface(images[n]->image, NULL, map.level[level], &pos);
+			// skip ahead
+			x += images[n]->image->w / TILE_W;
+		  } else {
+			x++;
+		  }
 		}
 	  }
 	}
@@ -162,20 +169,13 @@ void drawMapLeftEdge() {
    the left and top by EXTRA_X and EXTRA_Y tiles.
  */
 void drawMapTopEdge() {
-  // compute what to draw
-  MapDrawParams params;
-  getMapDrawParams(&params);
-
-  // override the top edge param
-  params.start_y = (cursor.pos_y - screen_center_y) - EXTRA_Y;
-
+  // erase the edge
   SDL_Rect pos;
   int n, row, level, x, y;
-  // erase the edge
   pos.x = 0;
   pos.y = 0;
   pos.w = map.level[0]->w;
-  pos.h = TILE_W;
+  pos.h = cursor.speed_y;
   for(level = LEVEL_BACK; level < LEVEL_COUNT; level++) {
 	if(level == LEVEL_BACK) {
 	  SDL_FillRect(map.level[level], &pos, SDL_MapRGBA(screen->format, 0x20, 0x20, 0x20, 0x00));
@@ -183,29 +183,37 @@ void drawMapTopEdge() {
 	  SDL_FillRect(map.level[level], &pos, SDL_MapRGBA(screen->format, 0x00, 0x00, 0x00, 0x00));
 	}
   }
+
+  // compute what to draw
+  MapDrawParams params;
+  getMapDrawParams(&params);
+
+  // override the top edge param
+  params.start_y = (cursor.pos_y - screen_center_y) - EXTRA_Y;
    
   if(params.start_y >= 0) {
 	// redraw the left edge of the screen
 	for(level = LEVEL_BACK; level < LEVEL_COUNT; level++) {
-	  y = params.start_y;
-	  for(x = params.start_x; x < params.end_x;) {
-		n = (map.image_index[level][x + (y * map.w)]);
-		if(n > -1) {
-		  // Draw the image
-		  // should be some check here in case images[n] points to la-la-land.
-		  pos.x = (params.offset_x + (x - params.start_x)) * TILE_W;
-		  pos.y = 0;
-		  pos.w = images[n]->image->w;
-		  pos.h = images[n]->image->h;
-		  
-		  // compensate for extra area
-		  pos.x += EXTRA_X * TILE_W;
-		  //pos.y += EXTRA_Y * TILE_H;		  
-		  SDL_BlitSurface(images[n]->image, NULL, map.level[level], &pos);
-		  // skip ahead
-		  x += images[n]->image->w / TILE_W;
-		} else {
-		  x++;
+	  for(y = params.start_y; y <= params.start_y + 1; y++) {
+		for(x = params.start_x; x < params.end_x;) {
+		  n = (map.image_index[level][x + (y * map.w)]);
+		  if(n > -1) {
+			// Draw the image
+			// should be some check here in case images[n] points to la-la-land.
+			pos.x = (params.offset_x + (x - params.start_x)) * TILE_W;
+			pos.y = ((y - params.start_y) * TILE_H)-cursor.pixel_y;
+			pos.w = images[n]->image->w;
+			pos.h = images[n]->image->h;
+			
+			// compensate for extra area
+			pos.x += (EXTRA_X * TILE_W) - cursor.pixel_x;
+			//pos.y += (EXTRA_Y * TILE_H) - cursor.pixel_y;
+			SDL_BlitSurface(images[n]->image, NULL, map.level[level], &pos);
+			// skip ahead
+			x += images[n]->image->w / TILE_W;
+		  } else {
+			x++;
+		  }
 		}
 	  }
 	}
@@ -218,19 +226,12 @@ void drawMapTopEdge() {
    given that the cursor is in the middle of the screen.
  */
 void drawMapRightEdge() {
-  // compute what to draw
-  MapDrawParams params;
-  getMapDrawParams(&params);
-
-  // override the right edge param
-  params.end_x = (cursor.pos_x - screen_center_x) + screen_w;
-
+  // erase the edge
   SDL_Rect pos;
   int n, row, level, x, y;
-  // erase the edge
-  pos.x = map.level[0]->w - TILE_W;
+  pos.x = map.level[0]->w - cursor.speed_x;
   pos.y = 0;
-  pos.w = TILE_W;
+  pos.w = cursor.speed_x;
   pos.h = map.level[0]->h;
   for(level = LEVEL_BACK; level < LEVEL_COUNT; level++) {
 	if(level == LEVEL_BACK) {
@@ -239,27 +240,34 @@ void drawMapRightEdge() {
 	  SDL_FillRect(map.level[level], &pos, SDL_MapRGBA(screen->format, 0x00, 0x00, 0x00, 0x00));
 	}
   }
-   
+
+  // compute what to draw
+  MapDrawParams params;
+  getMapDrawParams(&params);
+
+  // override the right edge param
+  params.end_x = (cursor.pos_x - screen_center_x) + screen_w;
+
   // redraw the left edge of the screen
   for(level = LEVEL_BACK; level < LEVEL_COUNT; level++) {
 	for(y = params.start_y; y < params.end_y; y++) {
 	  // here we have to draw more than 1 column b/c images
 	  // extend from right_edge-EXTRA_X on. 
-	  for(x = params.end_x - EXTRA_X; x < params.end_x;) {
+	  for(x = params.end_x - EXTRA_X; x <= params.end_x;) {
 		if(params.end_x >= map.w) break;
 		n = (map.image_index[level][x + (y * map.w)]);
 		if(n > -1) {
 		  // Draw the image
 		  // should be some check here in case images[n] points to la-la-land.
 		  //pos.x = (offset_x + (x - start_x)) * TILE_W;
-		  pos.x = map.level[level]->w - ((params.end_x - x) * TILE_W);
+		  pos.x = (map.level[level]->w - ((params.end_x - x) * TILE_W)) - cursor.pixel_x;
 		  pos.y = (params.offset_y + (y - params.start_y)) * TILE_H;
 		  pos.w = images[n]->image->w;
 		  pos.h = images[n]->image->h;
 		  
 		  // compensate for extra area
-		  //pos.x += EXTRA_X * TILE_W;
-		  pos.y += EXTRA_Y * TILE_H;
+		  //pos.x += (EXTRA_X * TILE_W) - cursor.pixel_x;
+		  pos.y += (EXTRA_Y * TILE_H) - cursor.pixel_y;
 		  SDL_BlitSurface(images[n]->image, NULL, map.level[level], &pos);
 		  // skip ahead
 		  x += images[n]->image->w / TILE_W;
@@ -277,20 +285,13 @@ void drawMapRightEdge() {
    given that the cursor is in the middle of the screen.
  */
 void drawMapBottomEdge() {
-  // compute what to draw
-  MapDrawParams params;
-  getMapDrawParams(&params);
-
-  // override the bottom edge param
-  params.end_y = (cursor.pos_y - screen_center_y) + screen_h;
-
+  // erase the edge
   SDL_Rect pos;
   int n, row, level, x, y;
-  // erase the edge
   pos.x = 0;
-  pos.y = map.level[0]->h - TILE_H;
+  pos.y = map.level[0]->h - cursor.speed_y;
   pos.w = map.level[0]->w;
-  pos.h = TILE_H;
+  pos.h = cursor.speed_y;
   for(level = LEVEL_BACK; level < LEVEL_COUNT; level++) {
 	if(level == LEVEL_BACK) {
 	  SDL_FillRect(map.level[level], &pos, SDL_MapRGBA(screen->format, 0x20, 0x20, 0x20, 0x00));
@@ -298,12 +299,19 @@ void drawMapBottomEdge() {
 	  SDL_FillRect(map.level[level], &pos, SDL_MapRGBA(screen->format, 0x00, 0x00, 0x00, 0x00));
 	}
   }
+
+  // compute what to draw
+  MapDrawParams params;
+  getMapDrawParams(&params);
+
+  // override the bottom edge param
+  params.end_y = (cursor.pos_y - screen_center_y) + screen_h;
    
   // redraw the left edge of the screen
   for(level = LEVEL_BACK; level < LEVEL_COUNT; level++) {
 	// here we have to draw more than 1 column b/c images
 	// extend from right_edge-EXTRA_X on. 
-	for(y = params.end_y - EXTRA_Y; y < params.end_y; y++) {
+	for(y = params.end_y - EXTRA_Y; y <= params.end_y; y++) {
 	  if(params.end_y >= map.h) break;
 	  for(x = params.start_x; x < params.end_x;) {
 		n = (map.image_index[level][x + (y * map.w)]);
@@ -311,13 +319,13 @@ void drawMapBottomEdge() {
 		  // Draw the image
 		  // should be some check here in case images[n] points to la-la-land.
 		  pos.x = (params.offset_x + (x - params.start_x)) * TILE_W;
-		  pos.y = map.level[level]->h - ((params.end_y - y) * TILE_H);
+		  pos.y = (map.level[level]->h - ((params.end_y - y) * TILE_H)) - cursor.pixel_y;
 		  pos.w = images[n]->image->w;
 		  pos.h = images[n]->image->h;
 		  
 		  // compensate for extra area
-		  pos.x += EXTRA_X * TILE_W;
-		  //pos.y += EXTRA_Y * TILE_H;
+		  pos.x += (EXTRA_X * TILE_W) - cursor.pixel_x;
+		  //pos.y += (EXTRA_Y * TILE_H) - cursor.pixel_y;
 		  SDL_BlitSurface(images[n]->image, NULL, map.level[level], &pos);
 		  // skip ahead
 		  x += images[n]->image->w / TILE_W;
@@ -347,9 +355,9 @@ void scrollMap(int dir) {
 		exit(0);	
 	  }
 	  for(row = 0; row < map.level[level]->h; row++) {
-		memmove((Uint16*)((Uint16*)(map.level[level]->pixels) + ((long)map.level[level]->w * (long)row) + (long)TILE_W), 
+		memmove((Uint16*)((Uint16*)(map.level[level]->pixels) + ((long)map.level[level]->w * (long)row) + (long)cursor.speed_x), 
 				(Uint16*)((Uint16*)(map.level[level]->pixels) + ((long)map.level[level]->w * (long)row)),
-				(long)(map.level[level]->w - TILE_W) * (long)sizeof(Uint16));
+				(long)(map.level[level]->w - cursor.speed_x) * (long)sizeof(Uint16));
 	  }
 	  SDL_UnlockSurface(map.level[level]);
 	}
@@ -372,15 +380,15 @@ void scrollMap(int dir) {
 	  for(row = 0; row < map.level[level]->h; row++) {
 		// I guess this could be a memcpy for left and up...
 		memmove((Uint16*)((Uint16*)(map.level[level]->pixels) + ((long)map.level[level]->w * (long)row)), 
-				(Uint16*)((Uint16*)(map.level[level]->pixels) + ((long)map.level[level]->w * (long)row + (long)TILE_W)),
-				(long)(map.level[level]->w - TILE_W) * (long)sizeof(Uint16));
+				(Uint16*)((Uint16*)(map.level[level]->pixels) + ((long)map.level[level]->w * (long)row + (long)cursor.speed_x)),
+				(long)(map.level[level]->w - cursor.speed_x) * (long)sizeof(Uint16));
 	  }
 	  SDL_UnlockSurface(map.level[level]);
 	}
 
 	// draw only the new left edge
 	drawMapRightEdge();
-
+	
 	break;
 
 
@@ -393,7 +401,7 @@ void scrollMap(int dir) {
 		fflush(stderr);
 		exit(0);	
 	  }
-	  long skipped = (long)map.level[level]->w * (long)TILE_H;
+	  long skipped = (long)map.level[level]->w * (long)cursor.speed_y;
 	  memmove((Uint16*)((Uint16*)(map.level[level]->pixels) + skipped), 
 			  (Uint16*)(map.level[level]->pixels),
 			  (long)(map.level[level]->w * map.level[level]->h - skipped) * (long)sizeof(Uint16));
@@ -415,7 +423,7 @@ void scrollMap(int dir) {
 		fflush(stderr);
 		exit(0);	
 	  }
-	  long skipped = (long)map.level[level]->w * (long)TILE_H;
+	  long skipped = (long)map.level[level]->w * (long)cursor.speed_y;
 	  memmove((Uint16*)(map.level[level]->pixels), 
 			  (Uint16*)((Uint16*)(map.level[level]->pixels) + skipped),
 			  (long)(map.level[level]->w * map.level[level]->h - skipped) * (long)sizeof(Uint16));
@@ -440,51 +448,182 @@ void scrollMap(int dir) {
   }
 }
 
+int moveLeft() {
+  if(cursor.dontMove) {
+	finishDrawMap();
+	return 0;
+  }
+  int move, old_pixel, old_pos;
+  while(cursor.speed_x > 0) {
+	move = 1;
+	old_pixel = cursor.pixel_x;
+	old_pos = cursor.pos_x;
+
+	cursor.pixel_x -= cursor.speed_x;
+	if(cursor.pixel_x < 0) {
+	  cursor.pixel_x += TILE_W;
+	  cursor.pos_x--;
+	  if(cursor.pos_x < 0) {
+		move = 0;
+	  }
+	}
+	if(move && detectCollision(DIR_LEFT)) {
+	  scrollMap(DIR_LEFT);	
+	  if(map.accelerate) {
+		if(cursor.speed_x < TILE_W) {
+		  cursor.speed_x += SPEED_INC_X;
+		  if(cursor.speed_x >= TILE_W) cursor.speed_x = TILE_W;
+		}
+	  }
+	  return 1;
+	}
+	cursor.pixel_x = old_pixel;
+	cursor.pos_x = old_pos;
+	cursor.speed_x -= SPEED_INC_X;
+  }
+  cursor.dir = DIR_NONE;
+  return 0;
+}
+
+int moveRight() {
+  if(cursor.dontMove) {
+	finishDrawMap();
+	return 0;
+  }
+  int move, old_pixel, old_pos;
+  while(cursor.speed_x > 0) {
+	move = 1;
+	old_pixel = cursor.pixel_x;
+	old_pos = cursor.pos_x;
+
+	cursor.pixel_x += cursor.speed_x;
+	if(cursor.pixel_x >= TILE_W) {
+	  cursor.pixel_x -= TILE_W;
+	  cursor.pos_x++;
+	  if(cursor.pos_x >= map.w) {
+		move = 0;
+	  }
+	}
+	if(move && detectCollision(DIR_RIGHT)) {
+	  scrollMap(DIR_RIGHT);	
+	  if(map.accelerate) {
+		if(cursor.speed_x < TILE_W) {
+		  cursor.speed_x += SPEED_INC_X;
+		  if(cursor.speed_x >= TILE_W) cursor.speed_x = TILE_W;
+		}
+	  }
+	  return 1;
+	}
+	cursor.pixel_x = old_pixel;
+	cursor.pos_x = old_pos;
+	cursor.speed_x -= SPEED_INC_X;
+  }
+  cursor.dir = DIR_NONE;
+  return 0;
+}
+
+int moveUp(int checkCollision) {
+  int move, old_pixel, old_pos;
+  while(cursor.speed_y > 0) {
+	move = 1;
+	old_pixel = cursor.pixel_y;
+	old_pos = cursor.pos_y;
+
+	cursor.pixel_y -= cursor.speed_y;
+	if(cursor.pixel_y < 0) {
+	  cursor.pixel_y += TILE_H;
+	  cursor.pos_y--;
+	  if(cursor.pos_y < 0) {
+		move = 0;
+	  }
+	}
+	if(move && (!checkCollision || detectCollision(DIR_UP))) {
+	  scrollMap(DIR_UP);	
+	  if(map.accelerate) {
+		if(cursor.speed_y < TILE_H) {
+		  cursor.speed_y += SPEED_INC_Y;
+		  if(cursor.speed_y >= TILE_H) cursor.speed_y = TILE_H;
+		}
+	  }
+	  return 1;
+	}
+	cursor.pixel_y = old_pixel;
+	cursor.pos_y = old_pos;
+	cursor.speed_y -= SPEED_INC_Y;
+  }
+  cursor.dir = DIR_NONE;
+  return 0;
+}
+
+int moveDown() {
+  int move, old_pixel, old_pos;
+  while(cursor.speed_y > 0) {
+	move = 1;
+	old_pixel = cursor.pixel_y;
+	old_pos = cursor.pos_y;
+
+	cursor.pixel_y += cursor.speed_y;
+	if(cursor.pixel_y >= TILE_H) {
+	  cursor.pixel_y -= TILE_H;
+	  cursor.pos_y++;
+	  if(cursor.pos_y >= map.h) {
+		move = 0;
+	  }
+	}
+	if(move && detectCollision(DIR_DOWN)) {
+	  scrollMap(DIR_DOWN);	
+	  if(map.accelerate) {
+		if(cursor.speed_y < TILE_H) {
+		  cursor.speed_y += SPEED_INC_Y;
+		  if(cursor.speed_y >= TILE_H) cursor.speed_y = TILE_H;
+		}
+	  }
+	  return 1;
+	}
+	cursor.pixel_y = old_pixel;
+	cursor.pos_y = old_pos;
+	cursor.speed_y -= SPEED_INC_Y;
+  }
+  cursor.dir = DIR_NONE;
+  return 0;
+}
+
 /**
    Move in the dir direction.
    This could be optimized by blitting the screen 1 tile unit in the 
    opposite direction and only drawing the new column.
  */
 int moveMap(void *data) {
+  int delay, old_dir;
   while(!map.stopThread) {
+	// a direction change
+	if(cursor.dir != last_dir) {
+	  if(map.accelerate) {
+		cursor.speed_x = cursor.speed_y = 2;
+	  }
+	  cursor.wait = 1;
+	  last_dir = cursor.dir;
+	}
 	switch(cursor.dir) {
 	case DIR_QUIT:
 	  return 0;
 	case DIR_LEFT:
-	  cursor.pos_x--;
-	  if(cursor.pos_x < 0) {
-		cursor.pos_x = 0;
-		cursor.dir = DIR_NONE;
-	  } else {
-		scrollMap(DIR_LEFT);
+	  if(!moveLeft()) {
+		// see if you can step up on it
 	  }
 	  break;	
 	case DIR_RIGHT:
-	  cursor.pos_x++;
-	  if(cursor.pos_x >= map.w) {
-		cursor.pos_x = map.w - 1;
-		cursor.dir = DIR_NONE;
-	  } else {
-		scrollMap(DIR_RIGHT);
-	  }
+	  moveRight();
 	  break;
 	case DIR_UP:
-	  cursor.pos_y--;
-	  if(cursor.pos_y < 0) {
-		cursor.pos_y = 0;
-		cursor.dir = DIR_NONE;
-	  } else {
-		scrollMap(DIR_UP);
-	  }
+	  moveUp(1);
 	  break;
 	case DIR_DOWN:
-	  cursor.pos_y++;
-	  if(cursor.pos_y >= map.h) {
-		cursor.pos_y = map.h - 1;
-		cursor.dir = DIR_NONE;
-	  } else {
-		scrollMap(DIR_DOWN);
-	  }
+	  moveDown();
+	  break;
+	case DIR_UPDATE:
+	  finishDrawMap();
+	  cursor.dir = DIR_NONE;
 	  break;
 	case DIR_NONE:
 	  // wait until there's movement.
@@ -498,13 +637,16 @@ int moveMap(void *data) {
 		fflush(stderr);
 		exit(-1);
 	  }
+	  // no need to unlock mutex, wait, etc.
+	  continue; 
 	}
 	if(cursor.wait) {
 	  cursor.wait = 0;
-	  SDL_Delay(map.delay);
+	  delay = map.delay;
 	} else {
-	  SDL_Delay(10); // a small delay to not max out the cpu
+	  delay = 10; // a small delay to not max out the cpu
 	}
+	SDL_Delay(delay);
   }
 }
 
@@ -527,6 +669,10 @@ void finishDrawMap() {
 	pos.w = map.level[level]->w;
 	pos.h = map.level[level]->h;
 	SDL_BlitSurface(map.level[level], NULL, screen, &pos);
+	// make a callback if it exists
+	if(level == LEVEL_MAIN && map.afterMainLevelDrawn) {
+	  map.afterMainLevelDrawn();
+	}
   }
 
   // if the callback function is set, call it now.
@@ -582,10 +728,12 @@ void setImage(int level, int index) {
 
 void initMap(char *name, int w, int h) {
   // start a new Map
+  map.accelerate = 1;
   map.name = strdup(name);
   map.w = w;
   map.h = h;
   map.beforeDrawToScreen = NULL;
+  map.afterMainLevelDrawn = NULL;
   map.delay = 25;
   map.thread = NULL;
   map.move_cond = NULL;
@@ -689,8 +837,13 @@ void signalMapMoveThread() {
 void resetCursor() {
   cursor.pos_x = 0;
   cursor.pos_y = 0;
+  cursor.pixel_x = 0;
+  cursor.pixel_y = 0;
+  cursor.speed_x = TILE_W;
+  cursor.speed_y = TILE_H;
   cursor.dir = DIR_NONE;
   cursor.wait = 0;
+  cursor.dontMove = 0;
 }
 
 void saveMap() {
@@ -715,7 +868,7 @@ void saveMap() {
 }
 
 // call this after initMap()!
-void loadMap() {
+int loadMap(int draw_map) {
   char path[300];
   sprintf(path, "%s/%s.dat", MAPS_DIR, map.name);
   printf("Loading map %s\n", path);  
@@ -724,7 +877,7 @@ void loadMap() {
   if(!(fp = fopen(path, "rb"))) {
 	fprintf(stderr, "Can't open file for reading.");
 	fflush(stderr);
-	return;
+	return 0;
   }
   fread(&(map.w), sizeof(map.w), 1, fp);
   fread(&(map.h), sizeof(map.h), 1, fp);
@@ -734,7 +887,7 @@ void loadMap() {
 	fread(map.image_index[i], sizeof(int) * map.w * map.h, 1, fp);
   }
   fclose(fp);
-
   resetCursor();
-  drawMap();
+  if(draw_map) drawMap();
+  return 1;
 }

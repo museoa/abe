@@ -18,5 +18,6 @@ int state;
 #define STATE_MAIN_LOOP 1
 #define STATE_EDIT_LOOP 2
 #define STATE_MENU 3
+#define STATE_GAME_LOOP 4
 
 #endif

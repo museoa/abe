@@ -12,6 +12,12 @@ void startEditor() {
   editMap("default", 1000, 1000);
 }
 
+void startGame() {
+  state = STATE_GAME_LOOP;
+  initGame();
+  runMap("default", 1000, 1000);
+}
+
 /**
    Main event handling.
 */
@@ -31,6 +37,8 @@ mainLoop(int showsplash) {
 	SDL_WaitEvent(&event);
 	if(state == STATE_EDIT_LOOP) {
 	  editorMainLoop(&event);
+	} else if(state == STATE_GAME_LOOP) {
+	  gameMainLoop(&event);
 	} else if(state == STATE_MENU) {
 	  menuMainLoop(&event);
 	}
@@ -40,6 +48,10 @@ mainLoop(int showsplash) {
 	  if(event.key.keysym.sym == SDLK_ESCAPE) {
 		if(state == STATE_SPLASH_SCREEN) hideSplashScreen();
 		return;
+	  } else if(event.key.keysym.sym == SDLK_SPACE && state == STATE_SPLASH_SCREEN) {
+		hideSplashScreen();
+		state = STATE_MAIN_LOOP;
+		startGame();
 	  } else if(event.key.keysym.sym == SDLK_RETURN && state == STATE_SPLASH_SCREEN) {
 		hideSplashScreen();
 		//		showMenu();

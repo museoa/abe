@@ -29,19 +29,19 @@ void editorMainLoop(SDL_Event *event) {
 	//	printf("The %s key was pressed! scan=%d\n", SDL_GetKeyName(event->key.keysym.sym), event->key.keysym.scancode);
 	switch(event->key.keysym.sym) {
 	case SDLK_LEFT: 
-	  cursor.dir = DIR_LEFT; cursor.wait = 1; 
+	  cursor.dir = DIR_LEFT;
 	  signalMapMoveThread();
 	  break;
 	case SDLK_RIGHT: 
-	  cursor.dir = DIR_RIGHT; cursor.wait = 1; 
+	  cursor.dir = DIR_RIGHT;
 	  signalMapMoveThread();
 	  break;
 	case SDLK_UP: 
-	  cursor.dir = DIR_UP; cursor.wait = 1; 
+	  cursor.dir = DIR_UP;
 	  signalMapMoveThread();
 	  break;
 	case SDLK_DOWN: 
-	  cursor.dir = DIR_DOWN; cursor.wait = 1; 
+	  cursor.dir = DIR_DOWN;
 	  signalMapMoveThread();
 	  break;
 	case SDLK_RETURN: 
@@ -85,7 +85,7 @@ void editorMainLoop(SDL_Event *event) {
 	  break;
 	case SDLK_l: 
 	  waitUntilPaintingStops();
-	  loadMap();
+	  loadMap(1);
 	  break;
 	case SDLK_s: 
 	  waitUntilPaintingStops();
@@ -186,6 +186,7 @@ void allocMap(char *name, int w, int h) {
   
   // set our painting events
   map.beforeDrawToScreen = beforeDrawToScreen;
+  map.accelerate = 0;
 
   // fill the map
   int level, i, x, y;
@@ -249,7 +250,7 @@ void editMap(char *name, int w, int h) {
   allocMap(name, w, h);
 
   // try to load it
-  loadMap();
+  loadMap(1);
 
   // show it
   drawMap();

@@ -17,6 +17,7 @@
 #define LEVEL_COUNT 3
 
 // Movement directions
+#define DIR_UPDATE -2
 #define DIR_QUIT -1
 #define DIR_NONE 0
 #define DIR_UP 1
@@ -30,6 +31,9 @@
 #define EXTRA_X 5
 #define EXTRA_Y 5
 
+#define SPEED_INC_X 1
+#define SPEED_INC_Y 1
+
 typedef struct _map {
   char *name;
   int w, h;
@@ -41,12 +45,18 @@ typedef struct _map {
   int stopThread;
   // painting callbacks
   void (*beforeDrawToScreen)();
+  void (*afterMainLevelDrawn)();
+  int (*detectCollision) (int);
   SDL_cond *move_cond;
   SDL_mutex *move_cond_mutex;
+  int accelerate; // 1 for accelerated movement, 0 otherwise
 } Map;
 
 typedef struct _cursor {
+  int dontMove;
   int pos_x, pos_y;
+  int pixel_x, pixel_y;
+  int speed_x, speed_y;
   int dir;
   int wait;
 } Cursor;
@@ -62,7 +72,12 @@ void signalMapMoveThread();
 void initMap(char *name, int w, int h);
 void destroyMap();
 void saveMap();
-void loadMap();
+int loadMap(int drawMap);
 void resetCursor();
 
+// return 1 or 0 if movement in that direction is possible
+int moveLeft();
+int moveRight();
+int moveUp(int checkCollision);
+int moveDown();
 #endif

@@ -49,10 +49,9 @@ void clearScreen(int title_x, int title_y) {
 		title_pos.y = title_y;
 	  }
 	  SDL_BlitSurface(title, NULL, screen, &title_pos);
-
-	  SDL_Flip(screen);
-	  SDL_Delay(5);
 	}
+	SDL_Flip(screen);
+	SDL_Delay(5);
   }
 
   while(moveTitle(&title_x, &title_y)) {	  

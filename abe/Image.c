@@ -40,12 +40,15 @@ doLoadImage(char *filename, char *name) {
 	tom[5] = image;
   } else {
 	// a primitive hashtable
+	int type = TYPE_WALL;
 	if(!strcmp(name, "brick")) {
 	  img_brick = image_count;
 	} else if(!strcmp(name, "rock")) {
 	  img_rock = image_count;
 	} else if(!strcmp(name, "back")) {
 	  img_back = image_count;
+	} else if(!strcmp(name, "ladder")) {
+	  type = TYPE_LADDER;
 	}
 	// store the image
 	if(!(images[image_count] = malloc(sizeof(Image)))) {
@@ -55,7 +58,7 @@ doLoadImage(char *filename, char *name) {
 	}
 	images[image_count]->image = image;
 	images[image_count]->name = strdup(name);
-	images[image_count]->type = TYPE_WALL;
+	images[image_count]->type = type;
 	image_count++;
   }
 }
