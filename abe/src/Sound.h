@@ -6,6 +6,6 @@
 #define SOUND_DIR "sounds"
 
 void initAudio();
-void playWav(char *wav);
+void playDoor();
 
 #endif

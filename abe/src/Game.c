@@ -254,7 +254,7 @@ int detectCollision(int dir) {
   if(containsTypeWhere(&pos, &key, TYPE_DOOR)) {
 	if(game.keys > 0) {
 	  // open door
-	  //playWav("door"); FIXME: sound code is not quite ready
+	  playDoor();
 	  map.image_index[LEVEL_MAIN][key.pos_x + (key.pos_y * map.w)] = EMPTY_MAP;
 	  map.image_index[LEVEL_FORE][key.pos_x + (key.pos_y * map.w)] = img_door2;
 	  game.keys--;

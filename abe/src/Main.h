@@ -6,6 +6,7 @@
 #include <string.h>
 #include "SDL.h"
 #include "SDL_thread.h"
+#include "SDL_mixer.h"
 
 #include "Common.h"
 #include "Image.h"

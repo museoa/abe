@@ -133,7 +133,7 @@ src/Editor.c src/Font.c src/Util.c src/Menu.c src/Map.c src/MapIO.c \
 src/Game.c src/Monster.c src/Sound.c
 
 
-abe_LDADD = @MATHLIB@
+abe_LDADD = @MATHLIB@ -lSDL_mixer
 subdir = .
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
