@@ -64,6 +64,11 @@ int main(int argc, char *argv[]) {
 	fprintf(stderr, "Unable to set 640x480 video: %s\n", SDL_GetError());
 	exit(1);
   }
+  fprintf(stderr, "SDL_HWSURFACE =%s\n", (screen->flags & SDL_HWSURFACE ? "true" : "false"));
+  fprintf(stderr, "SDL_FULLSCREEN=%s\n", (screen->flags & SDL_FULLSCREEN ? "true" : "false"));
+  fprintf(stderr, "SDL_DOUBLEBUF =%s\n", (screen->flags & SDL_DOUBLEBUF ? "true" : "false"));
+  fprintf(stderr, "w=%d h=%d bpp=%d pitch=%d\n", screen->w, screen->h, screen->format->BitsPerPixel, screen->pitch);
+  fflush(stderr);
 
   SDL_ShowCursor(0);
 

@@ -5,7 +5,7 @@
 #include <dirent.h>
 #include "Main.h"
 
-#define IMAGES_DIR "./images"
+#define IMAGES_DIR "images"
 
 SDL_Surface *title;
 SDL_Surface *tom[6];

@@ -410,9 +410,12 @@ void scrollMap(int dir) {
 		exit(0);	
 	  }
 	  for(row = 0; row < map.level[level]->h; row++) {
-		memmove((Uint16*)((Uint16*)(map.level[level]->pixels) + ((long)map.level[level]->w * (long)row) + (long)cursor.speed_x), 
-				(Uint16*)((Uint16*)(map.level[level]->pixels) + ((long)map.level[level]->w * (long)row)),
-				(long)(map.level[level]->w - cursor.speed_x) * (long)sizeof(Uint16));
+		memmove((Uint8*)((Uint8*)(map.level[level]->pixels) + 
+						 ((long)map.level[level]->pitch * (long)row) + 
+						 (long)cursor.speed_x * map.level[level]->format->BytesPerPixel), 
+				(Uint8*)((Uint8*)(map.level[level]->pixels) + 
+						 ((long)map.level[level]->pitch * (long)row)),
+				(long)(map.level[level]->pitch - (cursor.speed_x * map.level[level]->format->BytesPerPixel)));
 	  }
 	  SDL_UnlockSurface(map.level[level]);
 	}
@@ -433,10 +436,12 @@ void scrollMap(int dir) {
 		exit(0);	
 	  }
 	  for(row = 0; row < map.level[level]->h; row++) {
-		// I guess this could be a memcpy for left and up...
-		memmove((Uint16*)((Uint16*)(map.level[level]->pixels) + ((long)map.level[level]->w * (long)row)), 
-				(Uint16*)((Uint16*)(map.level[level]->pixels) + ((long)map.level[level]->w * (long)row + (long)cursor.speed_x)),
-				(long)(map.level[level]->w - cursor.speed_x) * (long)sizeof(Uint16));
+		memmove((Uint8*)((Uint8*)(map.level[level]->pixels) + 
+						 ((long)map.level[level]->pitch * (long)row)), 
+				(Uint8*)((Uint8*)(map.level[level]->pixels) + 
+						 ((long)map.level[level]->pitch * (long)row + 
+						  (long)cursor.speed_x * map.level[level]->format->BytesPerPixel)),
+				(long)(map.level[level]->pitch - (long)(cursor.speed_x *  map.level[level]->format->BytesPerPixel)));
 	  }
 	  SDL_UnlockSurface(map.level[level]);
 	}
@@ -456,10 +461,10 @@ void scrollMap(int dir) {
 		fflush(stderr);
 		exit(0);	
 	  }
-	  skipped = (long)map.level[level]->w * (long)cursor.speed_y;
-	  memmove((Uint16*)((Uint16*)(map.level[level]->pixels) + skipped), 
-			  (Uint16*)(map.level[level]->pixels),
-			  (long)(map.level[level]->w * map.level[level]->h - skipped) * (long)sizeof(Uint16));
+	  skipped = (long)map.level[level]->pitch * (long)cursor.speed_y;
+	  memmove((Uint8*)((Uint8*)(map.level[level]->pixels) + skipped), 
+			  (Uint8*)(map.level[level]->pixels),
+			  (long)(map.level[level]->pitch * map.level[level]->h - skipped));
 	  SDL_UnlockSurface(map.level[level]);
 	}
 
@@ -478,10 +483,10 @@ void scrollMap(int dir) {
 		fflush(stderr);
 		exit(0);	
 	  }
-	  skipped = (long)map.level[level]->w * (long)cursor.speed_y;
-	  memmove((Uint16*)(map.level[level]->pixels), 
-			  (Uint16*)((Uint16*)(map.level[level]->pixels) + skipped),
-			  (long)(map.level[level]->w * map.level[level]->h - skipped) * (long)sizeof(Uint16));
+	  skipped = (long)map.level[level]->pitch * (long)cursor.speed_y;
+	  memmove((Uint8*)(map.level[level]->pixels), 
+			  (Uint8*)((Uint8*)(map.level[level]->pixels) + skipped),
+			  (long)(map.level[level]->pitch * map.level[level]->h - skipped));
 	  SDL_UnlockSurface(map.level[level]);
 	}
 
@@ -959,7 +964,7 @@ void saveMap() {
   size_t new_size, written;
   int *compressed_map;
 
-  sprintf(path, "%s/%s.dat", MAPS_DIR, map.name);
+  sprintf(path, "%s%s%s.dat", MAPS_DIR, PATH_SEP, map.name);
   printf("Saving map %s\n", path);  
   fflush(stdout);
 
@@ -994,7 +999,7 @@ int loadMap(int draw_map) {
   int *read_buff;
   int count_read;
 
-  sprintf(path, "%s/%s.dat", MAPS_DIR, map.name);
+  sprintf(path, "%s%s%s.dat", MAPS_DIR, PATH_SEP, map.name);
   printf("Loading map %s\n", path);  
   fflush(stdout);
   if(!(fp = fopen(path, "rb"))) {

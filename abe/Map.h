@@ -4,7 +4,7 @@
 #include "Main.h"
 
 // Where to store the map files (no ending /)
-#define MAPS_DIR "./maps"
+#define MAPS_DIR "maps"
 
 // Tile sizes
 #define TILE_W 20

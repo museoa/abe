@@ -143,9 +143,9 @@ void loadImagesFromTar() {
   int block = 0;
 
   image_count = 0;
-  sprintf(tmp_path, "%s/%s", IMAGES_DIR, "tmp.bmp");
+  sprintf(tmp_path, "%s%s%s", IMAGES_DIR, PATH_SEP, "tmp.bmp");
 
-  sprintf(path, "%s/%s", IMAGES_DIR, "images.tar");
+  sprintf(path, "%s%s%s", IMAGES_DIR, PATH_SEP, "images.tar");
   fprintf(stderr, "Opening %s for reading.\n", path);
   fflush(stderr);
   fp = fopen(path, "rb");
