@@ -300,7 +300,8 @@ void initMonsters() {
 	monsters[i].drawMonster = defaultDrawMonster;
 	monsters[i].face_mod = 1;
 	monsters[i].type = i;
-	monsters[MONSTER_PLATFORM].harmless = 0;
+	monsters[i].harmless = 0;
+	monsters[i].random_speed = 1;
   }
 
   // crab monster
@@ -310,6 +311,7 @@ void initMonsters() {
   monsters[MONSTER_CRAB].start_speed_y = 2;
   // animation 2x slower
   monsters[MONSTER_CRAB].face_mod = 2;
+  monsters[MONSTER_CRAB].random_speed = 0;
 
   // smasher monster
   strcpy(monsters[MONSTER_SMASHER].name, "smasher");
@@ -386,8 +388,13 @@ void addLiveMonster(int monster_index, int image_index, int x, int y) {
   live_monsters[live_monster_count].pos_y = y;
   live_monsters[live_monster_count].pixel_x = 0;
   live_monsters[live_monster_count].pixel_y = 0;
-  live_monsters[live_monster_count].speed_x = m->start_speed_x + ((int)(MAX_RANDOM_SPEED * rand()/(RAND_MAX)));
-  live_monsters[live_monster_count].speed_y = m->start_speed_y + ((int)(MAX_RANDOM_SPEED * rand()/(RAND_MAX)));
+  if(m->random_speed) {
+	live_monsters[live_monster_count].speed_x = m->start_speed_x + ((int)(MAX_RANDOM_SPEED * rand()/(RAND_MAX)));
+	live_monsters[live_monster_count].speed_y = m->start_speed_y + ((int)(MAX_RANDOM_SPEED * rand()/(RAND_MAX)));
+  } else {
+	live_monsters[live_monster_count].speed_x = m->start_speed_x;
+	live_monsters[live_monster_count].speed_y = m->start_speed_y;
+  }
   live_monsters[live_monster_count].dir = DIR_NONE;
   live_monsters[live_monster_count].face = 0;
   live_monsters[live_monster_count].monster = m;

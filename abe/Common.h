@@ -42,6 +42,7 @@ typedef struct _monster {
   void (*moveMonster) (LiveMonster *live);
   void (*drawMonster) (SDL_Rect *pos, LiveMonster *live, SDL_Surface *surface, SDL_Surface *img);
   int harmless;
+  int random_speed;
 } Monster;
 
 typedef struct _cursor {
