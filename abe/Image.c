@@ -63,6 +63,16 @@ doLoadImage(char *filename, char *name) {
   }
 }
 
+int selectDirEntry(const struct dirent *d) {
+  return (strstr(d->d_name, ".bmp") || strstr(d->d_name, ".BMP") ? 1 : 0);
+}
+
+char *getImageName(char *s) {
+  char *r = strdup(s);
+  *(r + strlen(r) - 4) = 0;
+  return r;
+}
+
 /**
    Load every bmp file from the ./images directory.
  */
@@ -72,23 +82,24 @@ void loadImages() {
   fprintf(stderr, "Looking for images in %s \n", IMAGES_DIR);
   fflush(stderr);
 
-  DIR *fp;
-  if((fp = opendir(IMAGES_DIR)) == NULL) {
-	fprintf(stderr, "Can't read directory: %s\n", IMAGES_DIR);
+  // it's important to always load the images in the same order.
+  struct dirent **namelist;
+  int n;
+  n = scandir(IMAGES_DIR, &namelist, selectDirEntry, alphasort);
+  if(n < 0) {
+	fprintf(stderr, "Can't sort directory: %s\n", IMAGES_DIR);
 	fflush(stderr);
 	exit(0);
-  }
-
-  char filename[300];
-  struct dirent *d;
-
-  while((d = readdir(fp)) != NULL) {
-	if(strstr(d->d_name, ".bmp") || strstr(d->d_name, ".BMP")) {
-	  sprintf(filename, "%s/%s", IMAGES_DIR, d->d_name);
-	  *(d->d_name + strlen(d->d_name) - 4) = 0;
-	  doLoadImage(filename, d->d_name);
+  } else {
+	char *name;
+	char path[300];
+	while(n--) {
+	  name = getImageName(namelist[n]->d_name);
+	  sprintf(path, "%s/%s", IMAGES_DIR, namelist[n]->d_name);
+	  doLoadImage(path, name);
+	  free(name);
+	  free(namelist[n]);
 	}
+	free(namelist);
   }
-
-  closedir(fp);
 }
