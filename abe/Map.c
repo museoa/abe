@@ -467,7 +467,7 @@ int moveLeft() {
 		move = 0;
 	  }
 	}
-	if(move && detectCollision(DIR_LEFT)) {
+	if(move && map.detectCollision(DIR_LEFT)) {
 	  scrollMap(DIR_LEFT);	
 	  if(map.accelerate) {
 		if(cursor.speed_x < TILE_W) {
@@ -504,7 +504,7 @@ int moveRight() {
 		move = 0;
 	  }
 	}
-	if(move && detectCollision(DIR_RIGHT)) {
+	if(move && map.detectCollision(DIR_RIGHT)) {
 	  scrollMap(DIR_RIGHT);	
 	  if(map.accelerate) {
 		if(cursor.speed_x < TILE_W) {
@@ -537,7 +537,7 @@ int moveUp(int checkCollision) {
 		move = 0;
 	  }
 	}
-	if(move && (!checkCollision || detectCollision(DIR_UP))) {
+	if(move && (!checkCollision || map.detectCollision(DIR_UP))) {
 	  scrollMap(DIR_UP);	
 	  if(map.accelerate) {
 		if(cursor.speed_y < TILE_H) {
@@ -570,7 +570,7 @@ int moveDown() {
 		move = 0;
 	  }
 	}
-	if(move && detectCollision(DIR_DOWN)) {
+	if(move && map.detectCollision(DIR_DOWN)) {
 	  scrollMap(DIR_DOWN);	
 	  if(map.accelerate) {
 		if(cursor.speed_y < TILE_H) {
@@ -588,6 +588,24 @@ int moveDown() {
   return 0;
 }
 
+void lockMap() {
+  // lock
+  if(SDL_mutexP(map.move_cond_mutex) == -1){
+	fprintf(stderr, "Couldn't lock mutex\n");
+	fflush(stderr);
+	exit(-1);
+  }
+}
+
+void unlockMap() {
+  // lock
+  if(SDL_mutexV(map.move_cond_mutex) == -1){
+	fprintf(stderr, "Couldn't unlock mutex\n");
+	fflush(stderr);
+	exit(-1);
+  }
+}
+
 /**
    Move in the dir direction.
    This could be optimized by blitting the screen 1 tile unit in the 
@@ -600,6 +618,9 @@ int moveMap(void *data) {
 	if(cursor.dir != last_dir) {
 	  if(map.accelerate) {
 		cursor.speed_x = cursor.speed_y = 2;
+	  } else {
+		cursor.speed_x = TILE_W;
+		cursor.speed_y = TILE_H;
 	  }
 	  cursor.wait = 1;
 	  last_dir = cursor.dir;
@@ -627,11 +648,7 @@ int moveMap(void *data) {
 	  break;
 	case DIR_NONE:
 	  // wait until there's movement.
-	  if(SDL_mutexP(map.move_cond_mutex) == -1){
-		fprintf(stderr, "Couldn't lock mutex\n");
-		fflush(stderr);
-		exit(-1);
-	  }
+	  lockMap();
 	  if(SDL_CondWait(map.move_cond, map.move_cond_mutex) == -1) {
 		fprintf(stderr, "Couldn't wait on condition\n");
 		fflush(stderr);
@@ -726,6 +743,10 @@ void setImage(int level, int index) {
   drawMap();
 }
 
+int defaultDetectCollision(int dir) {
+  return 1;
+}
+
 void initMap(char *name, int w, int h) {
   // start a new Map
   map.accelerate = 1;
@@ -734,6 +755,7 @@ void initMap(char *name, int w, int h) {
   map.h = h;
   map.beforeDrawToScreen = NULL;
   map.afterMainLevelDrawn = NULL;
+  map.detectCollision = defaultDetectCollision;
   map.delay = 25;
   map.thread = NULL;
   map.move_cond = NULL;

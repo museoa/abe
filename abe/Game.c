@@ -82,6 +82,7 @@ void gameMainLoop(SDL_Event *event) {
    This method checks and if possible, jumps up on it.
    It returns 1 on success and 0 otherwise.
  */
+/*
 int canStepUp(int pos_x, int pos_y, int original_dir) {
   // Can we step up?
   int start_y = pos_y - 1 - (tom[0]->h / TILE_H);
@@ -104,6 +105,7 @@ int canStepUp(int pos_x, int pos_y, int original_dir) {
   cursor.dir = original_dir;
   return 1;
 }
+*/
 
 GameCollisionCheck getGameCollisionCheck() {
   GameCollisionCheck check;

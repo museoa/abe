@@ -45,30 +45,24 @@ void editorMainLoop(SDL_Event *event) {
 	  signalMapMoveThread();
 	  break;
 	case SDLK_RETURN: 
-	  waitUntilPaintingStops();
 	  setImage(edit_panel.level, edit_panel.image_index);
 	  break;
 	case SDLK_DELETE: case SDLK_BACKSPACE: 
-	  waitUntilPaintingStops();
 	  setImage(edit_panel.level, -1);
 	  break;
 	case SDLK_1: 
-	  waitUntilPaintingStops();
 	  edit_panel.level = LEVEL_BACK;
-	  drawMap();
+ 	  drawMap();
 	  break;
 	case SDLK_2: 
-	  waitUntilPaintingStops();
 	  edit_panel.level = LEVEL_MAIN;
 	  drawMap();
 	  break;
 	case SDLK_3: 
-	  waitUntilPaintingStops();
 	  edit_panel.level = LEVEL_FORE;
 	  drawMap();
 	  break;
 	case SDLK_5: 
-	  waitUntilPaintingStops();
 	  edit_panel.image_index--;
 	  if(edit_panel.image_index < 0) {
 		edit_panel.image_index = image_count - 1;
@@ -76,7 +70,6 @@ void editorMainLoop(SDL_Event *event) {
 	  drawMap();
 	  break;
 	case SDLK_6: 
-	  waitUntilPaintingStops();
 	  edit_panel.image_index++;
 	  if(edit_panel.image_index >= image_count) {
 		edit_panel.image_index = 0;
@@ -84,18 +77,18 @@ void editorMainLoop(SDL_Event *event) {
 	  drawMap();
 	  break;
 	case SDLK_l: 
-	  waitUntilPaintingStops();
 	  loadMap(1);
 	  break;
 	case SDLK_s: 
-	  waitUntilPaintingStops();
 	  saveMap();
 	  break;
 	}
 	break;
   case SDL_KEYUP: 
-	//	printf("The %s key was released! scan=%d\n", SDL_GetKeyName(event->key.keysym.sym), event->key.keysym.scancode);
-	cursor.dir = DIR_NONE; break;
+	//printf("The %s key was released! scan=%d\n", SDL_GetKeyName(event->key.keysym.sym), event->key.keysym.scancode);
+	cursor.dir = DIR_NONE; 
+	signalMapMoveThread();
+	break;
   }
 }
 
@@ -172,8 +165,10 @@ void drawEditPanel() {
 
 
   char s[80];
-  sprintf(s, "x%d y%d level%d", cursor.pos_x, cursor.pos_y, edit_panel.level);
+  sprintf(s, "x%d y%d level%d dir%d", cursor.pos_x, cursor.pos_y, edit_panel.level, cursor.dir);
   drawString(screen, 5, 5, s);
+  sprintf(s, "spx%d spy%d px%d py%d", cursor.speed_x, cursor.speed_y, cursor.pixel_x, cursor.pixel_y);
+  drawString(screen, 5, 5 + FONT_HEIGHT, s);
 }
 
 void resetEditPanel() {

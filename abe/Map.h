@@ -80,4 +80,8 @@ int moveLeft();
 int moveRight();
 int moveUp(int checkCollision);
 int moveDown();
+
+void lockMap();
+void unlockMap();
+
 #endif
