@@ -139,15 +139,29 @@ void gameBeforeDrawToScreen() {
   // draw score board
   SDL_BlitSurface(score_image, NULL, screen, NULL);
   sprintf(s, "%d", game.keys);
-  drawString(screen, 132, 8, s);
+  drawString(screen, 132, 10, s);
   sprintf(s, "%d", game.balloons);
-  drawString(screen, 190, 8, s);
+  drawString(screen, 190, 10, s);
   sprintf(s, "%d", game.lives);
-  drawString(screen, 257, 8, s);
-  sprintf(s, "score %d", game.score);
-  drawString(screen, 100, 41, s);
+  drawString(screen, 257, 10, s);
+  //  drawString(screen, 190, 39, s);
+  sprintf(s, "%d", game.score);
+  drawString(screen, 190, 67, s);
+
+  // draw the health-bar
+  x = 187;
+  y = 38;
+  // 0.87 = max_width / max_health = 87 / 100
+  w = (int)((double)game.health * 0.87);
+  h = 22;
+  rect.x = x;
+  rect.y = y;
+  rect.w = w;
+  rect.h = h;
+  SDL_FillRect(screen, &rect, SDL_MapRGBA(screen->format, 0xe0, (game.health > 30 ? 0xa0 : 0x00), 0x00, 0x00));
+  
   if(GOD_MODE) {
-	drawString(screen, 255, 41, (game.god_mode ? "t" : "f"));
+	drawString(screen, 255, 67, (game.god_mode ? "t" : "f"));
 
 	sprintf(s, "d %d f %d t %d", map.delta, map.fps_override, (1000 / FPS_THROTTLE));
 	drawString(screen, 0, screen->h - 80, s);
@@ -161,21 +175,16 @@ void gameBeforeDrawToScreen() {
 
   // draw the balloon timer
   if(game.balloonTimer > 0) {
-	x = 50;
-	y = 65;
-	u = (double)200 / (double)BALLOON_RIDE_INTERVAL;
+	x = 5;
+	y = 94;
+	u = (double)269 / (double)BALLOON_RIDE_INTERVAL;
 	w = (int)((double)game.balloonTimer * u);
-	h = 5;
+	h = 2;
 	rect.x = x;
 	rect.y = y;
 	rect.w = w;
 	rect.h = h;
-	SDL_FillRect(screen, &rect, SDL_MapRGBA(screen->format, 0x00, 0x00, 0x00, 0x00));
-	rect.x = x + 2;
-	rect.y = y + 2;
-	rect.w = w;
-	rect.h = h;
-	SDL_FillRect(screen, &rect, SDL_MapRGBA(screen->format, 0x00, 0x00, 0xa0, 0x00));
+	SDL_FillRect(screen, &rect, SDL_MapRGBA(screen->format, 0xe0, 0xa0, 0x00, 0x00));
   }
 }
 
@@ -262,6 +271,9 @@ void gameMainLoop(SDL_Event *event) {
 void handleDeath(char *killer) {
   int i;
 
+  game.health--;
+  if(game.health > 0) return;
+  game.health = MAX_HEALTH;
 
   playSound(DEATH_SOUND);
   fprintf(stderr, "Player death! Killed by %s at x=%d y=%d pixelx=%d pixely=%d\n", killer, cursor.pos_x, cursor.pos_y, cursor.pixel_x, cursor.pixel_y);
@@ -302,6 +314,7 @@ void gameCheckPosition() {
   int n;
   Position pos, pos2, key;
   LiveMonster *live;
+  int ignore = 0;
 
   pos.pos_x = cursor.pos_x;
   pos.pos_y = cursor.pos_y;
@@ -358,9 +371,7 @@ void gameCheckPosition() {
   // FIXME: this fails if there many objects close together.
   // maybe it should return a NULL terminated array of positions.
   if(containsTypeWhere(&pos, &key, TYPE_OBJECT)) {
-	// remove from map
 	n = map.image_index[LEVEL_MAIN][key.pos_x + (key.pos_y * map.w)];
-	playSound(n == img_gem[0] || n == img_gem[1] || n == img_gem[2] ? GEM_SOUND : OBJECT_SOUND);
 	if(n == img_key) {
 	  game.keys++;
 	} else if(n == img_balloon[0] || n == img_balloon[1] || n == img_balloon[2]) {
@@ -371,9 +382,16 @@ void gameCheckPosition() {
 	  game.score+=5;
 	} else if(n == img_gem[2]) {
 	  game.score+=10;
+	} else if(n == img_health) {
+	  if(game.health >= MAX_HEALTH - 10) ignore = 1;
+	  else game.health+=10;
 	}
-	map.image_index[LEVEL_MAIN][key.pos_x + (key.pos_y * map.w)] = EMPTY_MAP;
-	map.redraw = 1;
+	if(!ignore) {
+	  playSound(n == img_gem[0] || n == img_gem[1] || n == img_gem[2] ? GEM_SOUND : OBJECT_SOUND);
+	  // remove from map
+	  map.image_index[LEVEL_MAIN][key.pos_x + (key.pos_y * map.w)] = EMPTY_MAP;
+	  map.redraw = 1;
+	}
   }
 
   // did we hit a spring
@@ -523,4 +541,5 @@ void initGame() {
   game.god_mode = GOD_MODE;
   game.lastSavePosX = 0;
   game.lastSavePosY = 0;
+  game.health = MAX_HEALTH;
 }

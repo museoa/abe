@@ -232,8 +232,8 @@ void moveTorch(LiveMonster *live_monster) {
   // increment the face to display
   live_monster->face++;
   if(live_monster->face >= 
-	 live_monster->monster->image_count * live_monster->monster->face_mod) 
-	live_monster->face = 0;
+  	 live_monster->monster->image_count * live_monster->monster->face_mod) 
+  	live_monster->face = 0;
 }
 
 void moveBear(LiveMonster *live_monster) {

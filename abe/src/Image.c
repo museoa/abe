@@ -14,7 +14,7 @@ SDL_Surface *tom[10];
 Image *images[256];
 int image_count;
 int img_brick, img_rock, img_back, img_key, img_door, img_door2, img_key, img_smash, img_smash2, img_smash3, img_smash4;
-int img_water, img_spring, img_spring2, img_spider, img_spider2;
+int img_water, img_spring, img_spring2, img_spider, img_spider2, img_health;
 int img_balloon[3], img_gem[2], img_bullet[4], img_slide_left[3], img_slide_right[3];
 
 /**
@@ -82,6 +82,9 @@ void doLoadImage(char *filename, char *name) {
 	} else if(!strcmp(name, "key")) {
 	  type = TYPE_OBJECT;
 	  img_key = image_count;
+	} else if(!strcmp(name, "health")) {
+	  type = TYPE_OBJECT;
+	  img_health = image_count;
 	} else if(!strcmp(name, "balloon")) {
 	  type = TYPE_OBJECT;
 	  img_balloon[0] = image_count;

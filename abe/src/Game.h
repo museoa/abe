@@ -12,13 +12,15 @@
 
 #define FACE_STEP 2
 
-#define GOD_MODE 1
+#define GOD_MODE 0
 
 #define BALLOON_RIDE_INTERVAL 500
 
 #define SPRING_JUMP 30
 
 #define SAVEGAME_DIR "savegame"
+
+#define MAX_HEALTH 100
 
 typedef struct _game {
   int face;
@@ -33,6 +35,7 @@ typedef struct _game {
   int god_mode;
   int lastSavePosX;
   int lastSavePosY;
+  int health;
 } Game;
 extern Game game;
 
