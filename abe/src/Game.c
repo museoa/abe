@@ -214,6 +214,14 @@ void gameBeforeDrawToScreen() {
   }
   SDL_FillRect(screen, &rect, color);
   
+
+  if(game.end_game) {
+	drawString(screen, 50, 10 + FONT_HEIGHT * 6, "success!!!");
+	drawString(screen, 50, 10 + FONT_HEIGHT * 7, "abe rescued his mentor");
+	drawString(screen, 50, 10 + FONT_HEIGHT * 8, "from the cavernous prison of");  
+	drawString(screen, 50, 10 + FONT_HEIGHT * 9, "the great pyramid!");  
+	drawString(screen, screen->w / 2 - 100, screen->h - 30, "press escape");  
+  }
 #if GOD_MODE
 	drawString(screen, 255, 67, (game.god_mode ? "t" : "f"));
 
@@ -276,26 +284,36 @@ void gameMainLoop(SDL_Event *event) {
 	//	printf("The %s key was pressed! scan=%d\n", SDL_GetKeyName(event->key.keysym.sym), event->key.keysym.scancode);
 	switch(event->key.keysym.sym) {
 	case SDLK_LEFT: 
-	  cursor.dir |= DIR_LEFT;
- 	  cursor.speed_x = START_SPEED_X;
+	  if(!game.end_game) {
+		cursor.dir |= DIR_LEFT;
+		cursor.speed_x = START_SPEED_X;
+	  }
 	  break;
 	case SDLK_RIGHT: 
-	  cursor.dir |= DIR_RIGHT;
- 	  cursor.speed_x = START_SPEED_X;
+	  if(!game.end_game) {
+		cursor.dir |= DIR_RIGHT;
+		cursor.speed_x = START_SPEED_X;
+	  }
 	  break;
 	case SDLK_UP: 
-	  cursor.dir |= DIR_UP;
-	  cursor.speed_y = START_SPEED_Y;
+	  if(!game.end_game) {
+		cursor.dir |= DIR_UP;
+		cursor.speed_y = START_SPEED_Y;
+	  }
 	  break;
 	case SDLK_DOWN: 
-	  cursor.dir |= DIR_DOWN; 
-	  cursor.speed_y = START_SPEED_Y;
+	  if(!game.end_game) {
+		cursor.dir |= DIR_DOWN; 
+		cursor.speed_y = START_SPEED_Y;
+	  }
 	  break;
 	case SDLK_r: 
 	  drawMap();
 	  break;
 	case SDLK_SPACE: 
-	  if(startJump()) playSound(JUMP_SOUND);
+	  if(!game.end_game) {
+		if(startJump()) playSound(JUMP_SOUND);
+	  }
 	  break;
 	case SDLK_ESCAPE:
 	  map.quit = 1;
@@ -309,11 +327,13 @@ void gameMainLoop(SDL_Event *event) {
 	  break;
 #endif
 	case SDLK_RETURN:
-	  if(!game.balloonTimer && game.balloons) {
-		playSound(BUBBLE_SOUND);
-		game.balloons--;
-		game.balloonTimer = BALLOON_RIDE_INTERVAL;
-		map.gravity = 0;
+	  if(!game.end_game) {
+		if(!game.balloonTimer && game.balloons) {
+		  playSound(BUBBLE_SOUND);
+		  game.balloons--;
+		  game.balloonTimer = BALLOON_RIDE_INTERVAL;
+		  map.gravity = 0;
+		}
 	  }
 	  break;
 	case SDLK_s:
@@ -547,7 +567,7 @@ void gameCheckPosition() {
 	switch(game.difficoulty) {
 	case 0: if(!(game.tick % 50)) game.health++; break;
 	case 1: if(!(game.tick % 100)) game.health++; break;
-	default:
+	default: break;
 	}
   }
   if(game.difficoulty < 2 && !(game.tick % 100) && game.health < MAX_HEALTH) 
@@ -572,6 +592,12 @@ int detectCollision(int dir) {
   pos.pixel_y = cursor.pixel_y;
   pos.w = tom[0]->w / TILE_W;
   pos.h = tom[0]->h / TILE_H;
+
+  // end of game?
+  if(containsTypeWhere(&pos, &key, TYPE_END_GAME)) {
+	game.end_game = 1;
+	return 0;
+  }
 
   // did we hit a door?
   if(containsTypeWhere(&pos, &key, TYPE_DOOR)) {
@@ -661,7 +687,8 @@ void runMap() {
 	cursor.pos_x = game.player_start_x;
 	cursor.pos_y = game.player_start_y;
   }
-	
+
+  game.end_game = 0;
   game.draw_player = 1;
   game.balloonTimer = 0;
   cursor.speed_x = 8;

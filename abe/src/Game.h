@@ -50,6 +50,7 @@ typedef struct _game {
   int dir_changed;
   int in_water;
   int tick;
+  int end_game;
 } Game;
 extern Game game;
 
