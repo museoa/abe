@@ -46,12 +46,6 @@
 #define JUMP_LENGTH 7
 #define JUMP_SPEED 14
 
-// if this is 1, it uses a transfer surface to scroll
-// else it uses memmove() unless screen is a HWSURFACE
-// in which case this is ignored and a transfer surface
-// is used.
-#define FORCE_SDL_SCROLL 0
-
 // an empty map position
 #define EMPTY_MAP 0xffff
 
