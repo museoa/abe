@@ -30,7 +30,8 @@
 // increment this to avoid saved-game conflict
 // abe0.1, 0.2, 0.3 = 1 (actually no version number is saved)
 // abe0.4 = 2
-#define GAME_VERSION 2
+// abe1.0 = 3
+#define GAME_VERSION 3
 
 typedef struct _game {
   int face;

@@ -63,8 +63,10 @@ int loadGame() {
   SDL_RWops *rwop;
   int version;
 
+  version = (int)GAME_VERSION;
+
   // load the map from savegame/savedmap.dat
-  sprintf(path, "%s%ssavedmap%d.dat", SAVEGAME_DIR, PATH_SEP, (int)GAME_VERSION);
+  sprintf(path, "%s%ssavedmap%d.dat", SAVEGAME_DIR, PATH_SEP, version);
   if(!loadMapPath(path, 0)) {
 	// if can't find saved map load static map
 	fprintf(stderr, "Can't find current saved map. Will try to use static map.\n");
@@ -77,18 +79,28 @@ int loadGame() {
 
   // we have to do this _after_ loading the map
   // b/c it resets the cursor
-  sprintf(path, "%s%ssave%d.dat", SAVEGAME_DIR, PATH_SEP, (int)GAME_VERSION);  
-  if(!(fp = fopen(path, "rb"))) {
-
-	// try to load old saved game
-	fprintf(stderr, "Can't find current version of saved game. Will try to use old one.\n");
-	sprintf(path, "%s%ssave.dat", SAVEGAME_DIR, PATH_SEP);  
-	if(!(fp = fopen(path, "rb"))) {
-	  err = strerror(errno);
-	  fprintf(stderr, "Can't open file when saving game: %s\n", err);
-	  fflush(stderr);
-	  return 0;
+  // try to find a saved game of any version
+  while(version > 0) {
+	if(version > 1) {
+	  sprintf(path, "%s%ssave%d.dat", SAVEGAME_DIR, PATH_SEP, version);  
+	} else {
+	  sprintf(path, "%s%ssave.dat", SAVEGAME_DIR, PATH_SEP);  
 	}
+	fprintf(stderr, "Trying to load saved game: %s\n", path);
+	fflush(stderr);
+	if(fp = fopen(path, "rb")) {
+	  fprintf(stderr, "Saved game found.\n", path);
+	  fflush(stderr);
+	  break;
+	}
+	fprintf(stderr, "Saved game not found.\n", path);
+	fflush(stderr);
+	version--;
+  }
+  if(version == 0) {
+	fprintf(stderr, "Can't find or open saved game.\n");
+	fflush(stderr);
+	return 0;
   }
   rwop = SDL_RWFromFP(fp, 1);
 
