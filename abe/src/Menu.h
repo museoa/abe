@@ -3,5 +3,4 @@
 
 #include "Main.h"
 
-void showMenu();
 #endif

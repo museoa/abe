@@ -48,16 +48,8 @@ void afterMainLevelDrawn() {
 void gameBeforeDrawToScreen() {
   SDL_Rect rect;
   char s[80];
-  /*
-  sprintf(s, "life %d score %d keys %d balloons %d", game.lives, game.score, game.keys, game.balloons);
-  drawString(screen, 5, 5, s);
-  if(GOD_MODE) {
-	sprintf(s, "x %d y %d god mode %s", cursor.pos_x, cursor.pos_y, (game.god_mode ? "true" : "false"));
-    drawString(screen, 5, 5 + FONT_HEIGHT, s);
-	sprintf(s, "px %d py %d", cursor.pixel_x, cursor.pixel_y);
-    drawString(screen, 5, 5 + FONT_HEIGHT * 2, s);
-  }
-  */
+  int x, y, w, h;
+  double u;
 
   // draw score board
   SDL_BlitSurface(score_image, NULL, screen, NULL);
@@ -75,15 +67,20 @@ void gameBeforeDrawToScreen() {
 
   // draw the balloon timer
   if(game.balloonTimer > 0) {
-	rect.x = 0;
-	rect.y = screen->h - 8;
-	rect.w = game.balloonTimer * (screen->w / BALLOON_RIDE_INTERVAL) + 2;
-	rect.h = 5;
+	x = 50;
+	y = 65;
+	u = (double)200 / (double)BALLOON_RIDE_INTERVAL;
+	w = (int)((double)game.balloonTimer * u);
+	h = 5;
+	rect.x = x;
+	rect.y = y;
+	rect.w = w;
+	rect.h = h;
 	SDL_FillRect(screen, &rect, SDL_MapRGBA(screen->format, 0x00, 0x00, 0x00, 0x00));
-	rect.x = 0;
-	rect.y = screen->h - 10;
-	rect.w = game.balloonTimer * (screen->w / BALLOON_RIDE_INTERVAL);
-	rect.h = 5;
+	rect.x = x + 2;
+	rect.y = y + 2;
+	rect.w = w;
+	rect.h = h;
 	SDL_FillRect(screen, &rect, SDL_MapRGBA(screen->format, 0x00, 0x00, 0xa0, 0x00));
   }
 }

@@ -15,7 +15,7 @@ Image *images[256];
 int image_count;
 int img_brick, img_rock, img_back, img_key, img_door, img_door2, img_key, img_smash, img_smash2, img_smash3, img_smash4;
 int img_water, img_spring, img_spring2, img_spider, img_spider2;
-int img_balloon[3], img_gem[2];
+int img_balloon[3], img_gem[2], img_bullet[4];
 
 /**
    Store the image in an array or a named img buffer.
@@ -87,6 +87,14 @@ void doLoadImage(char *filename, char *name) {
 	} else if(!strcmp(name, "balloon3")) {
 	  type = TYPE_OBJECT;
 	  img_balloon[2] = image_count;
+	} else if(!strcmp(name, "bullet1")) {
+	  img_bullet[0] = image_count;
+	} else if(!strcmp(name, "bullet2")) {
+	  img_bullet[1] = image_count;
+	} else if(!strcmp(name, "bullet3")) {
+	  img_bullet[2] = image_count;
+	} else if(!strcmp(name, "bullet4")) {
+	  img_bullet[3] = image_count;
 	} else if(!strcmp(name, "gem")) {
 	  type = TYPE_OBJECT;
 	  img_gem[0] = image_count;

@@ -2,6 +2,8 @@
 #include <math.h>
 
 int menu_y;
+#define BULLET_FACE_COUNT 4
+int face = 0, face_mod = 4;
 
 void splashMainLoop(SDL_Event *event) {
   switch(event->type) {
@@ -33,34 +35,38 @@ void splashMainLoop(SDL_Event *event) {
 
 void splashBeforeDrawToScreen() {
   SDL_Rect pos;
-  int m;
-  int n;
+  int x, y;
 
-  pos.x = 50;
-  pos.y = 5;
+  x = screen->w / 2 - title->w / 2;
+  y = 0;
+
+  pos.x = x;
+  pos.y = y;
   pos.w = title->w;
   pos.h = title->h;
   SDL_BlitSurface(title, NULL, screen, &pos);
 
-  n = 5;
-  m = 50 + title->w;
+  x += 50;
+  y += title->h + FONT_HEIGHT;
 
-  drawString(screen, m, n + FONT_HEIGHT * 0, "start game");
-  drawString(screen, m, n + FONT_HEIGHT * 1, "map editor");
-  drawString(screen, m, n + FONT_HEIGHT * 2, "settings");
-  drawString(screen, m, n + FONT_HEIGHT * 3, "about");
-  drawString(screen, m, n + FONT_HEIGHT * 4, "exit abe!!");
+  drawString(screen, x, y + FONT_HEIGHT * 0, "start game");
+  drawString(screen, x, y + FONT_HEIGHT * 1, "map editor");
+  drawString(screen, x, y + FONT_HEIGHT * 2, "settings");
+  drawString(screen, x, y + FONT_HEIGHT * 3, "about");
+  drawString(screen, x, y + FONT_HEIGHT * 4, "exit abe!!");
 
-  pos.x = m - 35;
-  pos.y = menu_y + n;
-  pos.w = images[img_key]->image->w;
-  pos.h = images[img_key]->image->h;
-  SDL_BlitSurface(images[img_key]->image, NULL, screen, &pos);
-  pos.x = m + 200;
-  pos.y = menu_y + n;
-  pos.w = images[img_key]->image->w;
-  pos.h = images[img_key]->image->h;
-  SDL_BlitSurface(images[img_key]->image, NULL, screen, &pos);
+  face++;
+  if(face >= face_mod * BULLET_FACE_COUNT) face = 0;
+  pos.x = x - 30;
+  pos.y = menu_y + y;
+  pos.w = images[img_bullet[0]]->image->w;
+  pos.h = images[img_bullet[0]]->image->h;
+  SDL_BlitSurface(images[img_bullet[face / face_mod]]->image, NULL, screen, &pos);
+  pos.x = x + 155;
+  pos.y = menu_y + y;
+  pos.w = images[img_bullet[0]]->image->w;
+  pos.h = images[img_bullet[0]]->image->h;
+  SDL_BlitSurface(images[img_bullet[face / face_mod]]->image, NULL, screen, &pos);
 }
 
 void initIntroMap() {
