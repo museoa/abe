@@ -13,8 +13,7 @@ void playSound(int index) {
 }
 
 void playIntroMusic() {
-  // play music forever
-  // Mix_Music *music; // I assume this has been loaded already
+  if(!intro_music) return;
   if(Mix_PlayMusic(intro_music, -1)==-1) {
     printf("Mix_PlayMusic: intro %s\n", Mix_GetError());
     // well, there's no music, but most games don't break without music...
@@ -22,8 +21,7 @@ void playIntroMusic() {
 }
 
 void playGameMusic() {
-  // play music forever
-  // Mix_Music *music; // I assume this has been loaded already
+  if(!game_music) return;
   if(Mix_PlayMusic(game_music, -1)==-1) {
     printf("Mix_PlayMusic: game %s\n", Mix_GetError());
     // well, there's no music, but most games don't break without music...
@@ -49,18 +47,17 @@ void initAudio() {
     exit(2);
   }
 
+  intro_music = game_music = NULL;
   sprintf(path, "%s%sintro.xm", SOUND_DIR, PATH_SEP);
   intro_music = Mix_LoadMUS(path);
   if(!intro_music) {
     printf("Mix_LoadMUS(\"intro\"): %s\n", Mix_GetError());
-	exit(2);
   }
 
   sprintf(path, "%s%sgame.xm", SOUND_DIR, PATH_SEP);
   game_music = Mix_LoadMUS(path);
   if(!game_music) {
     printf("Mix_LoadMUS(\"game\"): %s\n", Mix_GetError());
-	exit(2);
   }  
 
   loadSound(DOOR_SOUND, "door");
