@@ -86,11 +86,11 @@ int loadGame() {
 int getGameFace() {
   // change the face
   if(cursor.jump || cursor.slide) {
-	game.face = (game.dir == GAME_DIR_LEFT ? 8 : 9);
+	game.face = (cursor.dir & DIR_LEFT ? 8 : 9);
 	return game.face;
   }
   if(game.balloonTimer) {
-	game.face = (game.dir == GAME_DIR_LEFT ? 6 : 7);
+	game.face = (cursor.dir & DIR_LEFT ? 6 : 7);
 	game.balloonTimer--;
 	if(game.balloonTimer <= 0) {
 	  game.balloonTimer = 0;
@@ -100,11 +100,11 @@ int getGameFace() {
 	  return game.face;
 	}
   } 
-  if(cursor.dir == DIR_LEFT || cursor.dir == DIR_RIGHT) {
+  if(cursor.dir & DIR_LEFT || cursor.dir & DIR_RIGHT) {
 	game.face++;
   }
   if(game.face >= FACE_COUNT * FACE_STEP) game.face = 0;
-  return (game.dir == GAME_DIR_LEFT ? 
+  return (cursor.dir & DIR_LEFT ? 
 		  (game.face / FACE_STEP) : 
 		  (game.face / FACE_STEP) + FACE_COUNT);
 }
@@ -163,14 +163,21 @@ void gameBeforeDrawToScreen() {
   if(GOD_MODE) {
 	drawString(screen, 255, 67, (game.god_mode ? "t" : "f"));
 
+	sprintf(s, "%s%s%s%s", 
+			(cursor.dir & DIR_UP ? "u" : " "),
+			(cursor.dir & DIR_DOWN ? "d" : " "),
+			(cursor.dir & DIR_LEFT ? "l" : " "),
+			(cursor.dir & DIR_RIGHT ? "r" : " "));
+	drawString(screen, 0, screen->h - 40, s);
 	sprintf(s, "d %d f %d t %d", map.delta, map.fps_override, (1000 / FPS_THROTTLE));
-	drawString(screen, 0, screen->h - 80, s);
-	sprintf(s, "pos %d %d", cursor.pos_x, cursor.pos_y);
+	drawString(screen, 0, screen->h - 20, s);
+	/*	sprintf(s, "pos %d %d", cursor.pos_x, cursor.pos_y);
 	drawString(screen, 0, screen->h - 60, s);
 	sprintf(s, "pixel %d %d", cursor.pixel_x, cursor.pixel_y);
 	drawString(screen, 0, screen->h - 40, s);
 	sprintf(s, "speed %d %d", cursor.speed_x, cursor.speed_y);
 	drawString(screen, 0, screen->h - 20, s);
+	*/
   }
 
   // draw the balloon timer
@@ -197,21 +204,19 @@ void gameMainLoop(SDL_Event *event) {
 	//	printf("The %s key was pressed! scan=%d\n", SDL_GetKeyName(event->key.keysym.sym), event->key.keysym.scancode);
 	switch(event->key.keysym.sym) {
 	case SDLK_LEFT: 
-	  game.dir = GAME_DIR_LEFT;
-	  cursor.dir = DIR_LEFT;
+	  cursor.dir |= DIR_LEFT;
  	  cursor.speed_x = START_SPEED_X;
 	  break;
 	case SDLK_RIGHT: 
-	  game.dir = GAME_DIR_RIGHT;
-	  cursor.dir = DIR_RIGHT;
+	  cursor.dir |= DIR_RIGHT;
  	  cursor.speed_x = START_SPEED_X;
 	  break;
 	case SDLK_UP: 
-	  cursor.dir = DIR_UP;
+	  cursor.dir |= DIR_UP;
 	  cursor.speed_y = START_SPEED_Y;
 	  break;
 	case SDLK_DOWN: 
-	  cursor.dir = DIR_DOWN; 
+	  cursor.dir |= DIR_DOWN; 
 	  cursor.speed_y = START_SPEED_Y;
 	  break;
 	case SDLK_r: 
@@ -252,17 +257,21 @@ void gameMainLoop(SDL_Event *event) {
 	break;	
   case SDL_KEYUP: 
 	switch(event->key.keysym.sym) {
-	case SDLK_LEFT: 
-	  if(cursor.dir == DIR_LEFT) cursor.dir = DIR_UPDATE;
+	case SDLK_LEFT:
+	  cursor.dir &= 15 - DIR_LEFT;
+	  //	  if(cursor.dir == DIR_LEFT) cursor.dir = DIR_UPDATE;
 	  break;
 	case SDLK_RIGHT: 
-	  if(cursor.dir == DIR_RIGHT) cursor.dir = DIR_UPDATE;
+	  cursor.dir &= 15 - DIR_RIGHT;
+	  //	  if(cursor.dir == DIR_RIGHT) cursor.dir = DIR_UPDATE;
 	  break;
 	case SDLK_UP: 
-	  if(cursor.dir == DIR_UP) cursor.dir = DIR_UPDATE;
+	  cursor.dir &= 15 - DIR_UP;
+	  //	  if(cursor.dir == DIR_UP) cursor.dir = DIR_UPDATE;
 	  break;
 	case SDLK_DOWN: 
-	  if(cursor.dir == DIR_DOWN) cursor.dir = DIR_UPDATE;
+	  cursor.dir &= 15 - DIR_DOWN;
+	  //	  if(cursor.dir == DIR_DOWN) cursor.dir = DIR_UPDATE;
 	  break;
 	default:
 	  break;
@@ -539,7 +548,6 @@ void runMap() {
 
 void initGame() {
   game.face = 0;
-  game.dir = GAME_DIR_RIGHT;
   game.balloonTimer = 0;
   game.god_mode = GOD_MODE;
   game.lastSavePosX = 0;

@@ -25,8 +25,8 @@
 #define DIR_NONE 0
 #define DIR_UP 1
 #define DIR_RIGHT 2
-#define DIR_DOWN 3
-#define DIR_LEFT 4
+#define DIR_DOWN 4
+#define DIR_LEFT 8
 
 // These are the extra tiles to draw on the left and top.
 // They should be the tile width and height of the biggest

@@ -5,8 +5,6 @@
 
 #define FACE_STILL 1
 #define FACE_COUNT 3
-#define GAME_DIR_LEFT 0
-#define GAME_DIR_RIGHT 1
 #define TOM_W 4
 #define TOM_H 4
 
@@ -24,7 +22,6 @@
 
 typedef struct _game {
   int face;
-  int dir;
   int player_start_x, player_start_y;
   int lives;
   int score;

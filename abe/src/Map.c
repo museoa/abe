@@ -817,28 +817,30 @@ void moveMap() {
 	  switch(cursor.dir) {
 	  case DIR_QUIT:
 		return;
-	  case DIR_LEFT:
-		if(!moveLeft(1)) {
-		  // try to step up onto the obsticle
-		  canStepUp(DIR_LEFT);
-		}
-		break;	
-	  case DIR_RIGHT:
-		if(!moveRight(1)) {
-		  // try to step up onto the obsticle
-		  canStepUp(DIR_RIGHT);
-		}
-		break;	
-	  case DIR_UP:
-		moveUp(1, 0);
-		break;
-	  case DIR_DOWN:
-		moveDown(1, 0, 0);
-		break;
 	  case DIR_UPDATE:
 		cursor.dir = DIR_NONE;
 	  break;
 	  }
+
+	  if(cursor.dir & DIR_LEFT) {
+		if(!moveLeft(1)) {
+		  // try to step up onto the obsticle
+		  canStepUp(DIR_LEFT);
+		}
+	  }
+	  if(cursor.dir & DIR_RIGHT) {
+		if(!moveRight(1)) {
+		  // try to step up onto the obsticle
+		  canStepUp(DIR_RIGHT);
+		}
+	  }
+	  if(cursor.dir & DIR_UP) {
+		moveUp(1, 0);
+	  }
+	  if(cursor.dir & DIR_DOWN) {
+		moveDown(1, 0, 0);
+	  }
+
 	  
 	  // check for monsters, etc.
 	  if(map.checkPosition) map.checkPosition();
@@ -874,8 +876,9 @@ void finishDrawMap() {
 
   getMapDrawParams(&params);
 
-  pos.x = -((cursor.pos_x * TILE_W + cursor.pixel_x) % (TILE_W * 4)) / 2;
-  pos.y = -((cursor.pos_y * TILE_H + cursor.pixel_y) % (TILE_H * 4)) / 2;
+  // draw the background
+  pos.x = -((cursor.pos_x * TILE_W + cursor.pixel_x) % (map.background_image->w * 2)) / 2;
+  pos.y = -((cursor.pos_y * TILE_H + cursor.pixel_y) % (map.background_image->h * 2)) / 2;
   pos.w = map.background->w;
   pos.h = map.background->h;
   SDL_BlitSurface(map.background, NULL, screen, &pos);
