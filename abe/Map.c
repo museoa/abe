@@ -1127,7 +1127,14 @@ void startJump() {
 }
 
 void startJumpN(int n) {
-  if(!cursor.jump) {
+  Position pos;
+  pos.pos_x = cursor.pos_x;
+  pos.pos_y = cursor.pos_y + tom[0]->h / TILE_H;
+  pos.pixel_x = cursor.pixel_x;
+  pos.pixel_y = cursor.pixel_y;
+  pos.w = tom[0]->w / TILE_W;
+  pos.h = 1;
+  if(!cursor.jump && (containsType(&pos, TYPE_WALL) || cursor.platform)) {
 	cursor.jump = n;
   }
 }
