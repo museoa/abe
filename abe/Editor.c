@@ -228,6 +228,10 @@ void allocMap(char *name, int w, int h) {
   // initialize the edit panel
   resetEditPanel();
 
+  // try to load an existing map
+  loadMap(0);
+  drawMap();
+
   // start the map's main loop
   moveMap();
 }
