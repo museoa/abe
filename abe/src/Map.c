@@ -1391,3 +1391,4 @@ void showMapStatus(char *s) {
   strcpy(map.status, s);
   map.status_time = STATUS_TIME;
 }
+

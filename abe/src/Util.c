@@ -268,8 +268,8 @@ void processShimmer() {
 		} else {
 		  color[r][count] = SDL_MapRGBA(fx_surface->format, 
 									 255, 
-									 64 + (int)(50.0 * rand()/(RAND_MAX)), 
-									 64 + (int)(50.0 * rand()/(RAND_MAX)), 
+									 80 + (int)(50.0 * rand()/(RAND_MAX)), 
+									 32 + (int)(50.0 * rand()/(RAND_MAX)), 
 									 0x00);
 		}
 		count++;

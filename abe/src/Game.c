@@ -183,6 +183,7 @@ void gameBeforeDrawToScreen() {
   char s[80];
   int x, y, w, h;
   double u;
+  Uint32 color;
 
   // draw score board
   SDL_BlitSurface(score_image, NULL, screen, NULL);
@@ -206,7 +207,12 @@ void gameBeforeDrawToScreen() {
   rect.y = y;
   rect.w = w;
   rect.h = h;
-  SDL_FillRect(screen, &rect, SDL_MapRGBA(screen->format, 0xe0, (game.health > 30 ? 0xa0 : 0x00), 0x00, 0x00));
+  if(game.in_water) {
+	color = SDL_MapRGBA(screen->format, 0x00, 0x60, 0xe0, 0x00);
+  } else {
+	color = SDL_MapRGBA(screen->format, 0xe0, (game.health > 30 ? 0xa0 : 0x00), 0x00, 0x00);
+  }
+  SDL_FillRect(screen, &rect, color);
   
 #if GOD_MODE
 	drawString(screen, 255, 67, (game.god_mode ? "t" : "f"));
@@ -217,7 +223,7 @@ void gameBeforeDrawToScreen() {
 			(cursor.dir & DIR_LEFT ? "l" : " "),
 			(cursor.dir & DIR_RIGHT ? "r" : " "));
 	drawString(screen, 0, screen->h - 40, s);
-	sprintf(s, "d %d f %d t %d b %d", map.delta, map.fps_override, (1000 / FPS_THROTTLE), map.max_speed_boost);
+	sprintf(s, "d %d f %d t %d b %d h2o %d", map.delta, map.fps_override, (1000 / FPS_THROTTLE), map.max_speed_boost, game.in_water);
 	drawString(screen, 0, screen->h - 20, s);
 	/*	sprintf(s, "pos %d %d", cursor.pos_x, cursor.pos_y);
 	drawString(screen, 0, screen->h - 60, s);
@@ -358,25 +364,35 @@ void handleDeath(LiveMonster *live) {
   SDL_Rect fx;
   int screen_center_x = (screen->w / TILE_W) / 2;
   int screen_center_y = (screen->h / TILE_H) / 2;  
+  int show_effect = 1;
 
-  showMapStatus(live->monster->name);
-
-  game.health-=(live->monster->damage * (game.difficoulty + 1));
-
-  if(mainstruct.effects_enabled) {
+  if(live) {
+	showMapStatus(live->monster->name);
+	game.health-=(live->monster->damage * (game.difficoulty + 1));
+  } else {
+	showMapStatus("drowning!");
+	game.health--; // water damage
+	show_effect = !(game.tick % 40);
+  }
+  if(show_effect && mainstruct.effects_enabled) {
 	fx.x = screen_center_x * TILE_W;
 	fx.y = screen_center_y * TILE_H;
 	fx.w = tom[0]->w;
 	fx.h = tom[0]->h;
 	damageEffect(&fx, screen);
   }
+
   
   if(game.health > 0) return;
   game.health = MAX_HEALTH;
 
   playSound(DEATH_SOUND);
-  fprintf(stderr, "Player death! Killed by %s at x=%d y=%d pixelx=%d pixely=%d\n", live->monster->name, 
-		  cursor.pos_x, cursor.pos_y, cursor.pixel_x, cursor.pixel_y);
+  if(live) {
+	fprintf(stderr, "Player death! Killed by %s at x=%d y=%d pixelx=%d pixely=%d\n", live->monster->name, 
+			cursor.pos_x, cursor.pos_y, cursor.pixel_x, cursor.pixel_y);
+  } else {
+	fprintf(stderr, "Player drowned.\n");
+  }
   fflush(stderr);
 
   if(game.god_mode) return;
@@ -414,7 +430,7 @@ void handleDeath(LiveMonster *live) {
  */
 void gameCheckPosition() {
   int n;
-  Position pos, pos2, key;
+  Position pos, pos2, pos3, key;
   LiveMonster *live;
   SDL_Rect fx;
   int ignore = 0;
@@ -480,9 +496,11 @@ void gameCheckPosition() {
   if(containsTypeWhere(&pos, &key, TYPE_OBJECT)) {
 	n = map.image_index[LEVEL_MAIN][key.pos_x + (key.pos_y * map.w)];
 	if(n == img_key) {
-	  game.keys++;
+	  if(game.keys < MAX_KEYS) game.keys++;
+	  else ignore = 1;
 	} else if(n == img_balloon[0] || n == img_balloon[1] || n == img_balloon[2]) {
-	  game.balloons++;
+	  if(game.balloons < MAX_BALLOONS) game.balloons++;
+	  else ignore = 1;
 	} else if(n == img_gem[0]) {
 	  game.score++;
 	} else if(n == img_gem[1]) {
@@ -508,11 +526,29 @@ void gameCheckPosition() {
 	}
   }
 
+  // in water?
+  pos3.pos_x = cursor.pos_x;
+  pos3.pos_y = cursor.pos_y;
+  pos3.pixel_x = cursor.pixel_x;
+  pos3.pixel_y = cursor.pixel_y;
+  pos3.w = tom[0]->w / TILE_W;
+  pos3.h = 1;
+  game.in_water = containsTypeInLevel(&pos3, &key, TYPE_HARMFUL, LEVEL_FORE);
+  if(game.in_water && !(game.tick % 10) && game.health > 0) handleDeath(NULL);
+
   // did we hit a spring
   if(containsType(&pos, TYPE_SPRING)) {
 	playSound(COIL_SOUND);
 	startJumpN(SPRING_JUMP);
   }
+
+  // healing
+  if(game.difficoulty < 2 && !(game.tick % 100) && game.health < MAX_HEALTH) 
+	game.health++;
+
+  // advance the timer
+  game.tick++;
+  if(game.tick == 10000) game.tick = 0;
 }
 
 /**
@@ -657,4 +693,6 @@ void initGame() {
   game.health = MAX_HEALTH;
   game.difficoulty = 1;
   game.dir_changed = 0;
+  game.in_water = 0;
+  game.tick = 0;
 }

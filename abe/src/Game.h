@@ -23,6 +23,10 @@
 
 #define MAX_HEALTH 100
 
+// don't hold more than these... mainly b/c the gui can't handle it
+#define MAX_BALLOONS 7
+#define MAX_KEYS 7
+
 // increment this to avoid saved-game conflict
 // abe0.1, 0.2, 0.3 = 1 (actually no version number is saved)
 // abe0.4 = 2
@@ -44,6 +48,8 @@ typedef struct _game {
   int health;
   int difficoulty;
   int dir_changed;
+  int in_water;
+  int tick;
 } Game;
 extern Game game;
 

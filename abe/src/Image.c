@@ -128,6 +128,7 @@ void doLoadImage(char *filename, char *name) {
 	  alphas[alphacount++] = image_count;
 	} else if(!strcmp(name, "water")) {
 	  img_water = image_count;
+	  type = TYPE_HARMFUL;
 	  alphas[alphacount++] = image_count;
 	} else if(!strcmp(name, "ladder")) {
 	  type = TYPE_LADDER;
