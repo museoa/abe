@@ -470,6 +470,7 @@ int moveLeft(int checkCollision, int scroll) {
 	cursor.speed_x -= SPEED_INC_X;
   }
   cursor.dir = DIR_NONE;
+  cursor.jump = 0;
   return 0;
 }
 
@@ -503,6 +504,7 @@ int moveRight(int checkCollision, int scroll) {
 	cursor.speed_x -= SPEED_INC_X;
   }
   cursor.dir = DIR_NONE;
+  cursor.jump = 0;
   return 0;
 }
 
@@ -536,6 +538,7 @@ int moveUp(int checkCollision, int scroll) {
 	cursor.speed_y -= SPEED_INC_Y;
   }
   cursor.dir = DIR_NONE;
+  cursor.jump = 0;
   return 0;
 }
 
@@ -569,6 +572,7 @@ int moveDown() {
 	cursor.speed_y -= SPEED_INC_Y;
   }
   cursor.dir = DIR_NONE;
+  cursor.jump = 0;
   return 0;
 }
 
@@ -626,6 +630,7 @@ int canStepUp(int dir) {
 	}
 	cursor.speed_x = 0;
 	cursor.dir = DIR_NONE;
+	cursor.jump = 0;
 	return 0;
   } else {
 	// scroll the screen up
@@ -636,6 +641,23 @@ int canStepUp(int dir) {
 	scrollMap(dir);
 	return 1;
   }
+}
+
+int moveJump() {
+  int ret = 0;
+  if(cursor.jump > 0) {
+	cursor.jump--;
+
+	int old_dir = cursor.dir;
+	int old_speed = cursor.speed_y;
+	cursor.dir = DIR_UP;
+	cursor.speed_y = JUMP_SPEED;
+	moveUp(1, 1);
+	cursor.dir = old_dir;
+	cursor.speed_y = old_speed;
+	ret = 1;
+  }
+  return ret;
 }
 
 /**
@@ -665,9 +687,11 @@ int moveMap() {
 	while(SDL_PollEvent(&event)) {
 	  map.handleMapEvent(&event);
 	}
-	
-	// activate gravity
-	moveGravity();
+	// jumping
+	if(!moveJump()) {
+	  // activate gravity
+	  moveGravity();
+	}
 	// a direction change
 	if(cursor.dir != last_dir) {
 	  if(map.accelerate) {
@@ -856,6 +880,7 @@ void resetCursor() {
   cursor.speed_y = TILE_H;
   cursor.dir = DIR_NONE;
   cursor.wait = 0;
+  cursor.jump = 0;
 }
 
 void saveMap() {
@@ -986,5 +1011,11 @@ void decompressMap(int *p) {
 		}
 	  }
 	}
+  }
+}
+
+void startJump() {
+  if(!cursor.jump) {
+	cursor.jump = JUMP_LENGTH;
   }
 }

@@ -58,8 +58,11 @@ void gameMainLoop(SDL_Event *event) {
 	case SDLK_DOWN: 
 	  cursor.dir = DIR_DOWN; 
 	  break;
-	case SDLK_SPACE: 
+	case SDLK_r: 
 	  drawMap();
+	  break;
+	case SDLK_SPACE: 
+	  startJump();
 	  break;
 	case SDLK_ESCAPE:
 	  cursor.dir = DIR_QUIT;
@@ -67,7 +70,20 @@ void gameMainLoop(SDL_Event *event) {
 	}
 	break;	
   case SDL_KEYUP: 
-	cursor.dir = DIR_UPDATE; 
+	switch(event->key.keysym.sym) {
+	case SDLK_LEFT: 
+	  if(cursor.dir == DIR_LEFT) cursor.dir = DIR_UPDATE;
+	  break;
+	case SDLK_RIGHT: 
+	  if(cursor.dir == DIR_RIGHT) cursor.dir = DIR_UPDATE;
+	  break;
+	case SDLK_UP: 
+	  if(cursor.dir == DIR_UP) cursor.dir = DIR_UPDATE;
+	  break;
+	case SDLK_DOWN: 
+	  if(cursor.dir == DIR_DOWN) cursor.dir = DIR_UPDATE;
+	  break;
+	}
 	break;
   }
 }

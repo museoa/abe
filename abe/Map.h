@@ -39,6 +39,10 @@
 #define START_SPEED_X 6
 #define START_SPEED_Y 6
 
+// how many units is in a jump?
+#define JUMP_LENGTH 7
+#define JUMP_SPEED 14
+
 typedef struct _map {
   char *name;
   int w, h;
@@ -62,6 +66,7 @@ typedef struct _cursor {
   int speed_x, speed_y;
   int dir;
   int wait;
+  int jump;
 } Cursor;
 
 Cursor cursor;
@@ -94,5 +99,7 @@ void unlockMap();
 */
 int *compressMap(size_t *new_size);
 void decompressMap();
+
+void startJump();
 
 #endif
