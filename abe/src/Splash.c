@@ -23,7 +23,7 @@ void splashMainLoop(SDL_Event *event) {
 	switch(event->key.keysym.sym) {
 	case SDLK_ESCAPE:
 	  menu_y = (GOD_MODE ? 4 : 3) * FONT_HEIGHT;
-	  cursor.dir = DIR_QUIT;	  
+	  map.quit = 1;
 	  break;
 	case SDLK_DOWN:
 	  menu_y += FONT_HEIGHT;
@@ -34,7 +34,7 @@ void splashMainLoop(SDL_Event *event) {
 	  if(menu_y < 0) menu_y = FONT_HEIGHT * (GOD_MODE ? 4 : 3);
 	  break;
 	case SDLK_RETURN: case SDLK_SPACE:
-	  cursor.dir = DIR_QUIT;
+	  map.quit = 1;
 	  break;
 	default:
 	  break;

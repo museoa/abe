@@ -207,7 +207,7 @@ void editorMainLoop(SDL_Event *event) {
 	  saveMap();
 	  break;
 	case SDLK_ESCAPE: 
-	  cursor.dir = DIR_QUIT;
+	  map.quit = 1;
 	  break;
 	default:
 	  break;

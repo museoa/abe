@@ -4,6 +4,7 @@
 Cursor cursor;
 Map map;
 int moves = 0;
+Interact interact;
 
 typedef struct _gameCollisionCheck {
   int start_x, start_y, end_x, end_y;
@@ -575,7 +576,7 @@ int moveUp(int checkCollision, int platform) {
 	  }
 	}
 	if(move && (!checkCollision || 
-				((platform || cursor.jump || map.detectLadder() || cursor.stepup) && map.detectCollision(DIR_UP)))) {
+				((platform || cursor.jump || interact.on_ladder || cursor.stepup) && map.detectCollision(DIR_UP)))) {
 	  scrollMap(DIR_UP);	
 	  if(map.accelerate) {
 		if(cursor.speed_y < SPEED_MAX_Y + map.max_speed_boost) {
@@ -611,7 +612,7 @@ int moveDown(int checkCollision, int platform, int slide) {
 	  }
 	}
 	if(move && (!checkCollision ||
-				((platform || cursor.gravity || map.detectLadder() || slide) && map.detectCollision(DIR_DOWN)))) {
+				((platform || cursor.gravity || interact.on_ladder || interact.ladder_change || slide) && map.detectCollision(DIR_DOWN)))) {
 	  scrollMap(DIR_DOWN);	
 	  if(map.accelerate) {
 		if(cursor.speed_y < SPEED_MAX_Y + map.max_speed_boost) {
@@ -726,7 +727,7 @@ int moveSlide() {
 void moveGravity() {
   int old_speed;
     
-  if(!map.gravity || map.detectLadder() || cursor.platform) {
+  if(!map.gravity || interact.on_ladder || cursor.platform) {
 	return;
   }
 	
@@ -752,39 +753,14 @@ int moveWithPlatform() {
   } else if(cursor.platform->dir == DIR_DOWN) {
 	py += cursor.platform->speed_y + map.max_speed_boost;
   }
-  for(i = 0; i < 2; i++) {
-	diff = py - (cursor.pos_y * TILE_H + tom[0]->h + cursor.pixel_y);
-	dir = (diff > 0 ? DIR_DOWN : DIR_UP);
-	if(diff) {
-
-	  old_speed = cursor.speed_y;
-	  cursor.speed_y = (abs(diff) < TILE_H ? abs(diff) : TILE_H);
-	  if(dir == DIR_UP) moveUp(1, 1);
-	  else moveDown(1, 1, 0);
-	  cursor.speed_y = old_speed;
-	  break;
-
-	  /*
-	  if(abs(diff) < TILE_H) {
-		old_speed = cursor.speed_y;
-		cursor.speed_y = abs(diff);
-		if(dir == DIR_UP) moveUp(1, 1);
-		else moveDown(1, 1, 0);
-		cursor.speed_y = old_speed;
-		break;
-	  } else {
-		old_pos = cursor.pos_y;
-		old_speed = cursor.speed_y;
-		cursor.speed_y = TILE_H;
-		if(dir == DIR_UP) moveUp(1, 1);
-		else moveDown(1, 1, 0);
-		cursor.speed_y = old_speed;
-		//		if(cursor.pos_y == old_pos) break; // blocked
-	  }
-	  */
-	} else {
-	  break;
-	}
+  diff = py - (cursor.pos_y * TILE_H + tom[0]->h + cursor.pixel_y);
+  dir = (diff > 0 ? DIR_DOWN : DIR_UP);
+  if(diff) {
+	old_speed = cursor.speed_y;
+	cursor.speed_y = (abs(diff) < TILE_H ? abs(diff) : TILE_H);
+	if(dir == DIR_UP) moveUp(1, 1);
+	else moveDown(1, 1, 0);
+	cursor.speed_y = old_speed;
   }
 
   // move sideways with the platform
@@ -797,6 +773,17 @@ int moveWithPlatform() {
   }
   
   return 1;
+}
+
+void initInteract() {
+  int on_ladder;
+
+  interact.ladder_change = 0;
+  on_ladder = map.detectLadder();
+  if(interact.on_ladder != on_ladder) {
+	interact.ladder_change = 1;
+	interact.on_ladder = on_ladder;
+  }
 }
 
 /**
@@ -819,6 +806,9 @@ void moveMap() {
 	  // where is the map?
 	  map.top_left_x = cursor.pos_x - screen_center_x;
 	  map.top_left_y = cursor.pos_y - screen_center_y;
+
+	  // fill up interact
+	  initInteract();
 	  
 	  // handle events.
 	  while(SDL_PollEvent(&event)) {
@@ -835,12 +825,12 @@ void moveMap() {
 		cursor.speed_x = TILE_W;
 		cursor.speed_y = TILE_H;
 	  }
-	  switch(cursor.dir) {
-	  case DIR_QUIT:
+
+	  // special flow logic
+	  if(map.quit) {
 		return;
-	  case DIR_UPDATE:
+	  } else if(cursor.dir & DIR_UPDATE) {
 		cursor.dir = DIR_NONE;
-	  break;
 	  }
 
 	  if(cursor.dir & DIR_LEFT) {
@@ -859,7 +849,15 @@ void moveMap() {
 		moveUp(1, 0);
 	  }
 	  if(cursor.dir & DIR_DOWN) {
-		moveDown(1, 0, 0);
+		// jumping off a platform
+		if(cursor.platform) {
+		  cursor.speed_y = TILE_H;
+		  moveDown(1, 1, 0);
+		  cursor.speed_y = GRAVITY_SPEED + map.max_speed_boost;
+		  moveDown(1, 1, 0);
+		} else {
+		  moveDown(1, 0, 0);
+		}
 	  }
 
 	  
@@ -1057,6 +1055,7 @@ void resetMap() {
 	map.image_index[LEVEL_MAIN][i] = EMPTY_MAP;
 	map.image_index[LEVEL_FORE][i] = EMPTY_MAP;
   }
+  map.quit = 0;
 }
 
 int initMap(char *name, int w, int h) {
@@ -1086,6 +1085,7 @@ int initMap(char *name, int w, int h) {
   map.delta = 0;
   map.fps_override = 0;
   map.moveBackground = 0;
+  map.quit = 0;
   for(i = LEVEL_BACK; i < LEVEL_COUNT; i++) {
 	if(!(map.image_index[i] = (Uint16*)malloc(sizeof(Uint16) * w * h))) {
 	  fprintf(stderr, "Out of memory.\n");

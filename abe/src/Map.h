@@ -20,13 +20,12 @@
 #define LEVEL_COUNT 3
 
 // Movement directions
-#define DIR_UPDATE -2
-#define DIR_QUIT -1
 #define DIR_NONE 0
 #define DIR_UP 1
 #define DIR_RIGHT 2
 #define DIR_DOWN 4
 #define DIR_LEFT 8
+#define DIR_UPDATE 32
 
 // These are the extra tiles to draw on the left and top.
 // They should be the tile width and height of the biggest
@@ -83,10 +82,19 @@ typedef struct _map {
   SDL_Surface *background_image;
   int moveBackground; // if 1 the background scroll artificially
   int max_speed_boost; // for slow machines, add this to movement speed. (0-10 extra)
+  int quit;
 } Map;
+
+// an optimization for looking up monsters etc. multiple times
+// fixme: add more object, etc. here
+typedef struct _interact {
+  int ladder_change; // did on_ladder change just now?
+  int on_ladder;     // are we on a ladder?
+} Interact;
 
 extern Cursor cursor;
 extern Map map;
+extern Interact interact;
 
 // the main map loop routine
 void moveMap();

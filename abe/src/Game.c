@@ -3,6 +3,20 @@
 
 Game game;
 
+void deleteSavedGame() {
+  char path[300];
+  // version 2
+  sprintf(path, "%s%ssave%d.dat", SAVEGAME_DIR, PATH_SEP, (int)GAME_VERSION);
+  remove(path);
+  sprintf(path, "%s%ssavedmap%d.dat", SAVEGAME_DIR, PATH_SEP, (int)GAME_VERSION);
+  remove(path);
+  // version 1
+  sprintf(path, "%s%ssave.dat", SAVEGAME_DIR, PATH_SEP);
+  remove(path);
+  sprintf(path, "%s%ssavedmap.dat", SAVEGAME_DIR, PATH_SEP);
+  remove(path);
+}
+
 void saveGame() {
   char path[300];
   FILE *fp;
@@ -214,6 +228,8 @@ void gameBeforeDrawToScreen() {
    Main game event handling
 */
 void gameMainLoop(SDL_Event *event) {
+  if(!move_monsters) return;
+
   switch(event->type) {
   case SDL_KEYDOWN:
 	//	printf("The %s key was pressed! scan=%d\n", SDL_GetKeyName(event->key.keysym.sym), event->key.keysym.scancode);
@@ -243,7 +259,7 @@ void gameMainLoop(SDL_Event *event) {
 	  if(startJump()) playSound(JUMP_SOUND);
 	  break;
 	case SDLK_ESCAPE:
-	  cursor.dir = DIR_QUIT;
+	  map.quit = 1;
 	  break;
 	case SDLK_d:
 	  debugMonsters();
@@ -330,13 +346,15 @@ void handleDeath(char *killer) {
   move_monsters = 1;
 
   if(game.lives <= 0) {
-	cursor.dir = DIR_QUIT;
-  } else {
-	repositionCursor(game.player_start_x, game.player_start_y);
-	cursor.speed_x = 0;
-	cursor.speed_y = 0;
-	drawMap();
+	deleteSavedGame();
+	map.quit = 1;
+	return;
   }
+
+  repositionCursor(game.player_start_x, game.player_start_y);
+  cursor.speed_x = 0;
+  cursor.speed_y = 0;
+  drawMap();
 }
 
 /**
@@ -394,7 +412,8 @@ void gameCheckPosition() {
   pos2.h = 2;
   live = detectMonster(&pos2);
   if(live && 
-	 (live->monster->type == MONSTER_PLATFORM || live->monster->type == MONSTER_PLATFORM2)) {
+	 (live->monster->type == MONSTER_PLATFORM || live->monster->type == MONSTER_PLATFORM2) &&
+	 !game.balloonTimer) {
 	if(!cursor.platform) playSound(PLATFORM_SOUND);
 	cursor.platform = live;
   } else {
@@ -484,7 +503,7 @@ int detectLadder() {
   // are we smack on top of a ladder? (extend checking to 1 row below Tom)
   if(pos.pixel_y == 0 && pos.pos_y + pos.h >= map.h) {
 	pos.h++;
-  }  
+  }
   return containsType(&pos, TYPE_LADDER);
 }
 

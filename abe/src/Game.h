@@ -10,6 +10,7 @@
 
 #define FACE_STEP 2
 
+// really: development mode
 #define GOD_MODE 1
 
 #define BALLOON_RIDE_INTERVAL 500
