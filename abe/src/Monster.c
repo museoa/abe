@@ -212,6 +212,41 @@ void moveCrab(LiveMonster *live_monster) {
   }
 }
 
+void moveBat(LiveMonster *live_monster) {
+  int j;
+
+  // increment the face to display
+  live_monster->face++;
+  if(live_monster->face >= 
+	 live_monster->monster->image_count * live_monster->monster->face_mod) 
+	live_monster->face = 0;
+
+  if(live_monster->dir == DIR_UPDATE) {
+	j=(int) (30.0*rand()/(RAND_MAX));
+	if(j == 0) {
+	  live_monster->dir = DIR_LEFT;
+	  if(!stepMonsterLeft(live_monster, 1)) {
+		live_monster->dir = DIR_RIGHT;
+		stepMonsterRight(live_monster, 1);
+	  }	
+	}
+  } else {
+	// move sideways until you hit a wall or an edge
+	if(live_monster->pos_y % 6 < 3) stepMonsterDown(live_monster);
+	else stepMonsterUp(live_monster);
+	
+	if(live_monster->dir == DIR_LEFT) {
+	  if(!stepMonsterLeft(live_monster, 1)) {
+		live_monster->dir = DIR_UPDATE;
+	  }
+	} else {
+	  if(!stepMonsterRight(live_monster, 1)) {
+		live_monster->dir = DIR_UPDATE;
+	  }
+	}
+  }
+}
+
 void breedBullet(LiveMonster *live, SDL_Rect *pos) {
   addLiveMonsterChangeMap(MONSTER_BULLET, img_bullet[0], live->pos_x + 2, live->pos_y, 0);
   live_monsters[live_monster_count - 1].pixel_x = 10;
@@ -628,6 +663,12 @@ void initMonsters() {
   monsters[MONSTER_CANNON2].breedMonster = breedBullet2;
   monsters[MONSTER_CANNON2].max_children = 1; // 1 bullet active at a time
 
+  // bat
+  strcpy(monsters[MONSTER_BAT].name, "vampire bat");
+  monsters[MONSTER_BAT].moveMonster = moveBat;
+  monsters[MONSTER_BAT].start_speed_x = 6;
+  monsters[MONSTER_BAT].start_speed_y = 4;
+  monsters[MONSTER_BAT].face_mod = 3;
 
   // add additional monsters here
 

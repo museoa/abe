@@ -184,6 +184,8 @@ void doLoadImage(char *filename, char *name) {
 	  monster = MONSTER_ARROW;
 	} else if(!strcmp(name, "fire1") || !strcmp(name, "fire2") || !strcmp(name, "fire3")) {
 	  monster = MONSTER_FIRE;
+	} else if(!strcmp(name, "bat1") || !strcmp(name, "bat2")) {
+	  monster = MONSTER_BAT;
 	} else if(!strcmp(name, "slide1")) {
 	  type = TYPE_SLIDE;
 	  img_slide_right[0] = image_count;
@@ -202,6 +204,8 @@ void doLoadImage(char *filename, char *name) {
 	} else if(!strcmp(name, "slide6")) {
 	  type = TYPE_SLIDE;
 	  img_slide_left[2] = image_count;
+	} else if(!strcmp(name, "crystal")) {
+	  type = TYPE_DECORATION;
 	}
 
 	// store the image

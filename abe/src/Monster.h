@@ -19,8 +19,9 @@
 #define MONSTER_BULLET 12
 #define MONSTER_CANNON 13
 #define MONSTER_CANNON2 14
+#define MONSTER_BAT 15
 
-#define MONSTER_COUNT 15
+#define MONSTER_COUNT 16
 
 struct _monster;
 
