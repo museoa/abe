@@ -52,36 +52,36 @@ install_sh_PROGRAM = $(install_sh) -c
 install_sh_SCRIPT = $(install_sh) -c
 INSTALL_SCRIPT = ${INSTALL}
 INSTALL_HEADER = $(INSTALL_DATA)
-transform = s,^,i386-mingw32msvc-,
+transform = s,x,x,
 NORMAL_INSTALL = :
 PRE_INSTALL = :
 POST_INSTALL = :
 NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
-host_alias = i386-mingw32msvc
-host_triplet = i386-pc-mingw32msvc
+host_alias = 
+host_triplet = i686-pc-linux-gnu
 
-EXEEXT = .exe
+EXEEXT = 
 OBJEXT = o
 PATH_SEPARATOR = :
 AMTAR = tar
 AWK = gawk
-CC = i386-mingw32msvc-gcc
+CC = gcc
 DEPDIR = .deps
-GL_LIBS = -lopengl32
+GL_LIBS =  -L/usr/X11R6/lib -lGL
 INSTALL_STRIP_PROGRAM = ${SHELL} $(install_sh) -c -s
-MATHLIB = 
+MATHLIB = -lm
 PACKAGE = SDL_tests
-SDL_CFLAGS = -I/usr/local/cross-tools/i386-mingw32msvc/include/SDL -Dmain=SDL_main
-SDL_CONFIG = /usr/local/cross-tools/i386-mingw32msvc/bin/sdl-config
-SDL_LIBS = -L/usr/local/cross-tools/i386-mingw32msvc/lib -lmingw32 -lSDLmain -lSDL -mwindows
-STRIP = i386-mingw32msvc-strip
+SDL_CFLAGS = -I/usr/include/SDL -D_REENTRANT
+SDL_CONFIG = /usr/bin/sdl-config
+SDL_LIBS = -L/usr/lib -Wl,-rpath,/usr/lib -lSDL -lpthread
+STRIP = 
 VERSION = 1.2.3
-X_CFLAGS = 
+X_CFLAGS =  -I/usr/X11R6/include
 X_EXTRA_LIBS = 
-X_LIBS = 
-X_PRE_LIBS = 
+X_LIBS =  -L/usr/X11R6/lib
+X_PRE_LIBS =  -lSM -lICE
 am__include = include
 am__quote = 
 install_sh = /home/gabor/sourceforge/abe/install-sh
@@ -92,7 +92,7 @@ noinst_PROGRAMS = \
 
 
 abe_SOURCES = Main.c Image.c Trans.c Splash.c Editor.c Font.c Util.c Menu.c Map.c Game.c Monster.c
-abe_LDADD = 
+abe_LDADD = -lm
 subdir = .
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
@@ -111,14 +111,14 @@ DEFS = -DPACKAGE_NAME=\"\" -DPACKAGE_TARNAME=\"\" -DPACKAGE_VERSION=\"\" -DPACKA
 DEFAULT_INCLUDES =  -I. -I$(srcdir)
 CPPFLAGS = 
 LDFLAGS = 
-LIBS =  -L/usr/local/cross-tools/i386-mingw32msvc/lib -lmingw32 -lSDLmain -lSDL -mwindows
+LIBS =  -L/usr/lib -Wl,-rpath,/usr/lib -lSDL -lpthread
 depcomp =
 am__depfiles_maybe =
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
 LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
-CFLAGS = -g -O2 -I/usr/local/cross-tools/i386-mingw32msvc/include/SDL -Dmain=SDL_main -DHAVE_OPENGL
+CFLAGS = -g -O2  -I/usr/X11R6/include -I/usr/include/SDL -D_REENTRANT -DHAVE_OPENGL
 DIST_SOURCES = $(abe_SOURCES)
 DIST_COMMON = README COPYING Makefile.am Makefile.in acinclude.m4 \
 	aclocal.m4 config.guess config.sub configure configure.in \

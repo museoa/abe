@@ -808,8 +808,8 @@ void finishDrawMap() {
 	  if(map.afterMainLevelDrawn) map.afterMainLevelDrawn();
 	  // draw creatures
 	  if(map.monsters) drawLiveMonsters(screen, 
-										params.start_x + EXTRA_X, 
-										params.start_y + EXTRA_Y);
+										(params.start_x + EXTRA_X) * TILE_W + cursor.pixel_x,
+										(params.start_y + EXTRA_Y) * TILE_H + cursor.pixel_y);
 	}
   }
 
@@ -864,6 +864,10 @@ void setImage(int level, int index) {
 	  cursor.pos_x += (images[index]->image->w / TILE_W);
   }
   drawMap();
+}
+
+void setImageNoCheck(int level, int x, int y, int image_index) {
+  map.image_index[level][x + (y * map.w)] = image_index;
 }
 
 int defaultDetectCollision(int dir) {

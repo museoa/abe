@@ -22,8 +22,8 @@ void initMonsters() {
   // init the screen rectangle.
   extended_screen_rect.x = -EXTRA_X * TILE_W;
   extended_screen_rect.y = -EXTRA_Y * TILE_H;
-  extended_screen_rect.w = screen->w + EXTRA_X * TILE_W;
-  extended_screen_rect.h = screen->h + EXTRA_Y * TILE_H;
+  extended_screen_rect.w = screen->w + 2 * EXTRA_X * TILE_W;
+  extended_screen_rect.h = screen->h + 2 * EXTRA_Y * TILE_H;
   
   // common properties.
   for(i = 0; i < MONSTER_COUNT; i++) {
@@ -82,16 +82,21 @@ void addLiveMonster(int monster_index, int image_index, int x, int y) {
 }
 
 void removeLiveMonster(int live_monster_index) {
-  /*
-
-  // this crashes... also it should add it back into the map
-
   int t;
+  LiveMonster *p;
+
+  // add it back to the map
+  p = &live_monsters[live_monster_index];
+  setImageNoCheck(LEVEL_MAIN, 
+				  p->pos_x, p->pos_y, 
+				  p->monster->image_index[p->face]);
+
+  // remove it from memory
   for(t = live_monster_index; t < live_monster_count - 1; t++) {
 	memcpy(&live_monsters[t], &live_monsters[t + 1], sizeof(LiveMonster));
   }
   live_monster_count--;
-  */
+
   fprintf(stderr, "Removed live monster! monster=%d index=%d count=%d\n", 
 		  live_monsters[live_monster_index].monster->type, live_monster_index, live_monster_count);
   fflush(stderr);
@@ -107,7 +112,7 @@ int isOnScreen(SDL_Rect rect) {
 
 /**
    Draw all currently tracked creatures.
-   start_x, start_y are the offset of the screen's top left edge in tiles.
+   start_x, start_y are the offset of the screen's top left edge in pixels.
  */
 void drawLiveMonsters(SDL_Surface *surface, int start_x, int start_y) {
   SDL_Rect pos;
@@ -117,23 +122,16 @@ void drawLiveMonsters(SDL_Surface *surface, int start_x, int start_y) {
 	live_monsters[i].monster->moveMonster(&live_monsters[i]);
 
 	img = images[live_monsters[i].monster->image_index[live_monsters[i].face]]->image;
-	//	pos.x = (live_monsters[i].pos_x - start_x - EXTRA_X) * TILE_W + live_monsters[i].pixel_x;
-	//	pos.y = (live_monsters[i].pos_y - start_y - EXTRA_Y) * TILE_H + live_monsters[i].pixel_y;
-	pos.x = (live_monsters[i].pos_x - start_x) * TILE_W + live_monsters[i].pixel_x;
-	pos.y = (live_monsters[i].pos_y - start_y) * TILE_H + live_monsters[i].pixel_y;
+	pos.x = live_monsters[i].pos_x * TILE_W - start_x + live_monsters[i].pixel_x;
+	pos.y = live_monsters[i].pos_y * TILE_H - start_y + live_monsters[i].pixel_y;
 	pos.w = img->w;
 	pos.h = img->h;
 
-	if(!isOnScreen(pos)) {	  
+	if(!isOnScreen(pos)) {
+	  fprintf(stderr, ">>> offscreen at (%d,%d)-(%d,%d)\n", pos.x, pos.y, pos.x + pos.w, pos.y + pos.h);
+	  fflush(stderr);
 	  removeLiveMonster(i);
 	} else {
-	  /*
-	  fprintf(stderr, "Drawing live monster! monster=%d index=%d pos: %d,%d screen: %d,%d\n", 
-			  live_monsters[i].monster->type, i, 
-			  live_monsters[i].pos_x, live_monsters[i].pos_y,
-			  pos.x, pos.y);
-			  fflush(stderr);
-	  */
 	  SDL_BlitSurface(img, NULL, surface, &pos);
 	}
   }

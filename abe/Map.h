@@ -81,6 +81,7 @@ void moveMap();
 
 void drawMap();
 void setImage(int level, int index);
+void setImageNoCheck(int level, int x, int y, int image_index);
 void initMap(char *name, int w, int h);
 void destroyMap();
 void saveMap();
