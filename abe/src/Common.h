@@ -26,6 +26,7 @@ typedef struct _liveMonster {
   int dir;
   int face;
   struct _monster *monster;
+  void *custom;
 } LiveMonster;
 
 /**
@@ -41,6 +42,10 @@ typedef struct _monster {
   int face_mod;
   void (*moveMonster) (LiveMonster *live);
   void (*drawMonster) (SDL_Rect *pos, LiveMonster *live, SDL_Surface *surface, SDL_Surface *img);
+  // return 1 if pos intersects with live's position; 0 otherwise
+  int (*detectMonster) (Position *pos, LiveMonster *live);
+  // use this to allocate memory for the live->custom field.
+  void (*allocCustom) (LiveMonster *live);
   int harmless;
   int random_speed;
 } Monster;

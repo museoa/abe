@@ -276,14 +276,14 @@ void moveFire(LiveMonster *live_monster) {
 }
 
 void drawFire(SDL_Rect *pos, LiveMonster *live, SDL_Surface *surface, SDL_Surface *img) {
-  int y = 0;
+  int y, original;
   SDL_Rect p, q;
   Position position;
   int index;
 
   p.x = pos->x;
   //  p.y = (pos->y / TILE_H) * TILE_H - TILE_H;
-  y = p.y = pos->y;
+  original = y = p.y = pos->y;
   p.w = pos->w;
   p.h = pos->h;
 
@@ -298,8 +298,6 @@ void drawFire(SDL_Rect *pos, LiveMonster *live, SDL_Surface *surface, SDL_Surfac
 		!containsType(&position, TYPE_WALL | TYPE_DOOR)) {
 	index = (int) ((double)(live->monster->image_count) * rand() / RAND_MAX);
 	SDL_BlitSurface(images[live->monster->image_index[index]]->image, NULL, surface, &p);
-	//	y = p.y;
-	//	if(!y) break;
 	p.x = pos->x;
 	y += TILE_H;
 	p.y = y;
@@ -307,6 +305,9 @@ void drawFire(SDL_Rect *pos, LiveMonster *live, SDL_Surface *surface, SDL_Surfac
 	p.h = pos->h;
 	position.pos_y++;	
   }
+
+  // save the fire column's height in the custom field
+  *((int*)(live->custom)) = y - original;
 
   // draw the last one
   if(position.pos_y > live->pos_y && live->pixel_y) {
@@ -394,6 +395,54 @@ void drawSmasher(SDL_Rect *pos, LiveMonster *live, SDL_Surface *surface, SDL_Sur
   SDL_BlitSurface(images[first]->image, NULL, surface, pos);
 }
 
+int defaultDetectMonster(Position *pos, LiveMonster *live) {
+  SDL_Rect monster, check;
+  SDL_Surface *img;
+
+  // convert pos to pixels
+  check.x = pos->pos_x * TILE_W + pos->pixel_x;
+  check.y = pos->pos_y * TILE_H + pos->pixel_y;
+  check.w = pos->w * TILE_W;
+  check.h = pos->h * TILE_H;
+
+  // get the live monster's pixel rect.
+  img = images[live->monster->image_index[getLiveMonsterFace(live)]]->image;
+  monster.x = live->pos_x * TILE_W + live->pixel_x;
+  monster.y = live->pos_y * TILE_H + live->pixel_y;
+  monster.w = img->w;
+  monster.h = img->h;
+
+  // compare
+  return intersectsBy(&check, &monster, MONSTER_COLLISION_FUZZ);
+}
+
+int detectFire(Position *pos, LiveMonster *live) {
+  SDL_Rect monster, check;
+  SDL_Surface *img;
+
+  // convert pos to pixels
+  check.x = pos->pos_x * TILE_W + pos->pixel_x;
+  check.y = pos->pos_y * TILE_H + pos->pixel_y;
+  check.w = pos->w * TILE_W;
+  check.h = pos->h * TILE_H;
+
+  // get the live monster's pixel rect.
+  //  img = images[live->monster->image_index[getLiveMonsterFace(live)]]->image;
+  monster.x = live->pos_x * TILE_W + live->pixel_x;
+  monster.y = live->pos_y * TILE_H + live->pixel_y;
+  monster.w = TILE_W;
+  monster.h = *((int*)(live->custom));
+
+  // compare
+  return intersectsBy(&check, &monster, MONSTER_COLLISION_FUZZ);
+}
+
+void allocFireCustom(LiveMonster *live) {
+  if(((int*)live->custom = (int*)malloc(sizeof(int))) == NULL) {
+	fprintf(stderr, "Out of memory when trying to allocate custom storage for fire column.\n");
+  }
+}
+
 /**
    Remember here, images are not yet initialized!
  */
@@ -418,6 +467,8 @@ void initMonsters() {
 	monsters[i].type = i;
 	monsters[i].harmless = 0;
 	monsters[i].random_speed = 1;
+	monsters[i].detectMonster = defaultDetectMonster;
+	monsters[i].allocCustom = NULL;
   }
 
   // crab monster
@@ -502,6 +553,8 @@ void initMonsters() {
   monsters[MONSTER_FIRE].start_speed_x = 2;
   monsters[MONSTER_FIRE].start_speed_y = 2;
   monsters[MONSTER_FIRE].face_mod = 3;
+  monsters[MONSTER_FIRE].detectMonster = detectFire;
+  monsters[MONSTER_FIRE].allocCustom = allocFireCustom;
 
   // add additional monsters here
 
@@ -544,6 +597,10 @@ void addLiveMonster(int monster_index, int image_index, int x, int y) {
   live_monsters[live_monster_count].dir = DIR_NONE;
   live_monsters[live_monster_count].face = 0;
   live_monsters[live_monster_count].monster = m;
+  // allocate custom storage
+  if(live_monsters[live_monster_count].monster->allocCustom) {
+	live_monsters[live_monster_count].monster->allocCustom(&live_monsters[live_monster_count]);
+  }
   live_monster_count++;
   fprintf(stderr, "Added live monster! monster=%s x=%d y=%d count=%d\n", 
 		  m->name, x, y, live_monster_count);
@@ -571,6 +628,11 @@ void removeLiveMonster(int live_monster_index) {
   setImageNoCheck(LEVEL_MAIN, 
 				  p->pos_x, p->pos_y, 
 				  p->monster->image_index[getLiveMonsterFace(p)]);
+
+  // free custom storage
+  if(live_monsters[live_monster_index].monster->allocCustom) {
+	free(live_monsters[live_monster_index].custom);
+  }
 
   // remove it from memory
   for(t = live_monster_index; t < live_monster_count - 1; t++) {
@@ -634,24 +696,10 @@ int getLiveMonsterFace(LiveMonster *live) {
  */
 LiveMonster *detectMonster(Position *pos) {
   int i;
-  SDL_Rect monster, check;
-  SDL_Surface *img;
-
-  check.x = pos->pos_x * TILE_W + pos->pixel_x;
-  check.y = pos->pos_y * TILE_H + pos->pixel_y;
-  check.w = pos->w * TILE_W;
-  check.h = pos->h * TILE_H;
   for(i = 0; i < live_monster_count; i++) {
-	img = images[live_monsters[i].monster->image_index[getLiveMonsterFace(&live_monsters[i])]]->image;
-	monster.x = live_monsters[i].pos_x * TILE_W + live_monsters[i].pixel_x;
-	monster.y = live_monsters[i].pos_y * TILE_H + live_monsters[i].pixel_y;
-	monster.w = img->w;
-	monster.h = img->h;
-	if(intersectsBy(&check, &monster, MONSTER_COLLISION_FUZZ)) {
+	if(live_monsters[i].monster->detectMonster(pos, &live_monsters[i])) {
 	  return &live_monsters[i];
 	}
   }
-
-
   return NULL;
 }
