@@ -4,7 +4,7 @@
 #include "Main.h"
 
 // Where to store the map files (no ending /)
-#define MAPS_DIR " maps"
+#define MAPS_DIR "maps"
 
 // Tile sizes
 #define TILE_W 20
@@ -48,7 +48,7 @@ typedef struct _map {
   int w, h;
   int *image_index[LEVEL_COUNT];
   SDL_Surface *level[LEVEL_COUNT];
-  SDL_Surface *transfer[LEVEL_COUNT];
+  SDL_Surface *transfer;
   int delay;
   // set this to 1 to kill the movement thread. (by calling: stopMapMoveThread())
   int stopThread;
@@ -83,7 +83,7 @@ void moveMap();
 void drawMap();
 void setImage(int level, int index);
 void setImageNoCheck(int level, int x, int y, int image_index);
-void initMap(char *name, int w, int h);
+int initMap(char *name, int w, int h);
 void destroyMap();
 void saveMap();
 int loadMap(int drawMap);

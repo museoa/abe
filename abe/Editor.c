@@ -175,12 +175,14 @@ void resetEditPanel() {
   edit_panel.image_index = 0;
 }
 
-void allocMap(char *name, int w, int h) {
+int allocMap(char *name, int w, int h) {
   int level, i, x, y;
   int step_x, step_y;
   Image *img;
 
-  initMap(name, w, h);
+  if(!initMap(name, w, h)) {
+	return 0;
+  }
   
   // set our painting events
   map.beforeDrawToScreen = beforeDrawToScreen;
@@ -238,6 +240,8 @@ void allocMap(char *name, int w, int h) {
 
   // start the map's main loop
   moveMap();
+
+  return 1;
 }
 
 void initEditor() {
@@ -257,7 +261,7 @@ void editMap(char *name, int w, int h) {
   // freeMap();
 
   // create a new one
-  allocMap(name, w, h);
+  if(!allocMap(name, w, h)) return;
 
   // try to load it
   loadMap(1);

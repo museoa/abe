@@ -73,9 +73,10 @@ void testModes() {
 
 int main(int argc, char *argv[]) {
   int runmode = RUNMODE_SPLASH;
-  Uint32 flags = SDL_HWSURFACE | SDL_DOUBLEBUF;
+  Uint32 flags = SDL_DOUBLEBUF;
   int i;
   int width, height, bpp, n;
+  int hw_mem = 1;
 
   width = 640;
   height = 480;
@@ -89,6 +90,8 @@ int main(int argc, char *argv[]) {
   for(i = 0; i < argc; i++) {
 	if(!strcmp(argv[i], "--fullscreen") || !strcmp(argv[i], "-f")) {
 	  flags |= SDL_FULLSCREEN;
+	} else if(!strcmp(argv[i], "--system") || !strcmp(argv[i], "-s")) {
+	  hw_mem = 0;
 	} else if(!strcmp(argv[i], "--editor") || !strcmp(argv[i], "-e")) {
 	  runmode = RUNMODE_EDITOR;
 	} else if(!strcmp(argv[i], "--game") || !strcmp(argv[i], "-g")) {
@@ -105,18 +108,25 @@ int main(int argc, char *argv[]) {
 	} else if(!strcmp(argv[i], "--test") || !strcmp(argv[i], "-t")) {
 	  testModes();
 	  exit(0);
-	} else if(!strcmp(argv[i], "--help") || !strcmp(argv[i], "-?")) {
+	} else if(!strcmp(argv[i], "--help") || !strcmp(argv[i], "-?") || !strcmp(argv[i], "-h")) {
 	  printf("Abe!! Happy Birthday, 2002\n\n");
 	  printf("-f --fullscreen   Run in fullscreen mode.\n");
 	  printf("-e --editor       Skip the splash screen and run the editor.\n"); 
 	  printf("-g --game         Skip the splash screen and run the game.\n"); 
 	  printf("-t --test         Test video modes only.\n"); 
+	  printf("-s --system       Use system memory instead of video(default) memory.\n");
 	  printf("-w --width #      Use this width for the video mode.\n"); 
 	  printf("-h --height #     Use this height for the video mode.\n"); 
 	  printf("-b --bpp #        Use this bpp for the video mode.\n"); 
-	  printf("-? --help         Show this help message.\n");
+	  printf("-? -h --help      Show this help message.\n");
 	  exit(0);
 	}
+  }
+
+  if(hw_mem) {
+	flags |= SDL_HWSURFACE;
+  } else {
+	flags |= SDL_SWSURFACE;
   }
 
   fprintf(stderr, "Attempting to set %dx%dx%d video mode.\n", width, height, bpp);

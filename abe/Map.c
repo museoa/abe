@@ -1,3 +1,4 @@
+#include <errno.h>
 #include "Map.h"
 
 void waitUntilPaintingStops();
@@ -405,13 +406,13 @@ void scrollMap(int dir) {
 
 	if(screen->flags & SDL_HWSURFACE) {
 	  for(level = LEVEL_BACK; level < LEVEL_COUNT; level++) {
-		SDL_FillRect(map.transfer[level], NULL, SDL_MapRGBA(screen->format, 0x00, 0x00, 0x00, 0x00));
-		SDL_BlitSurface(map.level[level], NULL, map.transfer[level], NULL);
+		SDL_FillRect(map.transfer, NULL, SDL_MapRGBA(screen->format, 0x00, 0x00, 0x00, 0x00));
+		SDL_BlitSurface(map.level[level], NULL, map.transfer, NULL);
 		pos.x = cursor.speed_x;
 		pos.y = 0;
 		pos.w = map.level[level]->w - cursor.speed_x;
 		pos.h = map.level[level]->h;
-		SDL_BlitSurface(map.transfer[level], NULL, map.level[level], &pos);
+		SDL_BlitSurface(map.transfer, NULL, map.level[level], &pos);
 	  }
 	} else {
 	  // scroll the virtual screens right row by row
@@ -443,17 +444,17 @@ void scrollMap(int dir) {
 
 	if(screen->flags & SDL_HWSURFACE) {
 	  for(level = LEVEL_BACK; level < LEVEL_COUNT; level++) {
-		SDL_FillRect(map.transfer[level], NULL, SDL_MapRGBA(screen->format, 0x00, 0x00, 0x00, 0x00));
+		SDL_FillRect(map.transfer, NULL, SDL_MapRGBA(screen->format, 0x00, 0x00, 0x00, 0x00));
 		pos.x = cursor.speed_x;
 		pos.y = 0;
 		pos.w = map.level[level]->w - cursor.speed_x;
 		pos.h = map.level[level]->h;
-		SDL_BlitSurface(map.level[level], &pos, map.transfer[level], NULL);
+		SDL_BlitSurface(map.level[level], &pos, map.transfer, NULL);
 		pos.x = 0;
 		pos.y = 0;
 		pos.w = map.level[level]->w - cursor.speed_x;
 		pos.h = map.level[level]->h;
-		SDL_BlitSurface(map.transfer[level], NULL, map.level[level], &pos);
+		SDL_BlitSurface(map.transfer, NULL, map.level[level], &pos);
 	  }
 	} else {
 
@@ -913,8 +914,9 @@ int defaultDetectLadder() {
   return 1;
 }
 
-void initMap(char *name, int w, int h) {
+int initMap(char *name, int w, int h) {
   int i;
+  int hw_surface;
 
   // start a new Map
   map.gravity = 0;
@@ -944,23 +946,37 @@ void initMap(char *name, int w, int h) {
 	  fflush(stderr);
 	  return;
 	}
-	fprintf(stderr, "level[%d] is HW surface? %s\n", i, (map.level[i]->flags & SDL_HWSURFACE ? "true" : "false"));	
-	if(!(map.transfer[i] = SDL_CreateRGBSurface(SDL_HWSURFACE, 
-												screen->w + EXTRA_X * TILE_W, 
-												screen->h + EXTRA_Y * TILE_H, 
-												screen->format->BitsPerPixel, 
-												0, 0, 0, 0))) {
-	  fprintf(stderr, "Error creating surface: %s\n", SDL_GetError());
+	hw_surface = (map.level[i]->flags & SDL_HWSURFACE ? 1 : 0);
+	fprintf(stderr, "level[%d] is HW surface? %d\n", i, hw_surface);
+	if(screen->flags & SDL_HWSURFACE & !hw_surface) {
+	  fprintf(stderr, "Can't create surface in video memory. Since the screen is there, this surface must too.\n");
 	  fflush(stderr);
-	  return;
+	  return 0;
 	}
-	fprintf(stderr, "transfer[%d] is HW surface? %s\n", i, (map.transfer[i]->flags & SDL_HWSURFACE ? "true" : "false"));	
 
 	// set black as the transparent color key
 	if(i > LEVEL_BACK) {
 	  SDL_SetColorKey(map.level[i], SDL_SRCCOLORKEY, SDL_MapRGBA(map.level[i]->format, 0x00, 0x00, 0x00, 0xff));
 	}
   }
+
+  // init the transfer area
+  if(!(map.transfer = SDL_CreateRGBSurface(SDL_HWSURFACE, 
+										   screen->w + EXTRA_X * TILE_W, 
+										   screen->h + EXTRA_Y * TILE_H, 
+										   screen->format->BitsPerPixel, 
+										   0, 0, 0, 0))) {
+	fprintf(stderr, "Error creating surface: %s\n", SDL_GetError());
+	fflush(stderr);
+	return;
+  }
+  fprintf(stderr, "transfer area is HW surface? %d\n", hw_surface);
+  if(screen->flags & SDL_HWSURFACE & !hw_surface) {
+	fprintf(stderr, "Can't create surface in video memory. Since the screen is there, this surface must too.\n");
+	fflush(stderr);
+	return 0;
+  }
+  
   // clean map
   for(i = 0; i < (w * h); i++) {
 	map.image_index[LEVEL_BACK][i] = -1;
@@ -974,6 +990,7 @@ void initMap(char *name, int w, int h) {
   screen_w = screen->w / TILE_W;
   //  screen_h = (screen->h - edit_panel.image->h) / TILE_H;
   screen_h = screen->h / TILE_H;
+  return 1;
 }
 
 void destroyMap() {
@@ -1005,14 +1022,17 @@ void saveMap() {
   FILE *fp;
   size_t new_size, written;
   int *compressed_map;
+  char *err;
 
   sprintf(path, "%s%s%s.dat", MAPS_DIR, PATH_SEP, map.name);
   printf("Saving map %s\n", path);  
   fflush(stdout);
 
   if(!(fp = fopen(path, "wb"))) {
-	fprintf(stderr, "Can't open file for writing.\n");
+	err = strerror(errno);
+	fprintf(stderr, "Can't open file for writing: %s\n", err);
 	fflush(stderr);
+	free(err);
 	return;
   }
   // write the header
@@ -1040,13 +1060,16 @@ int loadMap(int draw_map) {
   size_t size;
   int *read_buff;
   int count_read;
+  char *err;
 
   sprintf(path, "%s%s%s.dat", MAPS_DIR, PATH_SEP, map.name);
   printf("Loading map %s\n", path);  
   fflush(stdout);
   if(!(fp = fopen(path, "rb"))) {
-	fprintf(stderr, "Can't open file for reading.\n");
+	err = strerror(errno);
+	fprintf(stderr, "Can't open file for reading: %s\n", err);
 	fflush(stderr);
+	free(err);
 	return 0;
   }
   // read the header

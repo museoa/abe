@@ -164,7 +164,7 @@ int detectLadder() {
 }
 
 void runMap(char *name, int w, int h) {
-  initMap(name, w, h);
+  if(!initMap(name, w, h)) return;
   // try to load the map and quit if you can't find it.
   if(!loadMap(0)) {
 	fprintf(stderr, "Can't find map file: %s\n", name);
