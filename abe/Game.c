@@ -91,6 +91,11 @@ void gameMainLoop(SDL_Event *event) {
 		game.balloonTimer = BALLOON_RIDE_INTERVAL;
 		map.gravity = 0;
 	  }
+	case SDLK_s:
+	  drawMap();
+	  SDL_SaveBMP(screen, "screenshot.bmp");
+	  fprintf(stderr, "Saved screenshot.bmp.\n");
+	  fflush(stderr);
 	}
 	break;	
   case SDL_KEYUP: 
