@@ -5,7 +5,7 @@ int menu_y;
 #define BULLET_FACE_COUNT 4
 int face = 0, face_mod = 4;
 
-char text[] = "special thanks to sadfasdf asd f asdfasdfasdfa sdf asd fasdf asd f asdfasdfasdfa sdf asd fasdf asd f asdfasdfasdfa sdf asd fasdf asd f asdfasdfasdfa sdf asd fasdf asd f asdfasdfasdfa sdf asd fasdf asd f asdfasdfasdfa sdf asd fasdf asd f asdfasdfasdfa sdf asd fasdf";
+char text[] = "abes amazing adventure!! code and graphics by gabor torok music by alex clark special thanks to jay for lending his macos powerbook and to michal tomaszkiewicz for compiling under the beos 2003 april 14 happy birthday abraham!!";
 int text_pos = -10000;
 
 void drawScrollText() {
@@ -104,6 +104,7 @@ void initIntroMap() {
   // set our painting events
   map.beforeDrawToScreen = splashBeforeDrawToScreen;
   map.handleMapEvent = splashMainLoop;
+  map.moveBackground = 1;
   
   map.monsters = 1;
 
@@ -128,7 +129,6 @@ void showIntro() {
   initIntroMap();
   while(1) {	
 	cursor.dir = DIR_NONE;
-	// draw the map
 	drawMap();
 	// start the map main loop
 	moveMap();

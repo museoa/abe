@@ -3,10 +3,11 @@
 #define MAX_ENTRIES 50
 #define MAX_CHOICES 10
 
-#define SOUND_ENABLED 0
-#define MUSIC_ENABLED 1
-#define FULLSCREEN_ENABLED 2
-#define GAME_DIFFICOULTY 3
+#define SOUND_ENABLED 1
+#define MUSIC_ENABLED 2
+#define FULLSCREEN_ENABLED 4
+#define DRAW_BACKGROUND 5
+#define GAME_DIFFICOULTY 7
 
 typedef struct _settingEntry {
   char title[80];
@@ -15,19 +16,24 @@ typedef struct _settingEntry {
   int selected;
 } SettingEntry;
 SettingEntry entries[] = {
+  { "audio", 0, { "" }, 0 },
   { "sound", 2, { "on", "off" }, 0 },
   { "music", 2, { "on", "off" }, 0 },
+  { "video", 0, { "" }, 0 },
   { "full screen", 2, { "on", "off" }, 0 },
-  { "game", 3, { "easy", "normal", "hard" }, 0 },
+  { "background", 2, { "on", "off" }, 0 },
+  { "game", 0, { "" }, 0 },
+  { "difficulty", 3, { "easy", "normal", "hard" }, 0 },
   { "", 0, { "" }, 0 }
 };
 int entry_count;
 SDL_Surface *back;
 
 // menu cursor
-int m_menu_y;
+int m_menu_y = 1;
 #define BULLET_FACE_COUNT 4
 int m_face = 0, m_face_mod = 4;
+int bg_x = 0, bg_y = 0;
 
 int getSelectionCharIndex(int n) {
   int t;
@@ -48,32 +54,44 @@ void drawSettings() {
   int i, t, start, end;
   SDL_Rect pos;
   char s[200];
+  int y = 2 * (FONT_HEIGHT + 5);
+
   for(i = 0; i < MAX_ENTRIES; i++) {
 	if(!strlen(entries[i].title)) {
 	  entry_count = i;
 	  break;
 	}
-	drawString(screen, 35, (i + 2) * FONT_HEIGHT, entries[i].title);
-
-	// concat choices
-	strcpy(s, "");
-	for(t = 0; t < entries[i].choice_count; t++) {
-	  if(t > 0) strcat(s, " ");
-	  strcat(s, entries[i].choices[t]);
+	
+	if(entries[i].choice_count > 0) {
+	  drawString(screen, 35, y, entries[i].title);
+	  // concat choices
+	  strcpy(s, "");
+	  for(t = 0; t < entries[i].choice_count; t++) {
+		if(t > 0) strcat(s, " ");
+		strcat(s, entries[i].choices[t]);
+	  }
+	  
+	  start = getSelectionCharIndex(i);
+	  end = start + getNumberOfCharWidthOfSelection(i);
+	  
+	  // highlight the selected item
+	  pos.x = 250 + getFontPixelWidth(s, 0, start) - 2;
+	  pos.y = y;
+	  pos.w = getFontPixelWidth(s, start, end) + 4;
+	  pos.h = FONT_HEIGHT;
+	  SDL_FillRect(screen, &pos, SDL_MapRGBA(screen->format, 0xf0, 0xf0, 0x00, 0x00));
+	  
+	  // draw the choices
+	  drawString(screen, 250, y, s);
+	} else {
+	  drawString(screen, 50, y, entries[i].title);
+	  pos.x = 35;
+	  pos.y = y + FONT_WIDTH;
+	  pos.w = screen->w - 70;
+	  pos.h = 2;
+	  SDL_FillRect(screen, &pos, SDL_MapRGBA(screen->format, 0x80, 0x50, 0x00, 0x00));
 	}
-
-	start = getSelectionCharIndex(i);
-	end = start + getNumberOfCharWidthOfSelection(i);
-
-	// highlight the selected item
-	pos.x = 250 + getFontPixelWidth(s, 0, start) - 2;
-	pos.y = (i + 2) * FONT_HEIGHT;
-	pos.w = getFontPixelWidth(s, start, end) + 4;
-	pos.h = FONT_HEIGHT;
-	SDL_FillRect(screen, &pos, SDL_MapRGBA(screen->format, 0xf0, 0xf0, 0x00, 0x00));
-
-	// draw the choices
-	drawString(screen, 250, (i + 2) * FONT_HEIGHT, s);
+	y += (FONT_HEIGHT + 5);
   }
 }
 
@@ -85,7 +103,7 @@ int isEnabled(int n) {
 void saveSettings() {
   int old_screen, old_music;
 
-  old_screen = full_screen;
+  old_screen = mainstruct.full_screen;
   old_music = music_enabled;
 
   sound_enabled = !(entries[SOUND_ENABLED].selected);
@@ -97,25 +115,38 @@ void saveSettings() {
 	  stopMusic();
 	}
   }
-  full_screen = !(entries[FULLSCREEN_ENABLED].selected);
-  if(old_screen != full_screen) {
+  mainstruct.full_screen = !(entries[FULLSCREEN_ENABLED].selected);
+  if(old_screen != mainstruct.full_screen) {
 	SDL_WM_ToggleFullScreen(screen);
   }
   game.difficoulty = entries[GAME_DIFFICOULTY].selected;
+  mainstruct.drawBackground = !(entries[DRAW_BACKGROUND].selected);
 }
 
 void loadSettings() {
   entries[SOUND_ENABLED].selected = (sound_loaded && sound_enabled ? 0 : 1);
   entries[MUSIC_ENABLED].selected = (sound_loaded && music_enabled ? 0 : 1);
-  entries[FULLSCREEN_ENABLED].selected = (full_screen ? 0 : 1);
+  entries[FULLSCREEN_ENABLED].selected = (mainstruct.full_screen ? 0 : 1);
   entries[GAME_DIFFICOULTY].selected = game.difficoulty;
+  entries[DRAW_BACKGROUND].selected = (mainstruct.drawBackground ? 0 : 1);
 }
 
 void paintScreen() {
   SDL_Rect pos;
 
   saveSettings();
-  SDL_BlitSurface(back, NULL, screen, NULL);
+
+  if(m_face % 2 == 0) {
+	bg_x--;
+	if(bg_x < -40) bg_x = 0;
+	bg_y--;
+	if(bg_y < -40) bg_y = 0;
+  }
+  pos.x = bg_x;
+  pos.y = bg_y;
+  pos.w = back->w;
+  pos.h = back->h;
+  SDL_BlitSurface(back, NULL, screen, &pos);
   drawString(screen, 0, 0, "abe!! settings");
   drawString(screen, 0, screen->h - 40, "arrows to navigate");
   drawString(screen, 0, screen->h - 20, "space to toggle");
@@ -125,7 +156,7 @@ void paintScreen() {
   m_face++;
   if(m_face >= m_face_mod * BULLET_FACE_COUNT) m_face = 0;
   pos.x = 5;
-  pos.y = (m_menu_y + 2) * FONT_HEIGHT;
+  pos.y = (m_menu_y + 2) * (FONT_HEIGHT + 5);
   pos.w = images[img_bullet[0]]->image->w;
   pos.h = images[img_bullet[0]]->image->h;
   SDL_BlitSurface(images[img_bullet[m_face / m_face_mod]]->image, NULL, screen, &pos);
@@ -149,12 +180,16 @@ void showSettings() {
 		case SDLK_ESCAPE:
 		  goto escape;
 		case SDLK_DOWN:
-		  m_menu_y++;
-		  if(m_menu_y >= entry_count) m_menu_y = 0;
+		  do {
+			m_menu_y++;
+			if(m_menu_y >= entry_count) m_menu_y = 0;
+		  } while(entries[m_menu_y].choice_count == 0);
 		  break;
 		case SDLK_UP:
-		  m_menu_y--;
-		  if(m_menu_y < 0) m_menu_y = entry_count - 1;
+		  do{
+			m_menu_y--;
+			if(m_menu_y < 0) m_menu_y = entry_count - 1;
+		  } while(entries[m_menu_y].choice_count == 0);
 		  break;
 		case SDLK_SPACE:
 		  if(isEnabled(m_menu_y)) {

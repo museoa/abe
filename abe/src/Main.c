@@ -4,7 +4,7 @@ int runmode;
 
 SDL_Surface *screen;
 int state;
-int full_screen;
+Main mainstruct;
 
 void testModesInFormat(SDL_PixelFormat *format) {
   SDL_Rect **modes;
@@ -54,8 +54,9 @@ int main(int argc, char *argv[]) {
   char *mapname;
   int mapwidth, mapheight;
 
+  mainstruct.drawBackground = 1;
   runmode = RUNMODE_SPLASH;  
-  full_screen = 1;
+  mainstruct.full_screen = 1;
 
   w = 640;
   h = 480;
@@ -68,7 +69,7 @@ int main(int argc, char *argv[]) {
 
   for(i = 0; i < argc; i++) {
 	if(!strcmp(argv[i], "--window")) {
-	  full_screen = 0;
+	  mainstruct.full_screen = 0;
 	} else if(!strcmp(argv[i], "--system") || !strcmp(argv[i], "-s")) {
 	  hw_mem = 0;
 	} else if(!strcmp(argv[i], "--editor") || !strcmp(argv[i], "-e")) {
@@ -135,7 +136,7 @@ int main(int argc, char *argv[]) {
   } else {
 	flags |= SDL_SWSURFACE;
   }
-  if(full_screen) {
+  if(mainstruct.full_screen) {
 	flags |= SDL_FULLSCREEN;
   }
 

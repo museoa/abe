@@ -186,8 +186,8 @@ void createBack(SDL_Surface **back_surface) {
   SDL_Surface *img = images[img_back]->image;
 
   if(!(*back_surface = SDL_CreateRGBSurface(SDL_HWSURFACE, 
-										   screen->w, 
-										   screen->h, 
+										   screen->w + img->w, 
+										   screen->h + img->h, 
 										   screen->format->BitsPerPixel, 
 										   0, 0, 0, 0))) {
 	fprintf(stderr, "Error creating surm_face: %s\n", SDL_GetError());
@@ -195,6 +195,7 @@ void createBack(SDL_Surface **back_surface) {
 	return;
   }
 
+  /*
   for(y = 0; y < screen->h / TILE_H; y+=img->w/TILE_H) {
 	for(x = 0; x < screen->w / TILE_W; x+=img->h/TILE_W) {
 	  pos.x = x * TILE_W;
@@ -204,4 +205,15 @@ void createBack(SDL_Surface **back_surface) {
 	  SDL_BlitSurface(img, NULL, *back_surface, &pos);
 	}
   }
+*/
+  for(y = 0; y < (*back_surface)->h; y += img->h) {
+	for(x = 0; x < (*back_surface)->w; x += img->w) {
+	  pos.x = x;
+	  pos.y = y;
+	  pos.w = img->w;
+	  pos.h = img->h;
+	  SDL_BlitSurface(img, NULL, *back_surface, &pos);
+	}
+  }
+
 }

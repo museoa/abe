@@ -29,7 +29,12 @@ extern int runmode;
 
 extern SDL_Surface *screen;
 extern int state;
-extern int full_screen;
+
+typedef struct _main {
+  int drawBackground;
+  int full_screen;
+} Main;
+extern Main mainstruct;
 
 void startEditor();
 void startGame();

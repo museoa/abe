@@ -81,6 +81,7 @@ typedef struct _map {
   // the 3d background
   SDL_Surface *background;
   SDL_Surface *background_image;
+  int moveBackground; // if 1 the background scroll artificially
 } Map;
 
 extern Cursor cursor;
@@ -121,5 +122,6 @@ int containsTypeWhere(Position *p, Position *ret, int type);
 // like above but can specify a level (send NULL for *ret if not needed.)
 int containsTypeInLevel(Position *p, Position *ret, int type, int level);
 int onSolidGround(Position *p);
-
+// artificially move the background
+void scrollBackground();
 #endif

@@ -28,6 +28,10 @@ typedef struct _mapDrawParams {
   int offset_y;
 } MapDrawParams;
 
+// artificially moving the background
+int move_background_x = 0;
+int move_background_y = 0;
+
 /**
    Compute what to draw based on the cursor's location.
  */
@@ -869,6 +873,16 @@ void moveMap() {
   }
 }
 
+// artificially move the background in a direction
+void scrollBackground() {
+  move_background_x--;
+  if((int)move_background_x < -((int)map.background_image->w)) 
+	move_background_x = 0;
+  move_background_y--;
+  if((int)move_background_y < -((int)map.background_image->h)) 
+	move_background_y = 0;
+}
+
 void finishDrawMap() {
   MapDrawParams params;
   SDL_Rect pos;
@@ -876,12 +890,20 @@ void finishDrawMap() {
 
   getMapDrawParams(&params);
 
-  // draw the background
-  pos.x = -((cursor.pos_x * TILE_W + cursor.pixel_x) % (map.background_image->w * 2)) / 2;
-  pos.y = -((cursor.pos_y * TILE_H + cursor.pixel_y) % (map.background_image->h * 2)) / 2;
-  pos.w = map.background->w;
-  pos.h = map.background->h;
-  SDL_BlitSurface(map.background, NULL, screen, &pos);
+  if(mainstruct.drawBackground) {
+	// draw the background
+	if(map.moveBackground) {
+	  scrollBackground();
+	  pos.x = move_background_x;
+	  pos.y = move_background_y;
+	} else {
+	  pos.x = -((cursor.pos_x * TILE_W + cursor.pixel_x) % (map.background_image->w * 2)) / 2;
+	  pos.y = -((cursor.pos_y * TILE_H + cursor.pixel_y) % (map.background_image->h * 2)) / 2;
+	}
+	pos.w = map.background->w;
+	pos.h = map.background->h;  
+	SDL_BlitSurface(map.background, NULL, screen, &pos);
+  }
 
   // draw on screen
   for(level = LEVEL_BACK; level < LEVEL_COUNT; level++) {
@@ -997,6 +1019,7 @@ void resetMap() {
   map.redraw = 0;
   map.delta = 0;
   map.fps_override = 0;
+  map.moveBackground = 0;
   // clean map
   for(i = 0; i < (map.w * map.h); i++) {
 	map.image_index[LEVEL_BACK][i] = EMPTY_MAP;
@@ -1031,6 +1054,7 @@ int initMap(char *name, int w, int h) {
   map.redraw = 0;
   map.delta = 0;
   map.fps_override = 0;
+  map.moveBackground = 0;
   for(i = LEVEL_BACK; i < LEVEL_COUNT; i++) {
 	if(!(map.image_index[i] = (Uint16*)malloc(sizeof(Uint16) * w * h))) {
 	  fprintf(stderr, "Out of memory.\n");
@@ -1056,7 +1080,9 @@ int initMap(char *name, int w, int h) {
 	}
 
 	// set black as the transparent color key
-	SDL_SetColorKey(map.level[i], SDL_SRCCOLORKEY, SDL_MapRGBA(map.level[i]->format, 0x00, 0x00, 0x00, 0xff));
+	if(i != LEVEL_BACK || mainstruct.drawBackground) {
+	  SDL_SetColorKey(map.level[i], SDL_SRCCOLORKEY, SDL_MapRGBA(map.level[i]->format, 0x00, 0x00, 0x00, 0xff));
+	}
   }
 
   // init the transfer area
