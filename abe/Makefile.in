@@ -130,7 +130,7 @@ noinst_PROGRAMS = \
 
 abe_SOURCES = src/Main.c src/Image.c src/Trans.c src/Splash.c \
 src/Editor.c src/Font.c src/Util.c src/Menu.c src/Map.c src/MapIO.c \
-src/Game.c src/Monster.c src/Sound.c
+src/Sound.c src/Game.c src/Monster.c
 
 
 abe_LDADD = @MATHLIB@ -lSDL_mixer
@@ -144,8 +144,8 @@ PROGRAMS = $(noinst_PROGRAMS)
 am_abe_OBJECTS = src/Main.$(OBJEXT) src/Image.$(OBJEXT) \
 	src/Trans.$(OBJEXT) src/Splash.$(OBJEXT) src/Editor.$(OBJEXT) \
 	src/Font.$(OBJEXT) src/Util.$(OBJEXT) src/Menu.$(OBJEXT) \
-	src/Map.$(OBJEXT) src/MapIO.$(OBJEXT) src/Game.$(OBJEXT) \
-	src/Monster.$(OBJEXT) src/Sound.$(OBJEXT)
+	src/Map.$(OBJEXT) src/MapIO.$(OBJEXT) src/Sound.$(OBJEXT) \
+	src/Game.$(OBJEXT) src/Monster.$(OBJEXT)
 abe_OBJECTS = $(am_abe_OBJECTS)
 abe_DEPENDENCIES =
 abe_LDFLAGS =
@@ -199,9 +199,9 @@ src/Util.$(OBJEXT): src/Util.c src/.dirstamp
 src/Menu.$(OBJEXT): src/Menu.c src/.dirstamp
 src/Map.$(OBJEXT): src/Map.c src/.dirstamp
 src/MapIO.$(OBJEXT): src/MapIO.c src/.dirstamp
+src/Sound.$(OBJEXT): src/Sound.c src/.dirstamp
 src/Game.$(OBJEXT): src/Game.c src/.dirstamp
 src/Monster.$(OBJEXT): src/Monster.c src/.dirstamp
-src/Sound.$(OBJEXT): src/Sound.c src/.dirstamp
 abe$(EXEEXT): $(abe_OBJECTS) $(abe_DEPENDENCIES) 
 	@rm -f abe$(EXEEXT)
 	$(LINK) $(abe_LDFLAGS) $(abe_OBJECTS) $(abe_LDADD) $(LIBS)
@@ -291,6 +291,12 @@ src/MapIO.o: src/MapIO.c
 src/MapIO.obj: src/MapIO.c
 	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o src/MapIO.obj `if test -f 'src/MapIO.c'; then $(CYGPATH_W) 'src/MapIO.c'; else $(CYGPATH_W) '$(srcdir)/src/MapIO.c'`
 
+src/Sound.o: src/Sound.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o src/Sound.o `test -f 'src/Sound.c' || echo '$(srcdir)/'`src/Sound.c
+
+src/Sound.obj: src/Sound.c
+	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o src/Sound.obj `if test -f 'src/Sound.c'; then $(CYGPATH_W) 'src/Sound.c'; else $(CYGPATH_W) '$(srcdir)/src/Sound.c'`
+
 src/Game.o: src/Game.c
 	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o src/Game.o `test -f 'src/Game.c' || echo '$(srcdir)/'`src/Game.c
 
@@ -302,12 +308,6 @@ src/Monster.o: src/Monster.c
 
 src/Monster.obj: src/Monster.c
 	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o src/Monster.obj `if test -f 'src/Monster.c'; then $(CYGPATH_W) 'src/Monster.c'; else $(CYGPATH_W) '$(srcdir)/src/Monster.c'`
-
-src/Sound.o: src/Sound.c
-	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o src/Sound.o `test -f 'src/Sound.c' || echo '$(srcdir)/'`src/Sound.c
-
-src/Sound.obj: src/Sound.c
-	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o src/Sound.obj `if test -f 'src/Sound.c'; then $(CYGPATH_W) 'src/Sound.c'; else $(CYGPATH_W) '$(srcdir)/src/Sound.c'`
 uninstall-info-am:
 
 ETAGS = etags

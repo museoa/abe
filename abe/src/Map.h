@@ -98,8 +98,8 @@ int moveDown(int checkCollision, int platform);
 void lockMap();
 void unlockMap();
 
-void startJump();
-void startJumpN(int n);
+int startJump();
+int startJumpN(int n);
 int containsType(Position *p, int type);
 // like contains type, but returns the position of the object in ret.
 int containsTypeWhere(Position *p, Position *ret, int type);

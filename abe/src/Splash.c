@@ -24,6 +24,7 @@ void splashMainLoop(SDL_Event *event) {
 	  cursor.dir = DIR_QUIT;
 	  break;
 	}
+	playSound(MENU_SOUND);
 	break;	
   }
 }
@@ -74,6 +75,8 @@ void initIntroMap() {
   map.handleMapEvent = splashMainLoop;
   
   map.monsters = 1;
+
+  playIntroMusic();
 }
 
 void showIntro() {

@@ -8,6 +8,7 @@ int getGameFace() {
 	if(game.balloonTimer <= 0) {
 	  game.balloonTimer = 0;
 	  map.gravity = 1;
+	  playSound(POP_SOUND);
 	} else {
 	  return game.face;
 	}
@@ -84,13 +85,14 @@ void gameMainLoop(SDL_Event *event) {
 	  drawMap();
 	  break;
 	case SDLK_SPACE: 
-	  startJump();
+	  if(startJump()) playSound(JUMP_SOUND);
 	  break;
 	case SDLK_ESCAPE:
 	  cursor.dir = DIR_QUIT;
 	  break;
 	case SDLK_RETURN:
 	  if(!game.balloonTimer && game.balloons) {
+		playSound(BUBBLE_SOUND);
 		game.balloons--;
 		game.balloonTimer = BALLOON_RIDE_INTERVAL;
 		map.gravity = 0;
@@ -132,6 +134,8 @@ void gameMainLoop(SDL_Event *event) {
 void handleDeath(char *killer) {
   int i;
 
+
+  playSound(DEATH_SOUND);
   fprintf(stderr, "Player death! Killed by %s at x=%d y=%d pixelx=%d pixely=%d\n", killer, cursor.pos_x, cursor.pos_y, cursor.pixel_x, cursor.pixel_y);
   fflush(stderr);
 
@@ -201,6 +205,7 @@ void gameCheckPosition() {
   live = detectMonster(&pos2);
   if(live && 
 	 (live->monster->type == MONSTER_PLATFORM || live->monster->type == MONSTER_PLATFORM2)) {
+	if(!cursor.platform) playSound(PLATFORM_SOUND);
 	cursor.platform = live;
   } else {
 	cursor.platform = NULL;
@@ -210,6 +215,7 @@ void gameCheckPosition() {
   // FIXME: this fails if there many objects close together.
   // maybe it should return a NULL terminated array of positions.
   if(containsTypeWhere(&pos, &key, TYPE_OBJECT)) {
+	playSound(OBJECT_SOUND);
 	// remove from map
 	n = map.image_index[LEVEL_MAIN][key.pos_x + (key.pos_y * map.w)];
 	if(n == img_key) {
@@ -229,6 +235,7 @@ void gameCheckPosition() {
 
   // did we hit a spring
   if(containsType(&pos, TYPE_SPRING)) {
+	playSound(COIL_SOUND);
 	startJumpN(SPRING_JUMP);
   }
 }
@@ -254,7 +261,7 @@ int detectCollision(int dir) {
   if(containsTypeWhere(&pos, &key, TYPE_DOOR)) {
 	if(game.keys > 0) {
 	  // open door
-	  playDoor();
+	  playSound(DOOR_SOUND);
 	  map.image_index[LEVEL_MAIN][key.pos_x + (key.pos_y * map.w)] = EMPTY_MAP;
 	  map.image_index[LEVEL_FORE][key.pos_x + (key.pos_y * map.w)] = img_door2;
 	  game.keys--;
@@ -262,6 +269,7 @@ int detectCollision(int dir) {
 	  // always return 0 (block) so we don't fall into a door and get stuck there... (was a nasty bug)
 	  return 0;
 	} else {
+	  playSound(CLOSED_SOUND);
 	  return 0;
 	}
   }
@@ -336,6 +344,7 @@ void runMap() {
   map.monsters = 1;
 
   // start the map main loop
+  playGameMusic();
   drawMap();
   moveMap();
 }

@@ -1144,11 +1144,11 @@ void repositionCursor(int tile_x, int tile_y) {
   cursor.platform = NULL;
 }
 
-void startJump() {
-  startJumpN(JUMP_LENGTH);
+int startJump() {
+  return startJumpN(JUMP_LENGTH);
 }
 
-void startJumpN(int n) {
+int startJumpN(int n) {
   Position pos;
   pos.pos_x = cursor.pos_x;
   pos.pos_y = cursor.pos_y + tom[0]->h / TILE_H;
@@ -1158,7 +1158,9 @@ void startJumpN(int n) {
   pos.h = 1;
   if(!cursor.jump && (containsType(&pos, TYPE_WALL) || cursor.platform)) {
 	cursor.jump = n;
+	return 1;
   }
+  return 0;
 }
 
 void getGameCollisionCheck(GameCollisionCheck *check, Position *p) {
