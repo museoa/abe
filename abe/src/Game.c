@@ -86,11 +86,11 @@ int loadGame() {
 int getGameFace() {
   // change the face
   if(cursor.jump || cursor.slide) {
-	game.face = (cursor.dir & DIR_LEFT ? 8 : 9);
+	game.face = (game.dir == DIR_LEFT ? 8 : 9);
 	return game.face;
   }
   if(game.balloonTimer) {
-	game.face = (cursor.dir & DIR_LEFT ? 6 : 7);
+	game.face = (game.dir == DIR_LEFT ? 6 : 7);
 	game.balloonTimer--;
 	if(game.balloonTimer <= 0) {
 	  game.balloonTimer = 0;
@@ -104,7 +104,7 @@ int getGameFace() {
 	game.face++;
   }
   if(game.face >= FACE_COUNT * FACE_STEP) game.face = 0;
-  return (cursor.dir & DIR_LEFT ? 
+  return (game.dir == DIR_LEFT ? 
 		  (game.face / FACE_STEP) : 
 		  (game.face / FACE_STEP) + FACE_COUNT);
 }
@@ -206,10 +206,12 @@ void gameMainLoop(SDL_Event *event) {
 	case SDLK_LEFT: 
 	  cursor.dir |= DIR_LEFT;
  	  cursor.speed_x = START_SPEED_X;
+	  game.dir = DIR_LEFT;
 	  break;
 	case SDLK_RIGHT: 
 	  cursor.dir |= DIR_RIGHT;
  	  cursor.speed_x = START_SPEED_X;
+	  game.dir = DIR_RIGHT;
 	  break;
 	case SDLK_UP: 
 	  cursor.dir |= DIR_UP;
@@ -548,6 +550,7 @@ void runMap() {
 
 void initGame() {
   game.face = 0;
+  game.dir = DIR_LEFT;
   game.balloonTimer = 0;
   game.god_mode = GOD_MODE;
   game.lastSavePosX = 0;

@@ -22,6 +22,7 @@
 
 typedef struct _game {
   int face;
+  int dir;
   int player_start_x, player_start_y;
   int lives;
   int score;
