@@ -78,6 +78,9 @@ typedef struct _map {
   int top_left_x, top_left_y; // where is the tile top left corner of the map?
   int delta;
   int fps_override;
+  // the 3d background
+  SDL_Surface *background;
+  SDL_Surface *background_image;
 } Map;
 
 extern Cursor cursor;

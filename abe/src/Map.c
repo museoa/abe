@@ -9,9 +9,6 @@ typedef struct _gameCollisionCheck {
   SDL_Rect rect;
 } GameCollisionCheck;
 
-
-SDL_Surface *test_back;
-
 void waitUntilPaintingStops();
 void finishDrawMap();
 int last_dir = -1;
@@ -879,9 +876,9 @@ void finishDrawMap() {
 
   pos.x = -((cursor.pos_x * TILE_W + cursor.pixel_x) % (TILE_W * 4)) / 2;
   pos.y = -((cursor.pos_y * TILE_H + cursor.pixel_y) % (TILE_H * 4)) / 2;
-  pos.w = test_back->w;
-  pos.h = test_back->h;
-  SDL_BlitSurface(test_back, NULL, screen, &pos);
+  pos.w = map.background->w;
+  pos.h = map.background->h;
+  SDL_BlitSurface(map.background, NULL, screen, &pos);
 
   // draw on screen
   for(level = LEVEL_BACK; level < LEVEL_COUNT; level++) {
@@ -1055,19 +1052,6 @@ int initMap(char *name, int w, int h) {
 	  //	  return 0;
 	}
 
-	test_back = SDL_CreateRGBSurface(SDL_HWSURFACE, 
-									 screen->w + TILE_W * 2, screen->h + TILE_H * 2, 
-									 screen->format->BitsPerPixel, 0, 0, 0, 0);
-	for(y = 0; y < test_back->h; y += 2 * TILE_H) {
-	  for(x = 0; x < test_back->w; x += 2 * TILE_W) {
-		pos.x = x;
-		pos.y = y;
-		pos.w = 40;
-		pos.h = 40;
-		SDL_BlitSurface(images[img_back]->image, NULL, test_back, &pos);
-	  }
-	}
-
 	// set black as the transparent color key
 	SDL_SetColorKey(map.level[i], SDL_SRCCOLORKEY, SDL_MapRGBA(map.level[i]->format, 0x00, 0x00, 0x00, 0xff));
   }
@@ -1087,6 +1071,35 @@ int initMap(char *name, int w, int h) {
 	fprintf(stderr, "Can't create surface in video memory. Since the screen is there, this surface must too.\n");
 	fflush(stderr);
 	return 0;
+  }
+
+  // init the background
+  map.background_image = images[img_back]->image;
+  if(!(map.background = SDL_CreateRGBSurface(SDL_HWSURFACE, 
+											 screen->w + map.background_image->w, 
+											 screen->h + map.background_image->h, 
+											 screen->format->BitsPerPixel, 0, 0, 0, 0))) {
+	fprintf(stderr, "Error creating background surface: %s\n", SDL_GetError());
+	fflush(stderr);
+	return 0;
+  }
+  hw_surface = (map.background->flags & SDL_HWSURFACE ? 1 : 0);
+  fprintf(stderr, "background is HW surface? %d\n", i, hw_surface);
+  if(screen->flags & SDL_HWSURFACE & !hw_surface) {
+	fprintf(stderr, "*** Can't create background in video memory. Since the screen is there, this surface must too.\n");
+	fprintf(stderr, "*** This may make the game very slow!");
+	fflush(stderr);
+	//	  return 0;
+  }
+  
+  for(y = 0; y < map.background->h; y += map.background_image->h) {
+	for(x = 0; x < map.background->w; x += map.background_image->w) {
+	  pos.x = x;
+	  pos.y = y;
+	  pos.w = map.background_image->w;
+	  pos.h = map.background_image->h;
+	  SDL_BlitSurface(map.background_image, NULL, map.background, &pos);
+	}
   }
   
   // clean map
@@ -1117,6 +1130,7 @@ void destroyMap() {
 	free(map.image_index[i]);
   }
   SDL_FreeSurface(map.transfer);
+  SDL_FreeSurface(map.background);
 }
 
 void resetCursor() {
