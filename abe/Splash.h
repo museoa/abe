@@ -4,6 +4,5 @@
 #include "Main.h"
 
 void showSplashScreen();
-void hideSplashScreen();
 
 #endif

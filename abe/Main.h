@@ -14,10 +14,7 @@
 SDL_Surface *screen;
 int state;
 
-#define STATE_SPLASH_SCREEN 0
-#define STATE_MAIN_LOOP 1
-#define STATE_EDIT_LOOP 2
-#define STATE_MENU 3
-#define STATE_GAME_LOOP 4
+void startEditor();
+void startGame();
 
 #endif

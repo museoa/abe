@@ -7,8 +7,6 @@
 #define MUL 10
 
 SDL_Surface *splash_back;
-SDL_Thread *splash_thread;
-int splash_running = 1;
 int title_x, title_y;
 
 int moveTitle(int *title_x, int *title_y) {
@@ -85,21 +83,78 @@ void getNextPoint(int *x, int *y, int *dir, int *angle, int w) {
 }
 
 /**
-   The splash screen thread main method.
+   Start the splash screen thread.
  */
-int splashThreadFunc(void *data) {
-  int x = 300;
-  int y = 240;
+void showSplashScreen() {
+  // create the splash screen background
+  if(!(splash_back = SDL_CreateRGBSurface(SDL_HWSURFACE, 
+										  screen->w, screen->h, 
+										  screen->format->BitsPerPixel, 
+										  0, 0, 0, 0))) {
+	fprintf(stderr, "Error creating surface: %s\n", SDL_GetError());
+	fflush(stderr);
+	return;
+  }
+  SDL_Rect dest;
+
+  int x, y;
+  for(x = 0; x < screen->w; x+=images[img_back]->image->w) {
+	for(y = 0; y < screen->h; y+=images[img_back]->image->h) {
+	  dest.x = x;
+	  dest.y = y;
+	  dest.w = images[img_back]->image->w;
+	  dest.h = images[img_back]->image->h;
+	  SDL_BlitSurface(images[img_back]->image, NULL, splash_back, &dest);
+	}
+  }
+
+  int max_y = screen->h;
+  for(x = 0; x < screen->w; x+=images[img_brick]->image->w) {
+	if(max_y > 0) {
+	  for(y = 0; y < max_y; y+=images[img_brick]->image->h) {
+		dest.x = x;
+		dest.y = y;
+		dest.w = images[img_brick]->image->w;
+		dest.h = images[img_brick]->image->h;
+		SDL_BlitSurface(images[img_brick]->image, NULL, splash_back, &dest);
+	  }
+	}
+	if(x < screen->w / 2) max_y-=images[img_brick]->image->h;
+	else max_y+=images[img_brick]->image->h;
+  }
+
+  // start to bounce the title about the screen
+  x = 300;
+  y = 240;
   int angle = 45;
   int dir = -1;
-  SDL_Rect dest, tom_rect;
+  SDL_Rect tom_rect;
   tom_rect.x = 0;
   tom_rect.y = screen->h - tom[0]->h;
   int tom_dir = 1;
   tom_rect.w = tom[0]->w;
   tom_rect.h = tom[0]->h;
   int tom_face = 0;
-  while(splash_running) {
+  int mode = 0;
+  SDL_Event event;
+  while(1) {
+
+	// handle events
+	// handle events.
+	while(SDL_PollEvent(&event)) {
+	  if(event.type == SDL_KEYDOWN) {
+		switch(event.key.keysym.sym) {
+		case SDLK_RETURN: 
+		  mode = 1;
+		  break;
+		case SDLK_SPACE:
+		  mode = 2;
+		  break;
+		}
+	  }
+	}
+	if(mode) break;
+
 	// cover the screen with bricks
 	SDL_BlitSurface(splash_back, NULL, screen, NULL);
 
@@ -142,71 +197,13 @@ int splashThreadFunc(void *data) {
 	//	SDL_Delay(y < 10 ? 10 : (int)((double)y * .7));
 	SDL_Delay(25);
   }
-  return 0;
-}
-
-/**
-   Start the splash screen thread.
- */
-void showSplashScreen() {
-  // create the splash screen background
-  if(!(splash_back = SDL_CreateRGBSurface(SDL_HWSURFACE, 
-										  screen->w, screen->h, 
-										  screen->format->BitsPerPixel, 
-										  0, 0, 0, 0))) {
-	fprintf(stderr, "Error creating surface: %s\n", SDL_GetError());
-	fflush(stderr);
-	return;
-  }
-  SDL_Rect dest;
-
-  int x, y;
-  for(x = 0; x < screen->w; x+=images[img_back]->image->w) {
-	for(y = 0; y < screen->h; y+=images[img_back]->image->h) {
-	  dest.x = x;
-	  dest.y = y;
-	  dest.w = images[img_back]->image->w;
-	  dest.h = images[img_back]->image->h;
-	  SDL_BlitSurface(images[img_back]->image, NULL, splash_back, &dest);
-	}
-  }
-
-  int max_y = screen->h;
-  for(x = 0; x < screen->w; x+=images[img_brick]->image->w) {
-	if(max_y > 0) {
-	  for(y = 0; y < max_y; y+=images[img_brick]->image->h) {
-		dest.x = x;
-		dest.y = y;
-		dest.w = images[img_brick]->image->w;
-		dest.h = images[img_brick]->image->h;
-		SDL_BlitSurface(images[img_brick]->image, NULL, splash_back, &dest);
-	  }
-	}
-	if(x < screen->w / 2) max_y-=images[0]->image->h;
-	else max_y+=images[img_brick]->image->h;
-  }
-
-  // start the thread to bounce the title about the screen
-  splash_thread = SDL_CreateThread(splashThreadFunc, NULL);
-  if(!splash_thread) {
-	fprintf(stderr, "Unable to create thread: %s\n", SDL_GetError());
-	fflush(stderr);
-	exit(0);
-  }
-}
-
-/**
-   Stop the splash screen and clear the screen.
- */
-void hideSplashScreen() {
-  // kill bounce thread
-  if(splash_thread) {
-	splash_running = 0;
-	SDL_WaitThread(splash_thread, NULL);
-  }
-
+  
+  // start the game
   clearScreen(title_x, title_y);
-
   free(splash_back);
-  //free(splash_thread); <-- this hangs. Do I need to do this?
+  switch(mode) {
+  case 1: startEditor(); break;
+  case 2: startGame(); break;
+  default: return;
+  }
 }
