@@ -113,6 +113,13 @@ void loadImages() {
   */
 }
 
+/**
+   Loading from the tar has several benefits:
+   -only 1 file to deal with
+   -keeps the order of images constant
+   -allows me to append new images to the tar while the 
+    order of the existing ones doesn't change.
+ */
 void loadImagesFromTar() {
   image_count = 0;
 

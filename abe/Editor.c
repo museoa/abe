@@ -181,7 +181,6 @@ void allocMap(char *name, int w, int h) {
   
   // set our painting events
   map.beforeDrawToScreen = beforeDrawToScreen;
-  map.accelerate = 0;
 
   // fill the map
   int level, i, x, y;
@@ -195,6 +194,10 @@ void allocMap(char *name, int w, int h) {
 	for(x = 0; x < map.w; x += step_x) {
 	  i = x + (y * map.w);
 	  map.image_index[LEVEL_BACK][i] = img_back;
+	  // make a border
+	  if(y == 0 || y == map.h - 4 || x == 0 || x == map.w - 4) {
+		map.image_index[LEVEL_MAIN][i] = img_rock;		
+	  }
 	}
   }
 

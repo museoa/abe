@@ -337,10 +337,13 @@ void drawMapBottomEdge() {
   }
 }
 
+/**
+   Scrolls but doesn't update the screen.
+   You must call finishDrawMap() after this method.
+   (this is so you can string together multiple calls to this method.)
+*/
 void scrollMap(int dir) {
   if(dir == DIR_NONE) return;
-
-  int not_implemented = 0;
 
   // move the screen
   int row, level;
@@ -434,17 +437,6 @@ void scrollMap(int dir) {
 	drawMapBottomEdge();
 
 	break;
-
-
-  default:
-	// by default just draw the old way
-	not_implemented = 1;
-  }
-
-  if(not_implemented) {
-	drawMap();
-  } else {
-	finishDrawMap();
   }
 }
 
@@ -522,7 +514,7 @@ int moveRight(int checkCollision, int scroll) {
   return 0;
 }
 
-int moveUp(int checkCollision) {
+int moveUp(int checkCollision, int scroll) {
   int move, old_pixel, old_pos;
   while(cursor.speed_y > 0) {
 	move = 1;
@@ -538,7 +530,7 @@ int moveUp(int checkCollision) {
 	  }
 	}
 	if(move && (!checkCollision || map.detectCollision(DIR_UP))) {
-	  scrollMap(DIR_UP);	
+	  if(scroll) scrollMap(DIR_UP);	
 	  if(map.accelerate) {
 		if(cursor.speed_y < TILE_H) {
 		  cursor.speed_y += SPEED_INC_Y;
@@ -607,6 +599,29 @@ void unlockMap() {
 }
 
 /**
+   Is there ground beneath tom?
+   if so, return 1, 0 otherwise
+ */
+int onSolidGround() {
+  int old_dir = cursor.dir;
+  int old_speed = cursor.speed_y;
+  int old_pixel = cursor.pixel_y;
+  int old_pos = cursor.pos_y;
+
+  cursor.dir = DIR_DOWN;
+  cursor.speed_y = (cursor.pixel_y == 0 ? TILE_H : cursor.pixel_y);
+  int n = moveDown(1, 0);
+  
+  cursor.dir = old_dir;
+  cursor.speed_y = old_speed;
+  cursor.pixel_y = old_pixel;
+  cursor.pos_y = old_pos;
+
+  // if you can't move down then we're on ground.
+  return !n;
+}
+
+/**
    When moving left or right and hitting an obsticle, call this method
    to check if we can step onto the object.
    Returns 1 on success, 0 on failure.
@@ -626,8 +641,8 @@ int canStepUp(int dir) {
   // take a step up
   cursor.dir = DIR_UP;
   cursor.speed_y = (cursor.pixel_y == 0 ? TILE_H : cursor.pixel_y);
-  if(!moveUp(1)) {
-	// if can't step up, revert
+  if(!(moveUp(1, 0) && onSolidGround())) {
+	// if can't step up or stepped into air, revert
 	cursor.speed_x = TILE_W;
 	cursor.dir = dir;
 	if(dir == DIR_LEFT) {
@@ -639,6 +654,8 @@ int canStepUp(int dir) {
 	cursor.dir = DIR_NONE;
 	return 0;
   } else {
+	// scroll the screen up
+	scrollMap(DIR_UP);
 	// keep going right
 	cursor.dir = dir;
 	// scroll the screen
@@ -648,18 +665,35 @@ int canStepUp(int dir) {
 }
 
 /**
+   Drop down.
+ */
+void moveGravity() {
+  if(map.gravity) {
+	int old_dir = cursor.dir;
+	int old_speed = cursor.speed_y;
+	cursor.dir = DIR_DOWN;
+	cursor.speed_y = 10;
+	moveDown();
+	cursor.dir = (old_dir == DIR_NONE ? DIR_DOWN : old_dir);
+	cursor.speed_y = old_speed;
+  }
+}
+
+/**
    Move in the dir direction.
    This could be optimized by blitting the screen 1 tile unit in the 
    opposite direction and only drawing the new column.
  */
 int moveMap(void *data) {
-  int delay, old_dir;
-  int x;
+  int delay;
   while(!map.stopThread) {
+	// activate gravity
+	moveGravity();
 	// a direction change
 	if(cursor.dir != last_dir) {
 	  if(map.accelerate) {
-		cursor.speed_x = cursor.speed_y = 2;
+		cursor.speed_x = START_SPEED_X;
+		cursor.speed_y = START_SPEED_Y;
 	  } else {
 		cursor.speed_x = TILE_W;
 		cursor.speed_y = TILE_H;
@@ -673,17 +707,25 @@ int moveMap(void *data) {
 	case DIR_LEFT:
 	  if(!moveLeft(1, 1)) {
 		// try to step up onto the obsticle
-		canStepUp(DIR_LEFT);
+		int n = canStepUp(DIR_LEFT);
+		if(n) {
+		  fprintf(stderr, "L stepped up\n");
+		  fflush(stderr);
+		}
 	  }
 	  break;	
 	case DIR_RIGHT:
 	  if(!moveRight(1, 1)) {
 		// try to step up onto the obsticle
-		canStepUp(DIR_RIGHT);
+		int n = canStepUp(DIR_RIGHT);
+		if(n) {
+		  fprintf(stderr, "R stepped up\n");
+		  fflush(stderr);
+		}
 	  }
 	  break;	
 	case DIR_UP:
-	  moveUp(1);
+	  moveUp(1, 1);
 	  break;
 	case DIR_DOWN:
 	  moveDown();
@@ -703,6 +745,10 @@ int moveMap(void *data) {
 	  // no need to unlock mutex, wait, etc.
 	  continue; 
 	}
+
+	// update the screen
+	finishDrawMap();
+
 	if(cursor.wait) {
 	  cursor.wait = 0;
 	  delay = map.delay;
@@ -795,7 +841,8 @@ int defaultDetectCollision(int dir) {
 
 void initMap(char *name, int w, int h) {
   // start a new Map
-  map.accelerate = 1;
+  map.gravity = 0;
+  map.accelerate = 0;
   map.name = strdup(name);
   map.w = w;
   map.h = h;

@@ -175,6 +175,10 @@ void runMap(char *name, int w, int h) {
   map.beforeDrawToScreen = gameBeforeDrawToScreen;
   map.afterMainLevelDrawn = afterMainLevelDrawn;
   map.detectCollision = detectCollision;
+  // activate gravity and accelerated movement
+  map.accelerate = 1;
+  map.gravity = 1;
+  // start the move thread
   startMapMoveThread();
 }
 

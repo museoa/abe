@@ -31,8 +31,13 @@
 #define EXTRA_X 5
 #define EXTRA_Y 5
 
-#define SPEED_INC_X 1
-#define SPEED_INC_Y 1
+// the speed increments in accelerated mode
+#define SPEED_INC_X 2
+#define SPEED_INC_Y 2
+
+// the minimum (starting) speed in accelerated mode
+#define START_SPEED_X 6
+#define START_SPEED_Y 6
 
 typedef struct _map {
   char *name;
@@ -50,6 +55,7 @@ typedef struct _map {
   SDL_cond *move_cond;
   SDL_mutex *move_cond_mutex;
   int accelerate; // 1 for accelerated movement, 0 otherwise
+  int gravity; // 1 for gravity, 0 otherwise(default)
 } Map;
 
 typedef struct _cursor {
@@ -78,7 +84,7 @@ void resetCursor();
 // return 1 or 0 if movement in that direction is possible
 int moveLeft(int checkCollision, int scroll);
 int moveRight(int checkCollision, int scroll);
-int moveUp(int checkCollision);
+int moveUp(int checkCollision, int scroll);
 int moveDown();
 
 void lockMap();
