@@ -31,8 +31,7 @@ void saveMapPath(char *path) {
   fflush(stderr);
   // write out and further compress in step 2
   written = compress(compressed_map, new_size, rwop);
-  fprintf(stderr, "Compressed map step2. Written %ld ints. Compression ration: %f.2\%\n", (long int)written, 
-		  (float)written / ((float)(LEVEL_COUNT * map.w * map.h) / 100.0));
+  fprintf(stderr, "Compressed map step2. Written %ld ints. Compression ration: %f.2%%\n", (long int)written, (float)written / ((float)(LEVEL_COUNT * map.w * map.h) / 100.0));
   fflush(stderr);
 
   // Does this close the file? It should according to the constructor...
@@ -60,7 +59,7 @@ int loadMapPath(char *path, int draw_map) {
   int count_read;
   char *err;
   SDL_RWops *rwop;
-  int x, y, i, level;
+  int x, y, i;
 
   printf("Loading map %s\n", path);  
   fflush(stdout);

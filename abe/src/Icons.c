@@ -44,7 +44,7 @@ void paintIcons() {
 }
 
 void finishBack() {
-  int x, y, i, n;
+  int x, y, i;
   SDL_Rect pos, pos2;
   i = 0;
   for(y = 0; y < screen->h / ICON_SIZE; y++) {
@@ -63,7 +63,7 @@ void finishBack() {
 }
 
 int selectIcon() {
-  int x, y, n;
+  int x, y;
   SDL_Event event;
   
   icon_row = screen->w / ICON_SIZE;

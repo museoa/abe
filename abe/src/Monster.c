@@ -543,7 +543,6 @@ int defaultDetectMonster(Position *pos, LiveMonster *live) {
 
 int detectFire(Position *pos, LiveMonster *live) {
   SDL_Rect monster, check;
-  SDL_Surface *img;
 
   // convert pos to pixels
   check.x = pos->pos_x * TILE_W + pos->pixel_x;

@@ -60,7 +60,7 @@ int compress(Uint16 *buff, size_t size, SDL_RWops *rwop) {
 #ifdef USE_COMPRESSION
   //  printf("Compressing...\n");
   Uint16 *block;
-  size_t n, i, t = 0;
+  size_t i, t = 0;
   Uint16 block_note = BLOCK_NOTE;
   if(!(block = (Uint16*)malloc(sizeof(Uint16) * size))) {
 	fprintf(stderr, "Out of memory when writing compressed file");
@@ -244,7 +244,7 @@ void processShimmer() {
   int row[3][100], size[3][100];
   Uint32  color[3][100];
   int count;
-  int x, i, j, r;
+  int x, j, r;
   SDL_Rect pos;
   int done;
 

@@ -388,8 +388,8 @@ void drawMapBottomEdge() {
    (this is so you can string together multiple calls to this method.)
 */
 void scrollMap(int dir) {
-  int row, level;
-  long skipped;
+  int level;
+  //long skipped;
   SDL_Rect pos;
 
   if(dir == DIR_NONE) return;
@@ -743,8 +743,8 @@ void moveGravity() {
 }
 
 int moveWithPlatform() {
-  int py, i;
-  int old_pos, old_speed;
+  int py;
+  int old_speed;
   int diff, dir;
 
   if(!cursor.platform) return 0;
@@ -794,7 +794,7 @@ void initInteract() {
  */
 void moveMap() {
   SDL_Event event;
-  int delay;
+  //int delay;
   Uint32 curr_time, next_time = 0;
   Uint32 TICK_AMOUNT = 1000 / FPS_THROTTLE;
 
@@ -1196,7 +1196,7 @@ int initMap(char *name, int w, int h) {
 	return 0;
   }
   hw_surface = (map.background->flags & SDL_HWSURFACE ? 1 : 0);
-  fprintf(stderr, "background is HW surface? %d\n", i, hw_surface);
+  fprintf(stderr, "background is HW surface? %d\n", hw_surface);
   if(screen->flags & SDL_HWSURFACE & !hw_surface) {
 	fprintf(stderr, "*** Can't create background in video memory. Since the screen is there, this surface must too.\n");
 	fprintf(stderr, "*** This may make the game very slow!");

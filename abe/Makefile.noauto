@@ -1,8 +1,0 @@
-CC = gcc 
-
-all:
-	$(CC) src/*.c -o abe `sdl-config --cflags --libs` -lSDL_mixer
-
-clean:
-	@rm abe
-	

@@ -101,7 +101,9 @@ void drawSettings() {
 
 int isEnabled(int n) {
   if(n == SOUND_ENABLED || n == MUSIC_ENABLED) 
-	return sound_loaded;
+    return sound_loaded;
+  else
+    return 0;
 }
 
 void saveSettings() {

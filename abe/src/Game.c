@@ -59,7 +59,7 @@ void saveGame() {
 int loadGame() {
   char path[300];
   FILE *fp;
-  char *err;
+  //char *err;
   SDL_RWops *rwop;
   int version;
 
@@ -88,12 +88,13 @@ int loadGame() {
 	}
 	fprintf(stderr, "Trying to load saved game: %s\n", path);
 	fflush(stderr);
-	if(fp = fopen(path, "rb")) {
-	  fprintf(stderr, "Saved game found.\n", path);
+  fp = fopen(path, "rb");
+	if(fp) {
+	  fprintf(stderr, "Saved game found. %s\n", path);
 	  fflush(stderr);
 	  break;
 	}
-	fprintf(stderr, "Saved game not found.\n", path);
+	fprintf(stderr, "Saved game not found. %s\n", path);
 	fflush(stderr);
 	version--;
   }

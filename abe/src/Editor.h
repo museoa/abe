@@ -4,6 +4,7 @@
 #include <sys/types.h>
 #include <dirent.h>
 #include "Main.h"
+#include "Icons.h"
 
 #define EDIT_PANEL_HEIGHT 120
 
