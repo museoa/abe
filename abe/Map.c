@@ -865,6 +865,9 @@ void moveMap() {
 	  break;
 	}
 
+	// check for monsters, etc.
+	if(map.checkPosition) map.checkPosition();
+
 	// update the screen
 	finishDrawMap();
 
@@ -1022,6 +1025,7 @@ int initMap(char *name, int w, int h) {
   map.detectCollision = defaultDetectCollision;
   map.detectLadder = defaultDetectLadder;
   map.handleMapEvent = NULL;
+  map.checkPosition = NULL;
   map.delay = 25;
   map.redraw = 0;
   for(i = LEVEL_BACK; i < LEVEL_COUNT; i++) {

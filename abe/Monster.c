@@ -353,6 +353,18 @@ void removeLiveMonster(int live_monster_index) {
   int t;
   LiveMonster *p;
 
+  // debug
+  if(live_monster_index >= live_monster_count) {
+	fprintf(stderr, "Trying to remove monster w. index out of bounds: count=%d index=%d\n", 
+			live_monster_count, live_monster_index);
+	for(t = 0; t < live_monster_count; t++) {
+	  fprintf(stderr, "\tmonster=%s x=%d y=%d\n", 
+			  live_monsters[t].monster->name, live_monsters[t].pos_x, live_monsters[t].pos_y);
+	}
+	fflush(stderr);
+	exit(-1);
+  }
+
   // add it back to the map
   p = &live_monsters[live_monster_index];
   setImageNoCheck(LEVEL_MAIN, 
@@ -419,6 +431,7 @@ LiveMonster *detectMonster(Position *pos) {
   SDL_Rect monster, check;
   SDL_Surface *img;
 
+  /*
   check.x = pos->pos_x;
   check.y = pos->pos_y;
   check.w = pos->w + (pos->pixel_x > 0 ? 1 : 0);
@@ -431,5 +444,25 @@ LiveMonster *detectMonster(Position *pos) {
 	monster.h = (img->h / TILE_H) + (live_monsters[i].pixel_y > 0 ? 1 : 0);
 	if(intersects(&check, &monster)) return &live_monsters[i];
   }
+*/
+
+  
+	
+  check.x = pos->pos_x * TILE_W + pos->pixel_x;
+  check.y = pos->pos_y * TILE_H + pos->pixel_y;
+  check.w = pos->w * TILE_W;
+  check.h = pos->h * TILE_H;
+  for(i = 0; i < live_monster_count; i++) {
+	img = images[live_monsters[i].monster->image_index[getLiveMonsterFace(&live_monsters[i])]]->image;
+	monster.x = live_monsters[i].pos_x * TILE_W + live_monsters[i].pixel_x;
+	monster.y = live_monsters[i].pos_y * TILE_H + live_monsters[i].pixel_y;
+	monster.w = img->w;
+	monster.h = img->h;
+	if(intersects(&check, &monster)) {
+	  return &live_monsters[i];
+	}
+  }
+
+
   return NULL;
 }

@@ -63,6 +63,7 @@ typedef struct _map {
   void (*beforeDrawToScreen)();
   void (*afterMainLevelDrawn)();
   int (*detectCollision) (int);
+  void (*checkPosition) ();
   int (*detectLadder) ();
   void (*handleMapEvent) (SDL_Event*);
   int accelerate; // 1 for accelerated movement, 0 otherwise(default)

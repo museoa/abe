@@ -47,7 +47,7 @@ void gameBeforeDrawToScreen() {
   sprintf(s, "life %d score %d keys %d balloons %d", game.lives, game.score, game.keys, game.balloons);
   drawString(screen, 5, 5, s);
   if(GOD_MODE) {
-	sprintf(s, "x %d y %d god mode %s", cursor.pos_x, cursor.pos_y, (game.god_mode ? "true" : "false"));
+	sprintf(s, "x %d y %d px %d py %d god mode %s", cursor.pos_x, cursor.pos_y, cursor.pixel_x, cursor.pixel_y, (game.god_mode ? "true" : "false"));
     drawString(screen, 5, 5 + FONT_HEIGHT, s);
   }
 }
@@ -127,11 +127,13 @@ void gameMainLoop(SDL_Event *event) {
   }
 }
 
-void handleDeath() {
+void handleDeath(char *killer) {
   int i;
 
-  fprintf(stderr, "Player death!\n");
+  fprintf(stderr, "Player death! Killed by %s at x=%d y=%d pixelx=%d pixely=%d\n", killer, cursor.pos_x, cursor.pos_y, cursor.pixel_x, cursor.pixel_y);
   fflush(stderr);
+
+  if(game.god_mode) return;
 
   game.lives--;
 
@@ -157,8 +159,12 @@ void handleDeath() {
   }
 }
 
-// return a 1 to proceed, 0 to stop
-int detectCollision(int dir) {
+/**
+   This is called with the cursor position established.
+   Do checks here that need precision, like monster hits,
+   platform jumps, etc.
+ */
+void gameCheckPosition() {
   int n;
   Position pos, pos2, key;
   LiveMonster *live;
@@ -173,10 +179,14 @@ int detectCollision(int dir) {
   live = detectMonster(&pos);
 
   // did we hit a monster?
-  if(!game.god_mode && 
-	 ((live && !(live->monster->harmless)) || containsType(&pos, TYPE_HARMFUL))) {
-	handleDeath();
-	return 1;
+  if(live && !live->monster->harmless) {
+	handleDeath(live->monster->name);
+	//	if(!game.god_mode) return 1;
+  }
+  // did we hit a harmful field
+  if(containsType(&pos, TYPE_HARMFUL)) {
+	handleDeath("harmful field");
+	//	if(!game.god_mode) return 1;
   }
 
   // did we hit a platform?
@@ -208,6 +218,29 @@ int detectCollision(int dir) {
 	map.redraw = 1;
   }
 
+  // did we hit a spring
+  if(containsType(&pos, TYPE_SPRING)) {
+	startJumpN(SPRING_JUMP);
+  }
+}
+
+/**
+   This is called with the cursor position proposed.
+   (that is the player could fail to move there.)
+   return a 1 to proceed, 0 to stop
+ */
+int detectCollision(int dir) {
+  int n;
+  Position pos, key;
+  LiveMonster *live;
+
+  pos.pos_x = cursor.pos_x;
+  pos.pos_y = cursor.pos_y;
+  pos.pixel_x = cursor.pixel_x;
+  pos.pixel_y = cursor.pixel_y;
+  pos.w = tom[0]->w / TILE_W;
+  pos.h = tom[0]->h / TILE_H;
+
   // did we hit a door?
   if(containsTypeWhere(&pos, &key, TYPE_DOOR)) {
 	if(game.keys > 0) {
@@ -216,15 +249,11 @@ int detectCollision(int dir) {
 	  map.image_index[LEVEL_FORE][key.pos_x + (key.pos_y * map.w)] = img_door2;
 	  game.keys--;
 	  map.redraw = 1;
-	  return 1;
+	  // always return 0 (block) so we don't fall into a door and get stuck there... (was a nasty bug)
+	  return 0;
 	} else {
 	  return 0;
 	}
-  }
-
-  // did we hit a spring
-  if(containsType(&pos, TYPE_SPRING)) {
-	startJumpN(SPRING_JUMP);
   }
   
   // are we in a wall?
@@ -262,8 +291,8 @@ void runMap(char *name, int w, int h) {
   //  game.player_start_x = 20;
   //  game.player_start_y = 28;
 
-  game.player_start_x = 269;
-  game.player_start_y = 44;
+  game.player_start_x = 24;
+  game.player_start_y = 42;
 
   game.lives = 5;
   game.score = 0;
@@ -284,6 +313,7 @@ void runMap(char *name, int w, int h) {
   map.afterMainLevelDrawn = afterMainLevelDrawn;
   map.detectCollision = detectCollision;
   map.detectLadder = detectLadder;
+  map.checkPosition = gameCheckPosition;
 
   // add our event handling
   map.handleMapEvent = gameMainLoop;
