@@ -17,8 +17,8 @@ void initMonsterPos(Position *pos, LiveMonster *live) {
   pos->pos_y = live->pos_y;
   pos->pixel_x = live->pixel_x;
   pos->pixel_y = live->pixel_y;
-  pos->w = images[live->monster->image_index[0]]->image->w / TILE_W + (live->pixel_x ? 1 : 0);
-  pos->h = images[live->monster->image_index[0]]->image->h / TILE_H + (live->pixel_y ? 1 : 0);
+  pos->w = images[live->monster->image_index[0]]->image->w / TILE_W;
+  pos->h = images[live->monster->image_index[0]]->image->h / TILE_H;
 }
 
 int stepMonsterLeft(LiveMonster *live, int float_ok) {
@@ -208,12 +208,14 @@ void moveSmasher(LiveMonster *live_monster) {
   if(live_monster->dir == DIR_DOWN) {
 	if(!stepMonsterDown(live_monster)) {
 	  live_monster->dir = DIR_UP;
-	  live_monster->speed_y = 2;
+	  live_monster->speed_y = live_monster->monster->start_speed_y / 2 + ((int)((MAX_RANDOM_SPEED / 2) * rand()/(RAND_MAX)));
+	  if(live_monster->speed_y <= 0) live_monster->speed_y = 1;
 	}
   } else {
 	if(!stepMonsterUp(live_monster)) {
 	  live_monster->dir = DIR_DOWN;
-	  live_monster->speed_y = 8;
+	  live_monster->speed_y = live_monster->monster->start_speed_y + ((int)((MAX_RANDOM_SPEED / 2) * rand()/(RAND_MAX)));
+	  if(live_monster->speed_y <= 0) live_monster->speed_y = 1;
 	}
   }
 }
@@ -313,15 +315,15 @@ void initMonsters() {
   strcpy(monsters[MONSTER_SMASHER].name, "smasher");
   monsters[MONSTER_SMASHER].moveMonster = moveSmasher;
   monsters[MONSTER_SMASHER].drawMonster = drawSmasher;
-  monsters[MONSTER_SMASHER].start_speed_x = 8;
-  monsters[MONSTER_SMASHER].start_speed_y = 8;
+  monsters[MONSTER_SMASHER].start_speed_x = 4;
+  monsters[MONSTER_SMASHER].start_speed_y = 4;
 
   // purple smasher
   strcpy(monsters[MONSTER_SMASHER2].name, "smasher2");
   monsters[MONSTER_SMASHER2].moveMonster = moveSmasher;
   monsters[MONSTER_SMASHER2].drawMonster = drawSmasher;
-  monsters[MONSTER_SMASHER2].start_speed_x = 8;
-  monsters[MONSTER_SMASHER2].start_speed_y = 8;
+  monsters[MONSTER_SMASHER2].start_speed_x = 4;
+  monsters[MONSTER_SMASHER2].start_speed_y = 4;
 
   // demon monster
   strcpy(monsters[MONSTER_DEMON].name, "little demon");
@@ -349,8 +351,8 @@ void initMonsters() {
   strcpy(monsters[MONSTER_SPIDER].name, "spider");
   monsters[MONSTER_SPIDER].moveMonster = moveSmasher;
   monsters[MONSTER_SPIDER].drawMonster = drawSmasher;
-  monsters[MONSTER_SPIDER].start_speed_x = 8;
-  monsters[MONSTER_SPIDER].start_speed_y = 8;
+  monsters[MONSTER_SPIDER].start_speed_x = 2;
+  monsters[MONSTER_SPIDER].start_speed_y = 2;
 
 
   // add additional monsters here
