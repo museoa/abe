@@ -270,23 +270,23 @@ loadImages()
   /*
      image_count = 0;
 
-     fprintf(stderr, "Looking for images in %s \n", IMAGES_DIR);
+     fprintf(stderr, "Looking for images in %s \n", xstr(BASE_DIR) PATH_SEP IMAGES_DIR PATH_SEP);
      fflush(stderr);
 
      // it's important to always load the images in the same order.
      struct dirent **namelist;
      int n;
-     n = scandir(IMAGES_DIR, &namelist, selectDirEntry, alphasort);
+     n = scandir(xstr(BASE_DIR) PATH_SEP IMAGES_DIR PATH_SEP, &namelist, selectDirEntry, alphasort);
      if(n < 0) {
-     fprintf(stderr, "Can't sort directory: %s\n", IMAGES_DIR);
+     fprintf(stderr, "Can't sort directory: %s\n", xstr(BASE_DIR) PATH_SEP IMAGES_DIR PATH_SEP);
      fflush(stderr);
      exit(0);
      } else {
      char *name;
-     char path[300];
+     char path[PATH_SIZE];
      while(n--) {
      name = getImageName(namelist[n]->d_name);
-     sprintf(path, "%s/%s", IMAGES_DIR, namelist[n]->d_name);
+     sprintf(path, xstr(BASE_DIR) PATH_SEP IMAGES_DIR PATH_SEP "%s", namelist[n]->d_name);
      doLoadImage(path, name);
      free(name);
      free(namelist[n]);
@@ -306,9 +306,9 @@ loadImages()
 void
 loadImagesFromTar()
 {
-  char tmp_path[300];
+  char tmp_path[PATH_SIZE];
   FILE *tmp = NULL, *fp;
-  char path[300];
+  char path[PATH_SIZE];
   char buff[TAR_BLOCK_SIZE];    // a tar block
   int end = 0;
   int i;
@@ -320,9 +320,10 @@ loadImagesFromTar()
   int block = 0;
 
   image_count = 0;
-  sprintf(tmp_path, "%s%s%s", IMAGES_DIR, PATH_SEP, "tmp.bmp");
+  mkshuae();
+  sprintf(tmp_path, "%s%s", getHomeUserAbe(), "tmp.bmp");
 
-  sprintf(path, "%s%s%s", IMAGES_DIR, PATH_SEP, "images.tar");
+  sprintf(path, xstr(BASE_DIR) PATH_SEP IMAGES_DIR PATH_SEP "images.tar");
   fprintf(stderr, "Opening %s for reading.\n", path);
   fflush(stderr);
   fp = fopen(path, "rb");

@@ -5,8 +5,7 @@
 #include "SDL_rwops.h"
 #include "SDL_endian.h"
 
-// Where to store the map files (no ending /)
-#define MAPS_DIR "maps"
+#include "Directories.h"
 
 void saveMap();
 int loadMap(int drawMap);

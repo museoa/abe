@@ -2,6 +2,8 @@ bin_PROGRAMS = abe
 
 abe_SOURCES = \
 	Common.h\
+	Directories.c\
+	Directories.h\
 	Editor.c\
 	Editor.h\
 	Font.c\

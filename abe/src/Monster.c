@@ -650,7 +650,9 @@ detectFire(Position * pos, LiveMonster * live)
 void
 allocFireCustom(LiveMonster * live)
 {
-  if(((int *) live->custom = (int *) malloc(sizeof(int))) == NULL) {
+//warning: use of cast expressions as lvalues is deprecated
+//if(((int *) live->custom = (int *) malloc(sizeof(int))) == NULL) {
+  if((live->custom = (int *) malloc(sizeof(int))) == NULL) {
     fprintf(stderr,
             "Out of memory when trying to allocate custom storage for fire column.\n");
   }
@@ -659,7 +661,8 @@ allocFireCustom(LiveMonster * live)
 void
 allocEndGameCustom(LiveMonster * live)
 {
-  if(((int *) live->custom = (int *) malloc(sizeof(int))) == NULL) {
+//if(((int *) live->custom = (int *) malloc(sizeof(int))) == NULL) {
+  if((live->custom = (int *) malloc(sizeof(int))) == NULL) {
     fprintf(stderr,
             "Out of memory when trying to allocate custom storage for end game.\n");
   }

@@ -1,12 +1,6 @@
 #include "Game.h"
 #include <errno.h>
-
-#ifndef WIN32
-#include <pwd.h>
-#include <stdlib.h>
-#include <sys/stat.h>
-#include <unistd.h>
-#endif
+#include <string.h>
 
 Game game;
 
@@ -15,23 +9,11 @@ static void
 path_sprintf(char *path, char *formatted_name, int version)
 {
 
-#ifndef WIN32
-  struct passwd *pwent;
-#endif
   int len;
 
   printf("path_sprintf (%p, %s, %d)\n", path, formatted_name, version);
 
-#ifdef WIN32
-  strcpy(path, SAVEGAME_DIR PATH_SEP);
-#else
-  pwent = getpwuid(getuid());
-  if(NULL == pwent) {
-    perror("getpwuid");
-    exit(EXIT_FAILURE);
-  }
-  sprintf(path, "%s%s", pwent->pw_dir, PATH_SEP SAVEGAME_DIR PATH_SEP);
-#endif
+  strcpy(path, getSaveGameDir());
 
   len = strlen(path);
 
@@ -59,27 +41,6 @@ deleteSavedGame()
   remove(path);
 }
 
-// MaKe Sure Directory Exists. Not msde to do not confuse with some M$ function.
-static void
-mksde()
-{
-#ifndef WIN32
-  char path[PATH_SIZE];
-  struct passwd *pwent;
-
-  pwent = getpwuid(getuid());
-  if(NULL == pwent) {
-    perror("getpwuid");
-    exit(EXIT_FAILURE);
-  }
-  sprintf(path, "%s%s", pwent->pw_dir, PATH_SEP SAVEGAME_DIR PATH_SEP);
-
-  if(mkdir(path, (mode_t) S_IFDIR | S_IRWXU)) {
-    perror(path);
-  }
-#endif
-}
-
 void
 saveGame()
 {
@@ -88,7 +49,7 @@ saveGame()
   char *err;
   SDL_RWops *rwop;
 
-  mksde();
+  mkshuae();
 
   path_sprintf(path, "save%d.dat", GAME_VERSION);
 

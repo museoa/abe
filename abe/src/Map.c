@@ -935,7 +935,6 @@ moveMap()
           moveDown(1, 0, 0);
         }
       }
-
       // check for monsters, etc.
       if(map.checkPosition)
         map.checkPosition();

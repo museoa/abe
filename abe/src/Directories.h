@@ -1,6 +1,14 @@
 #ifndef DIRECTORIES_H
 #define DIRECTORIES_H
 
+#ifndef WIN32
+#include <pwd.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#endif
+
 // The macros xstr(s) and str(s) were extracted from 
 // http://gcc.gnu.org/onlinedocs/cpp/Stringification.html
 // They are used to expand BASE_DIR .
@@ -22,14 +30,18 @@
 #define BASE_DIR .
 #endif
 
-#ifdef WIN32
-#define SAVEGAME_DIR "savegame"
-#else
-#define SAVEGAME_DIR ".abe"
-#endif
-
 #define IMAGES_DIR "images"
 #define MAPS_DIR "maps"
 #define SOUND_DIR "sounds"
+
+char *getHomeUserAbe();
+
+#ifndef WIN32
+#define getSaveGameDir() getHomeUserAbe()
+#else
+#define getSaveGameDir() xstr(BASE_DIR) PATH_SEP "savegame" PATH_SEP
+#endif
+
+void mkshuae();
 
 #endif

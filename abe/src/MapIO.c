@@ -48,8 +48,8 @@ saveMapPath(char *path)
 void
 saveMap()
 {
-  char path[300];
-  sprintf(path, "%s%s%s.dat", MAPS_DIR, PATH_SEP, map.name);
+  char path[PATH_SIZE];
+  sprintf(path, xstr(BASE_DIR) PATH_SEP MAPS_DIR PATH_SEP "%s.dat", map.name);
   saveMapPath(path);
 }
 
@@ -57,8 +57,8 @@ saveMap()
 int
 loadMap(int draw_map)
 {
-  char path[300];
-  sprintf(path, "%s%s%s.dat", MAPS_DIR, PATH_SEP, map.name);
+  char path[PATH_SIZE];
+  sprintf(path, xstr(BASE_DIR) PATH_SEP MAPS_DIR PATH_SEP "%s.dat", map.name);
   return loadMapPath(path, draw_map);
 }
 

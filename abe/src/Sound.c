@@ -48,8 +48,8 @@ playGameMusic()
 void
 loadSound(int index, char *name)
 {
-  char path[300];
-  sprintf(path, "%s%s%s.wav", SOUND_DIR, PATH_SEP, name);
+  char path[PATH_SIZE];
+  sprintf(path, xstr(BASE_DIR) PATH_SEP SOUND_DIR PATH_SEP "%s.wav", name);
   fprintf(stderr, "Loading sound: path=%s\n", path);
   sound[index] = Mix_LoadWAV(path);
   if(!sound[index]) {
@@ -68,7 +68,7 @@ stopMusic()
 void
 initAudio()
 {
-  char path[300];
+  char path[PATH_SIZE];
   if(!sound_enabled)
     return;
 
@@ -78,14 +78,14 @@ initAudio()
   }
 
   intro_music = game_music = NULL;
-  sprintf(path, "%s%sintro.ogg", SOUND_DIR, PATH_SEP);
+  sprintf(path, xstr(BASE_DIR) PATH_SEP SOUND_DIR PATH_SEP "intro.ogg");
   intro_music = Mix_LoadMUS(path);
   if(!intro_music) {
     printf("Mix_LoadMUS(\"intro\"): %s\n", Mix_GetError());
   }
   showLoadingProgress();
 
-  sprintf(path, "%s%sgame.ogg", SOUND_DIR, PATH_SEP);
+  sprintf(path, xstr(BASE_DIR) PATH_SEP SOUND_DIR PATH_SEP "game.ogg");
   game_music = Mix_LoadMUS(path);
   if(!game_music) {
     printf("Mix_LoadMUS(\"game\"): %s\n", Mix_GetError());

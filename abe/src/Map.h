@@ -2,9 +2,7 @@
 #define MAP_H
 
 #include "Main.h"
-
-// Where to store the map files (no ending /)
-#define MAPS_DIR "maps"
+#include "Directories.h"
 
 // Throttle the game speed at 25 fps (for fast machines)
 #define FPS_THROTTLE 30
