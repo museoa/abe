@@ -590,6 +590,7 @@ int isMonsterImage(int image_index) {
 }
 
 void addLiveMonster(int monster_index, int image_index, int x, int y) {
+  int i;
   Monster *m = &monsters[monster_index];
   live_monsters[live_monster_count].pos_x = x;
   live_monsters[live_monster_count].pos_y = y;
@@ -604,6 +605,11 @@ void addLiveMonster(int monster_index, int image_index, int x, int y) {
   }
   live_monsters[live_monster_count].dir = DIR_NONE;
   live_monsters[live_monster_count].face = 0;
+  for(i = 0; i < m->image_count; i++) {
+	if(m->image_index[i] == image_index) {
+	  live_monsters[live_monster_count].face = i;
+	}
+  }
   live_monsters[live_monster_count].monster = m;
   // allocate custom storage
   if(live_monsters[live_monster_count].monster->allocCustom) {
