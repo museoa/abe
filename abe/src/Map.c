@@ -818,7 +818,7 @@ void moveMap() {
 	curr_time = SDL_GetTicks();
 
 	// is it time to draw the map?
-	if(!next_time || curr_time > next_time) {
+	if(map.fps_override || !next_time || curr_time > next_time) {
 
 
 	  // where is the map?
@@ -877,6 +877,10 @@ void moveMap() {
 		// update the screen
 		finishDrawMap(!map.redraw);
 	  }
+
+	  // if the video is too slow to display FPS_THROTTLE then remove the constraint.
+	  map.delta = SDL_GetTicks() - curr_time;
+	  map.fps_override = (map.delta > TICK_AMOUNT);
 	  
 	  // when to update the screen next?
 	  next_time += TICK_AMOUNT;
@@ -1008,7 +1012,8 @@ void resetMap() {
   map.handleMapEvent = NULL;
   map.delay = 25;
   map.redraw = 0;
-
+  map.delta = 0;
+  map.fps_override = 0;
   // clean map
   for(i = 0; i < (map.w * map.h); i++) {
 	map.image_index[LEVEL_BACK][i] = EMPTY_MAP;
@@ -1038,6 +1043,8 @@ int initMap(char *name, int w, int h) {
   map.checkPosition = NULL;
   map.delay = 25;
   map.redraw = 0;
+  map.delta = 0;
+  map.fps_override = 0;
   for(i = LEVEL_BACK; i < LEVEL_COUNT; i++) {
 	if(!(map.image_index[i] = (Uint16*)malloc(sizeof(Uint16) * w * h))) {
 	  fprintf(stderr, "Out of memory.\n");

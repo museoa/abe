@@ -149,6 +149,8 @@ void gameBeforeDrawToScreen() {
   if(GOD_MODE) {
 	drawString(screen, 255, 41, (game.god_mode ? "t" : "f"));
 
+	sprintf(s, "d %d f %d t %d", map.delta, map.fps_override, (1000 / FPS_THROTTLE));
+	drawString(screen, 0, screen->h - 80, s);
 	sprintf(s, "pos %d %d", cursor.pos_x, cursor.pos_y);
 	drawString(screen, 0, screen->h - 60, s);
 	sprintf(s, "pixel %d %d", cursor.pixel_x, cursor.pixel_y);

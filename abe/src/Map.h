@@ -76,6 +76,8 @@ typedef struct _map {
   int slides; // 1 for active slides, 0 otherwise(default)
   int redraw; // set to 1 to cause a full map repaint
   int top_left_x, top_left_y; // where is the tile top left corner of the map?
+  int delta;
+  int fps_override;
 } Map;
 
 extern Cursor cursor;
