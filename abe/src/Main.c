@@ -96,6 +96,11 @@ main(int argc, char *argv[])
   mainstruct.effects_enabled = 1;
   runmode = RUNMODE_SPLASH;
   mainstruct.full_screen = 1;
+  
+  // my laptop can't handle fullscreen for some reason
+#if defined(__APPLE__) || defined(__MACH_O__)
+  mainstruct.full_screen = 0;
+#endif
 
   w = 640;
   h = 480;
