@@ -199,8 +199,8 @@ void paintAboutScreen() {
   drawString(screen, 50, 10 + FONT_HEIGHT * 5, "now abe braves the deadly twisting");  
   drawString(screen, 50, 10 + FONT_HEIGHT * 6, "passages of the great pyramid!");  
 
-  drawString(screen, 50, 10 + FONT_HEIGHT * 8, "he seeks to free his father from the");
-  drawString(screen, 50, 10 + FONT_HEIGHT * 9, "fate that binds him to the dark depths");
+  drawString(screen, 50, 10 + FONT_HEIGHT * 8, "he seeks to free his father and");
+  drawString(screen, 50, 10 + FONT_HEIGHT * 9, "uncover the mystery of the depths");
 
   pos.x = screen->w / 2 - (tom[0]->w / 2);
   pos.y =  screen->h - 30 - tom[0]->h;

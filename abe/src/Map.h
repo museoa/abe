@@ -54,6 +54,9 @@
 // an empty map position
 #define EMPTY_MAP 0xffff
 
+// how long to keep a status message up? (about 10sec.)
+#define STATUS_TIME 100
+
 typedef struct _map {
   char *name;
   Uint16 w, h;
@@ -85,6 +88,8 @@ typedef struct _map {
   int max_speed_boost; // for slow machines, add this to movement speed. (0-10 extra)
   int quit;
   SDL_Surface *overlay;
+  char status[80];
+  int status_time;
 } Map;
 
 // an optimization for looking up monsters etc. multiple times
@@ -135,4 +140,5 @@ int containsTypeInLevel(Position *p, Position *ret, int type, int level);
 int onSolidGround(Position *p);
 // artificially move the background
 void scrollBackground();
+void showMapStatus(char *s);
 #endif

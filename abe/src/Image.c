@@ -15,7 +15,7 @@ Image *images[256];
 int image_count;
 int img_brick, img_rock, img_back, img_key, img_door, img_door2, img_key, img_smash, img_smash2, img_smash3, img_smash4;
 int img_water, img_spring, img_spring2, img_spider, img_spider2, img_health;
-int img_balloon[3], img_gem[2], img_bullet[4], img_slide_left[3], img_slide_right[3];
+int img_balloon[3], img_gem[2], img_bullet[4], img_slide_left[3], img_slide_right[3], img_slideback;
 int alphacount = 0;
 int alphas[256];
 
@@ -204,6 +204,8 @@ void doLoadImage(char *filename, char *name) {
 	} else if(!strcmp(name, "slide6")) {
 	  type = TYPE_SLIDE;
 	  img_slide_left[2] = image_count;
+	} else if(!strcmp(name, "slideback")) {
+	  img_slideback = image_count;
 	} else if(!strcmp(name, "crystal")) {
 	  type = TYPE_DECORATION;
 	}

@@ -60,6 +60,7 @@ del,backspace - clear tile
 L - load map
 S - save map
 esc - quit
+q,w - make a slide (q-top left, w-bottom right)
 
 If you have any comments, email me at cctorok@yahoo.com.
 

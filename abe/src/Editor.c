@@ -1,5 +1,8 @@
 #include "Editor.h"
 
+
+int slide_start_x = -1;
+int slide_start_y = -1;
 EditPanel edit_panel;
 Cursor editor_cursor;
 
@@ -27,6 +30,45 @@ void beforeDrawToScreen() {
   
   // draw the edit panel
   drawEditPanel();
+}
+
+void drawSlide(int x1, int y1, int x2, int y2) {
+  int sx, sy, x, y;
+  Position pos;
+
+  if(x1 == x2 || y1 == y2) {
+	showMapStatus("error cant draw slide");
+  }
+  // swap
+  if(y1 > y2) {
+	sx = x1;
+	sy = y1;
+	x1 = x2;
+	y1 = y2;
+	x2 = sx;
+	y2 = sy;
+  }
+  x = x1;
+  for(y = y1; y < y2; y++) {
+	pos.pos_x = x;
+	pos.pos_y = y;
+	setImageNoCheck(LEVEL_MAIN, x, y, img_slideback);
+	if(x1 < x2) {
+	  // NW -> SE slide
+	  setImageNoCheck(LEVEL_FORE, x - 1, y, img_slide_right[2]);
+	  setImageNoCheck(LEVEL_FORE, x, y, img_slide_right[0]);
+	  setImageNoCheck(LEVEL_FORE, x + 1, y, img_slide_right[1]);
+	  x++;
+	} else {
+	  // NE -> SW slide
+	  setImageNoCheck(LEVEL_FORE, x - 1, y, img_slide_left[1]);
+	  setImageNoCheck(LEVEL_FORE, x, y, img_slide_left[0]);
+	  setImageNoCheck(LEVEL_FORE, x + 1, y, img_slide_left[2]);
+	  x--;
+	}
+  }
+  showMapStatus("added slide");
+  drawMap();
 }
 
 /**
@@ -209,6 +251,17 @@ void editorMainLoop(SDL_Event *event) {
 	case SDLK_ESCAPE: 
 	  map.quit = 1;
 	  break;
+	case SDLK_q: 
+	  slide_start_x = map.top_left_x + editor_cursor.pos_x;
+	  slide_start_y = map.top_left_y + editor_cursor.pos_y;
+	  showMapStatus("slide started");
+	  break;
+	case SDLK_w:
+	  if(slide_start_x > -1 && slide_start_y > -1) {
+		drawSlide(slide_start_x, slide_start_y, map.top_left_x + editor_cursor.pos_x, map.top_left_y + editor_cursor.pos_y);
+	  } else {
+		showMapStatus("press q first!");
+	  }
 	default:
 	  break;
 	}
@@ -261,6 +314,7 @@ void drawEditPanel() {
   // draw some instructions
   drawString(edit_panel.image, 10, 35, "change level 123");
   drawString(edit_panel.image, 10, 35 + FONT_HEIGHT, "change image 567");
+  drawString(edit_panel.image, 10, 35 + FONT_HEIGHT * 2, "slide  q  w");
   drawString(edit_panel.image, 400, 5, "editor");
   drawString(edit_panel.image, 400, 5 + FONT_HEIGHT, "draw enter");
   drawString(edit_panel.image, 400, 5 + FONT_HEIGHT * 2, "erase del");

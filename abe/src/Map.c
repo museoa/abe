@@ -29,7 +29,7 @@ typedef struct _mapDrawParams {
   int offset_x;  // how many tiles to offset from the top/left edge of the screen
   int offset_y;
 } MapDrawParams;
-MapDrawParams params;
+MapDrawParams global_params;
 
 // artificially moving the background
 int move_background_x = 0;
@@ -70,6 +70,8 @@ void getMapDrawParams(MapDrawParams *params) {
   if(params->end_x > map.w) params->end_x = map.w;
   if(params->end_y > map.h) params->end_y = map.h;
 
+  // store the original
+  memcpy(&global_params, params, sizeof(global_params));
 }
 
 /**
@@ -77,6 +79,7 @@ void getMapDrawParams(MapDrawParams *params) {
    is the center of the screen.
  */
 void drawMap() {
+  MapDrawParams params;
   SDL_Rect pos;
   int x, m, y, level, n;
 
@@ -138,7 +141,7 @@ void drawMap() {
    the left and top by EXTRA_X and EXTRA_Y tiles.
  */
 void drawMapLeftEdge() {
-  // erase the edge
+  MapDrawParams params;
   SDL_Rect pos;
   int n, m, level, x, y;
 
@@ -202,7 +205,7 @@ void drawMapLeftEdge() {
    the left and top by EXTRA_X and EXTRA_Y tiles.
  */
 void drawMapTopEdge() {
-  // erase the edge
+  MapDrawParams params;
   SDL_Rect pos;
   int n, m, level, x, y;
 
@@ -262,7 +265,7 @@ void drawMapTopEdge() {
    given that the cursor is in the middle of the screen.
  */
 void drawMapRightEdge() {
-  // erase the edge
+  MapDrawParams params;
   SDL_Rect pos;
   int n, m, level, x, y;
 
@@ -324,7 +327,7 @@ void drawMapRightEdge() {
    given that the cursor is in the middle of the screen.
  */
 void drawMapBottomEdge() {
-  // erase the edge
+  MapDrawParams params;
   SDL_Rect pos;
   int n, m, level, x, y;
 
@@ -400,6 +403,10 @@ void scrollMap(int dir) {
 
 	for(level = LEVEL_BACK; level < LEVEL_COUNT - 1; level++) {
 	  SDL_FillRect(map.transfer, NULL, SDL_MapRGBA(screen->format, 0x00, 0x00, 0x00, 0x00));
+	  pos.x = 0;
+	  pos.y = 0;
+	  pos.w = map.level[level]->w - cursor.speed_x;
+	  pos.h = map.level[level]->h;
 	  SDL_BlitSurface(map.level[level], NULL, map.transfer, NULL);
 	  pos.x = cursor.speed_x;
 	  pos.y = 0;
@@ -913,25 +920,26 @@ void drawLevelFore() {
   int x, y, n, i;
 
   // draw the map
-  for(y = params.start_y; y < params.end_y; y++) {
-	for(x = params.start_x; x < params.end_x;) {
+  for(y = global_params.start_y; y < global_params.end_y; y++) {
+	for(x = global_params.start_x; x < global_params.end_x;) {
 	  i = x + (y * map.w);
 	  if(i < 0) {
-		fprintf(stderr, "ERROR: x=%d y=%d start_x=%d start_y=%d i=%d\n", x, y, params.start_x, params.start_y, i);
+		fprintf(stderr, "ERROR: x=%d y=%d start_x=%d start_y=%d i=%d\n", x, y, global_params.start_x, global_params.start_y, i);
 		exit(1);
 	  }
 	  n = map.image_index[LEVEL_FORE][i];
 	  if(n != EMPTY_MAP) {
 		// Draw the image
 		// should be some check here in case images[n] points to la-la-land.
-		pos.x = (params.offset_x + (x - params.start_x)) * TILE_W;
-		pos.y = (params.offset_y + (y - params.start_y)) * TILE_H;
+		pos.x = (global_params.offset_x + (x - global_params.start_x)) * TILE_W;
+		pos.y = (global_params.offset_y + (y - global_params.start_y)) * TILE_H;
 		pos.w = images[n]->image->w;
 		pos.h = images[n]->image->h;
 		
 		// compensate for extra area
 		pos.x += -cursor.pixel_x;
 		pos.y += -cursor.pixel_y;
+
 		SDL_BlitSurface(images[n]->image, NULL, screen, &pos);
 		
 		// skip ahead
@@ -973,8 +981,8 @@ void finishDrawMap() {
   // make a callback if it exists
   // draw creatures
   if(map.monsters) drawLiveMonsters(screen, 
-									(params.start_x - params.offset_x) * TILE_W + cursor.pixel_x,
-									(params.start_y - params.offset_y) * TILE_H + cursor.pixel_y);
+									(global_params.start_x - global_params.offset_x) * TILE_W + cursor.pixel_x,
+									(global_params.start_y - global_params.offset_y) * TILE_H + cursor.pixel_y);
   // draw Tom
   if(map.afterMainLevelDrawn) map.afterMainLevelDrawn();
 
@@ -985,7 +993,12 @@ void finishDrawMap() {
   if(map.beforeDrawToScreen) {
 	map.beforeDrawToScreen();
   }
-    
+
+  // show map status
+  if(map.status_time > 0) {
+	map.status_time--;
+	drawString(screen, screen->w / 2, 5, map.status);  
+  }
   SDL_Flip(screen);
 }
 
@@ -1078,6 +1091,7 @@ void resetMap() {
   map.delta = 0;
   map.fps_override = 0;
   map.moveBackground = 0;
+  map.status_time = 0;
   // clean map
   for(i = 0; i < (map.w * map.h); i++) {
 	map.image_index[LEVEL_BACK][i] = EMPTY_MAP;
@@ -1115,6 +1129,7 @@ int initMap(char *name, int w, int h) {
   map.fps_override = 0;
   map.moveBackground = 0;
   map.quit = 0;
+  map.status_time = 0;  
   for(i = LEVEL_BACK; i < LEVEL_COUNT; i++) {
 	if(!(map.image_index[i] = (Uint16*)malloc(sizeof(Uint16) * w * h))) {
 	  fprintf(stderr, "Out of memory.\n");
@@ -1370,4 +1385,9 @@ int onSolidGround(Position *p) {
 	if(!found) return 0;
   }
   return 1;
+}
+
+void showMapStatus(char *s) {
+  strcpy(map.status, s);
+  map.status_time = STATUS_TIME;
 }

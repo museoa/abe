@@ -36,6 +36,6 @@ extern int image_count;
 // known image indexes
 extern int img_brick, img_rock, img_back, img_key, img_door, img_door2, img_key, img_smash, img_smash2, img_smash3, img_smash4;
 extern int img_water, img_spring, img_spring2, img_spider, img_spider2, img_health;
-extern int img_balloon[3], img_gem[2], img_bullet[4], img_slide_left[3], img_slide_right[3];
+extern int img_balloon[3], img_gem[2], img_bullet[4], img_slide_left[3], img_slide_right[3], img_slideback;
 
 #endif
