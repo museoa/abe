@@ -871,7 +871,8 @@ void moveMap() {
 	  // for slow machines: max speed adjustment
 	  if(map.fps_override) {
 		map.max_speed_boost = (map.delta - TICK_AMOUNT) / 3;
-		if(map.max_speed_boost > 10) map.max_speed_boost = 10;
+		if(map.max_speed_boost > TILE_W - SPEED_MAX_X) 
+		  map.max_speed_boost = TILE_W - SPEED_MAX_X;
 	  } else {
 		map.max_speed_boost = 0;
 	  }
