@@ -70,6 +70,7 @@ void initAudio() {
   loadSound(DEATH_SOUND, "death");
   loadSound(PLATFORM_SOUND, "platform");
   loadSound(JUMP_SOUND, "jump");
+  loadSound(GEM_SOUND, "gem");
 
   Mix_AllocateChannels(16);
 

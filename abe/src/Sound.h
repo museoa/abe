@@ -15,6 +15,7 @@
 #define DEATH_SOUND 7
 #define PLATFORM_SOUND 8
 #define JUMP_SOUND 9
+#define GEM_SOUND 10
 
 void initAudio();
 void playSound(int index);

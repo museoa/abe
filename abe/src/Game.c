@@ -215,9 +215,9 @@ void gameCheckPosition() {
   // FIXME: this fails if there many objects close together.
   // maybe it should return a NULL terminated array of positions.
   if(containsTypeWhere(&pos, &key, TYPE_OBJECT)) {
-	playSound(OBJECT_SOUND);
 	// remove from map
 	n = map.image_index[LEVEL_MAIN][key.pos_x + (key.pos_y * map.w)];
+	playSound(n == img_gem[0] || n == img_gem[1] || n == img_gem[2] ? GEM_SOUND : OBJECT_SOUND);
 	if(n == img_key) {
 	  game.keys++;
 	} else if(n == img_balloon[0] || n == img_balloon[1] || n == img_balloon[2]) {
