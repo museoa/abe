@@ -34,22 +34,30 @@ void splashMainLoop(SDL_Event *event) {
 void splashBeforeDrawToScreen() {
   SDL_Rect pos;
   int m;
+  int n;
 
-  m = screen->w / 2 - 100;
+  pos.x = 50;
+  pos.y = 5;
+  pos.w = title->w;
+  pos.h = title->h;
+  SDL_BlitSurface(title, NULL, screen, &pos);
 
-  drawString(screen, m, FONT_HEIGHT * 0, "start game");
-  drawString(screen, m, FONT_HEIGHT * 1, "map editor");
-  drawString(screen, m, FONT_HEIGHT * 2, "settings");
-  drawString(screen, m, FONT_HEIGHT * 3, "about");
-  drawString(screen, m, FONT_HEIGHT * 4, "exit abe!!");
+  n = 5;
+  m = 50 + title->w;
+
+  drawString(screen, m, n + FONT_HEIGHT * 0, "start game");
+  drawString(screen, m, n + FONT_HEIGHT * 1, "map editor");
+  drawString(screen, m, n + FONT_HEIGHT * 2, "settings");
+  drawString(screen, m, n + FONT_HEIGHT * 3, "about");
+  drawString(screen, m, n + FONT_HEIGHT * 4, "exit abe!!");
 
   pos.x = m - 35;
-  pos.y = menu_y;
+  pos.y = menu_y + n;
   pos.w = images[img_key]->image->w;
   pos.h = images[img_key]->image->h;
   SDL_BlitSurface(images[img_key]->image, NULL, screen, &pos);
   pos.x = m + 200;
-  pos.y = menu_y;
+  pos.y = menu_y + n;
   pos.w = images[img_key]->image->w;
   pos.h = images[img_key]->image->h;
   SDL_BlitSurface(images[img_key]->image, NULL, screen, &pos);

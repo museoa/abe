@@ -9,7 +9,7 @@
 #define TAR_SIZE_SIZE 12
 #define TAR_SIZE_OFFSET 124
 
-SDL_Surface *title;
+SDL_Surface *title, *score_image;
 SDL_Surface *tom[8];
 Image *images[256];
 int image_count;
@@ -43,6 +43,8 @@ void doLoadImage(char *filename, char *name) {
 	title = image;
   } else if(!strcmp(name, "fonts")) {
 	initFonts(image);
+  } else if(!strcmp(name, "score")) {
+	score_image = image;
   } else if(!strcmp(name, "tom1")) {
 	tom[0] = image;
   } else if(!strcmp(name, "tom2")) {

@@ -7,7 +7,7 @@
 
 #define IMAGES_DIR "images"
 
-extern SDL_Surface *title;
+extern SDL_Surface *title, *score_image;
 extern SDL_Surface *tom[8];
 
 void loadImages();
