@@ -298,8 +298,8 @@ void runMap() {
   //game.player_start_x = 20;
   //game.player_start_y = 28;
 
-  game.player_start_x = 361;
-  game.player_start_y = 80;
+  game.player_start_x = 310;
+  game.player_start_y = 8;
 
   game.lives = 5;
   game.score = 0;

@@ -782,44 +782,51 @@ void moveGravity() {
 }
 
 int moveWithPlatform() {
-  int old_speed, old_dir, diff;
+  int py, i;
+  int old_pos, old_speed;
+  int diff, dir;
+
   if(!cursor.platform) return 0;
 
-  // move up or down if needed.
-  //  if(cursor.platform->monster->type == MONSTER_PLATFORM) {
-  old_speed = cursor.speed_y;
-  old_dir = cursor.dir;
-  diff = (cursor.platform->pos_y * TILE_H + cursor.platform->pixel_y) - 
-	(cursor.pos_y * TILE_H + tom[0]->h + cursor.pixel_y);
-  if(diff != 0) {
-	if(cursor.platform->pos_y == cursor.pos_y + (tom[0]->h / TILE_H)) {
-	  cursor.speed_y = abs(diff);
-	  cursor.dir = DIR_UP;
-	  moveUp(1, 1);
-	} else {
-	  cursor.speed_y = abs(diff);
-	  cursor.dir = DIR_DOWN;
-	  moveDown(1, 1);
-	}
-	fflush(stderr);
+  // make sure we're on top of the platform
+  py = cursor.platform->pos_y * TILE_H + cursor.platform->pixel_y;
+  if(cursor.platform->dir == DIR_UP) {
+	py -= cursor.platform->speed_y;
+  } else if(cursor.platform->dir == DIR_DOWN) {
+	py += cursor.platform->speed_y;
   }
-  cursor.speed_y = old_speed;
-  cursor.dir = old_dir;
-  //  }
+  for(i = 0; i < 2; i++) {
+	diff = py - (cursor.pos_y * TILE_H + tom[0]->h + cursor.pixel_y);
+	dir = (diff > 0 ? DIR_DOWN : DIR_UP);
+	if(diff) {
+	  if(abs(diff) < TILE_H) {
+		old_speed = cursor.speed_y;
+		cursor.speed_y = abs(diff);
+		if(dir == DIR_UP) moveUp(1, 1);
+		else moveDown(1, 1);
+		cursor.speed_y = old_speed;
+		break;
+	  } else {
+		old_pos = cursor.pos_y;
+		old_speed = cursor.speed_y;
+		cursor.speed_y = TILE_H;
+		if(dir == DIR_UP) moveUp(1, 1);
+		else moveDown(1, 1);
+		cursor.speed_y = old_speed;
+		//		if(cursor.pos_y == old_pos) break; // blocked
+	  }
+	} else {
+	  break;
+	}
+  }
 
-  // move with the platform
+  // move sideways with the platform
   if(cursor.platform->monster->type == MONSTER_PLATFORM) {
 	old_speed = cursor.speed_x;
 	cursor.speed_x = cursor.platform->speed_x;
 	if(cursor.platform->dir == DIR_LEFT) moveLeft(1);
 	else moveRight(1);
 	cursor.speed_x = old_speed;
-  } else {
-	old_speed = cursor.speed_y;
-	cursor.speed_y = cursor.platform->speed_y;
-	if(cursor.platform->dir == DIR_UP) moveUp(1, 1);
-	else moveDown(1, 1);
-	cursor.speed_y = old_speed;
   }
   
   fflush(stderr);
