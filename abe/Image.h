@@ -20,6 +20,7 @@ typedef struct image {
   char *name;
   SDL_Surface *image;
   int type;
+  int monster_index;
 } Image;
 
 Image *images[256];

@@ -43,6 +43,12 @@
 #define JUMP_LENGTH 7
 #define JUMP_SPEED 14
 
+// if this is 1, it uses a transfer surface to scroll
+// else it uses memmove() unless screen is a HWSURFACE
+// in which case this is ignored and a transfer surface
+// is used.
+#define FORCE_SDL_SCROLL 0
+
 typedef struct _map {
   char *name;
   int w, h;
@@ -50,8 +56,6 @@ typedef struct _map {
   SDL_Surface *level[LEVEL_COUNT];
   SDL_Surface *transfer;
   int delay;
-  // set this to 1 to kill the movement thread. (by calling: stopMapMoveThread())
-  int stopThread;
   // painting callbacks
   void (*beforeDrawToScreen)();
   void (*afterMainLevelDrawn)();
@@ -63,6 +67,7 @@ typedef struct _map {
   int monsters; // 1 for active monsters, 0 otherwise(default)
 } Map;
 
+// TODO: reuse Position inside Cursor.
 typedef struct _cursor {
   int pos_x, pos_y;
   int pixel_x, pixel_y;
@@ -73,6 +78,12 @@ typedef struct _cursor {
   int gravity;
   int stepup;
 } Cursor;
+
+typedef struct _position {
+  int pos_x, pos_y; // in tiles
+  int pixel_x, pixel_y; // in pixels
+  int w, h; // in tiles
+} Position;
 
 Cursor cursor;
 Map map;
@@ -110,5 +121,6 @@ int *compressMap(size_t *new_size);
 void decompressMap(int *data);
 
 void startJump();
+int containsType(Position *p, int type);
 
 #endif

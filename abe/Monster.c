@@ -6,9 +6,42 @@ void defaultMoveMonster(LiveMonster *live) {
   // no-op
 }
 
+int stepMonsterLeft(LiveMonster *live) {
+  LiveMonster old;
+  memcpy(&old, live, sizeof(LiveMonster));
+  live->pixel_x -= live->speed_x;
+  if(live->pixel_x < 0) {
+	live->pos_x--;
+	live->pixel_x = TILE_W + live->pixel_x;
+	if(live->pos_x < 0) {
+	  memcpy(live, &old, sizeof(LiveMonster));
+	  return 0;
+	}
+  }
+  // FIXME: use Map.containsType() here.
+  //  if() {
+  //  }
+}
+
+int stepMonsterRight(LiveMonster *live) {
+}
+
 void moveCrab(LiveMonster *live_monster) {
+  // increment the face to display
   live_monster->face++;
-  if(live_monster->face >= 2) live_monster->face = 0;
+  if(live_monster->face >= 
+	 live_monster->monster->image_count * live_monster->monster->face_mod) 
+	live_monster->face = 0;
+  // move sideways until you hit a wall or an edge
+  if(live_monster->dir == DIR_LEFT) {
+	if(!stepMonsterLeft(live_monster)) {
+	  live_monster->dir == DIR_RIGHT;
+	}
+  } else {
+	if(!stepMonsterRight(live_monster)) {
+	  live_monster->dir == DIR_LEFT;
+	}
+  }
 }
 
 /**
@@ -29,6 +62,7 @@ void initMonsters() {
   for(i = 0; i < MONSTER_COUNT; i++) {
 	monsters[i].image_count = 0;	
 	monsters[i].moveMonster = defaultMoveMonster;
+	monsters[i].face_mod = 1;
   }
 
   // crab monster
@@ -37,6 +71,8 @@ void initMonsters() {
   monsters[MONSTER_CRAB].type = MONSTER_CRAB;
   monsters[MONSTER_CRAB].start_speed_x = 4;
   monsters[MONSTER_CRAB].start_speed_y = 4;
+  // animation 2x slower
+  monsters[MONSTER_CRAB].face_mod = 2;
 
   // add additional monsters here
 
@@ -53,15 +89,10 @@ void addMonsterImage(int monster_index, int image_index) {
   fflush(stderr);
 }
 
-// FIXME: a faster solution is needed. This is O(n^2).
 int isMonsterImage(int image_index) {
-  int i, t;
-  for(i = 0; i < MONSTER_COUNT; i++) {
-	for(t = 0; t < monsters[i].image_count; t++) {
-	  if(monsters[i].image_index[t] == image_index) return i;
-	}
-  }
-  return -1;
+  // new fast way of doing this.
+  if(image_index < 0) return -1;
+  return images[image_index]->monster_index;  
 }
 
 void addLiveMonster(int monster_index, int image_index, int x, int y) {
@@ -117,11 +148,14 @@ int isOnScreen(SDL_Rect rect) {
 void drawLiveMonsters(SDL_Surface *surface, int start_x, int start_y) {
   SDL_Rect pos;
   SDL_Surface *img;
+  int face;
   int i;
+
   for(i = 0; i < live_monster_count; i++) {
 	live_monsters[i].monster->moveMonster(&live_monsters[i]);
 
-	img = images[live_monsters[i].monster->image_index[live_monsters[i].face]]->image;
+	face = live_monsters[i].face / live_monsters[i].monster->face_mod;
+	img = images[live_monsters[i].monster->image_index[face]]->image;
 	pos.x = live_monsters[i].pos_x * TILE_W - start_x + live_monsters[i].pixel_x;
 	pos.y = live_monsters[i].pos_y * TILE_H - start_y + live_monsters[i].pixel_y;
 	pos.w = img->w;

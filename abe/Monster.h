@@ -34,6 +34,7 @@ typedef struct _monster {
   int image_index[256];
   int start_speed_x;
   int start_speed_y;
+  int face_mod;
   void (*moveMonster) (LiveMonster *live);
 } Monster;
 

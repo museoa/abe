@@ -1,6 +1,12 @@
 #include <errno.h>
 #include "Map.h"
 
+typedef struct _gameCollisionCheck {
+  int start_x, start_y, end_x, end_y;
+  SDL_Rect rect;
+} GameCollisionCheck;
+
+
 void waitUntilPaintingStops();
 void finishDrawMap();
 int last_dir = -1;
@@ -404,7 +410,7 @@ void scrollMap(int dir) {
   switch(dir) {
   case DIR_LEFT:
 
-	if(screen->flags & SDL_HWSURFACE) {
+	if(FORCE_SDL_SCROLL || screen->flags & SDL_HWSURFACE) {
 	  for(level = LEVEL_BACK; level < LEVEL_COUNT; level++) {
 		SDL_FillRect(map.transfer, NULL, SDL_MapRGBA(screen->format, 0x00, 0x00, 0x00, 0x00));
 		SDL_BlitSurface(map.level[level], NULL, map.transfer, NULL);
@@ -442,7 +448,7 @@ void scrollMap(int dir) {
 
   case DIR_RIGHT:
 
-	if(screen->flags & SDL_HWSURFACE) {
+	if(FORCE_SDL_SCROLL || screen->flags & SDL_HWSURFACE) {
 	  for(level = LEVEL_BACK; level < LEVEL_COUNT; level++) {
 		SDL_FillRect(map.transfer, NULL, SDL_MapRGBA(screen->format, 0x00, 0x00, 0x00, 0x00));
 		pos.x = cursor.speed_x;
@@ -484,7 +490,7 @@ void scrollMap(int dir) {
 
 
   case DIR_UP:
-	if(screen->flags & SDL_HWSURFACE) {
+	if(FORCE_SDL_SCROLL || screen->flags & SDL_HWSURFACE) {
 	  for(level = LEVEL_BACK; level < LEVEL_COUNT; level++) {
 		SDL_FillRect(map.transfer, NULL, SDL_MapRGBA(screen->format, 0x00, 0x00, 0x00, 0x00));
 		pos.x = 0;
@@ -522,7 +528,7 @@ void scrollMap(int dir) {
 
   case DIR_DOWN:
 
-	if(screen->flags & SDL_HWSURFACE) {
+	if(FORCE_SDL_SCROLL || screen->flags & SDL_HWSURFACE) {
 	  for(level = LEVEL_BACK; level < LEVEL_COUNT; level++) {
 		SDL_FillRect(map.transfer, NULL, SDL_MapRGBA(screen->format, 0x00, 0x00, 0x00, 0x00));
 		pos.x = 0;
@@ -800,7 +806,7 @@ void moveMap() {
   SDL_Event event;
   int delay;
 
-  while(!map.stopThread) {
+  while(1) {
 
 	// handle events.
 	while(SDL_PollEvent(&event)) {
@@ -1197,4 +1203,50 @@ void startJump() {
   if(!cursor.jump) {
 	cursor.jump = JUMP_LENGTH;
   }
+}
+
+void getGameCollisionCheck(GameCollisionCheck *check, Position *p) {
+  check->start_x = p->pos_x - EXTRA_X;
+  if(check->start_x < 0) check->start_x = 0;
+  check->start_y = p->pos_y - EXTRA_Y;
+  if(check->start_y < 0) check->start_y = 0;
+  check->end_x = p->pos_x + p->w + (p->pixel_x > 0 ? 1 : 0);
+  if(check->end_x >= map.w) check->end_x = map.w;
+  check->end_y = p->pos_y + p->h + (p->pixel_y > 0 ? 1 : 0);
+  if(check->end_y >= map.h) check->end_y = map.h;
+  // tom's rect
+  // FIXME: known issue, doesn't work near map's edge.
+  check->rect.x = check->start_x + EXTRA_X;
+  check->rect.y = check->start_y + EXTRA_Y;
+  check->rect.w = tom[0]->w / TILE_W + (p->pixel_x > 0 ? 1 : 0);
+  check->rect.h = tom[0]->h / TILE_H + (p->pixel_y > 0 ? 1 : 0);
+}
+
+int containsType(Position *p, int type) {
+  GameCollisionCheck check;
+  SDL_Rect rect, pos;
+  int x, y, n;
+  
+  getGameCollisionCheck(&check, p);
+
+  for(y = check.start_y; y < check.end_y; y++) {
+	for(x = check.start_x; x < check.end_x;) {
+	  n = map.image_index[LEVEL_MAIN][x + (y * map.w)];
+	  if(n > -1) {
+		if(images[n]->type == type) {
+		  rect.x = x;
+		  rect.y = y;
+		  rect.w = images[n]->image->w / TILE_W;
+		  rect.h = images[n]->image->h / TILE_H;
+		  if(intersects(&rect, &check.rect)) {
+			return 1;
+		  }
+		}
+		x += images[n]->image->w / TILE_W;
+	  } else {
+		x++;
+	  }
+	}
+  }
+  return 0;
 }

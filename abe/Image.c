@@ -13,6 +13,8 @@
    Store the image in an array or a named img buffer.
  */
 void doLoadImage(char *filename, char *name) {
+  int type = TYPE_WALL;
+  int monster = -1;
   SDL_Surface *image;
 
   fprintf(stderr, "\tLoading %s [%s]...\n", filename, name);
@@ -47,7 +49,6 @@ void doLoadImage(char *filename, char *name) {
 	tom[5] = image;
   } else {
 	// a primitive hashtable
-	int type = TYPE_WALL;
 	if(!strcmp(name, "brick")) {
 	  img_brick = image_count;
 	} else if(!strcmp(name, "rock")) {
@@ -56,10 +57,8 @@ void doLoadImage(char *filename, char *name) {
 	  img_back = image_count;
 	} else if(!strcmp(name, "ladder")) {
 	  type = TYPE_LADDER;
-	} else if(!strcmp(name, "crab1")) { // add monster images
-	  addMonsterImage(MONSTER_CRAB, image_count);
-	} else if(!strcmp(name, "crab2")) {
-	  addMonsterImage(MONSTER_CRAB, image_count);
+	} else if(!strcmp(name, "crab1") || !strcmp(name, "crab2")) {
+	  monster = MONSTER_CRAB;
 	}
 
 	// store the image
@@ -71,6 +70,12 @@ void doLoadImage(char *filename, char *name) {
 	images[image_count]->image = image;
 	images[image_count]->name = strdup(name);
 	images[image_count]->type = type;
+
+	// create a monster if needed
+	if(monster > -1) {
+	  addMonsterImage(monster, image_count);
+	}
+	images[image_count]->monster_index = monster;
 
 	image_count++;
   }

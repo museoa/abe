@@ -1,10 +1,5 @@
 #include "Game.h"
 
-typedef struct _gameCollisionCheck {
-  int start_x, start_y, end_x, end_y;
-  SDL_Rect rect;
-} GameCollisionCheck;
-
 /**
    The editor-specific map drawing event.
    This is called before the map is sent to the screen.
@@ -99,6 +94,7 @@ void gameMainLoop(SDL_Event *event) {
   }
 }
 
+/*
 GameCollisionCheck getGameCollisionCheck() {
   GameCollisionCheck check;
   check.start_x = cursor.pos_x - EXTRA_X;
@@ -142,25 +138,35 @@ int containsType(GameCollisionCheck *check, int type) {
   }
   return 0;
 }
+*/
 
 // return a 1 to proceed, 0 to stop
 int detectCollision(int dir) {
-  GameCollisionCheck check = getGameCollisionCheck();
-  int ret = 1;
+  Position pos;
+  pos.pos_x = cursor.pos_x;
+  pos.pos_y = cursor.pos_y;
+  pos.pixel_x = cursor.pixel_x;
+  pos.pixel_y = cursor.pixel_y;
+  pos.w = tom[0]->w / TILE_W;
+  pos.h = tom[0]->h / TILE_H;
+  
   // are we in a wall?
-  ret = !containsType(&check, TYPE_WALL);
-  return ret;
+  return !containsType(&pos, TYPE_WALL);
 }
 
 int detectLadder() {
-  GameCollisionCheck check = getGameCollisionCheck();
+  Position pos;
+  pos.pos_x = cursor.pos_x;
+  pos.pos_y = cursor.pos_y;
+  pos.pixel_x = cursor.pixel_x;
+  pos.pixel_y = cursor.pixel_y;
+  pos.w = tom[0]->w / TILE_W;
+  pos.h = tom[0]->h / TILE_H;
   // are we smack on top of a ladder? (extend checking to 1 row below Tom)
-  if(cursor.pixel_y == 0) {
-	check.end_y++;
-	if(check.end_y >= map.h) check.end_y = map.h;
-	check.rect.h++;
-  }
-  return containsType(&check, TYPE_LADDER);
+  if(pos.pixel_y == 0 && pos.pos_y + pos.h >= map.h) {
+	pos.h++;
+  }  
+  return containsType(&pos, TYPE_LADDER);
 }
 
 void runMap(char *name, int w, int h) {
@@ -171,24 +177,37 @@ void runMap(char *name, int w, int h) {
 	fflush(stderr);
 	exit(0);
   }
-  cursor.pos_x = 177;
+  // start outside
+  //  cursor.pos_x = 177;
+  //  cursor.pos_y = 44;
+
+  // start inside
+  //  cursor.pos_x = 20;
+  //  cursor.pos_y = 28;
+
+  // monster testing
+  cursor.pos_x = 35;
   cursor.pos_y = 44;
+
   cursor.speed_x = 8;
   cursor.speed_y = 8;
-  drawMap();
+
   // set our painting events
   map.beforeDrawToScreen = gameBeforeDrawToScreen;
   map.afterMainLevelDrawn = afterMainLevelDrawn;
   map.detectCollision = detectCollision;
   map.detectLadder = detectLadder;
+
   // add our event handling
   map.handleMapEvent = gameMainLoop;
+
   // activate gravity and accelerated movement
   map.accelerate = 1;
   map.gravity = 1;
   map.monsters = 1;
 
   // start the map main loop
+  drawMap();
   moveMap();
 }
 
