@@ -1,5 +1,9 @@
 #include "Main.h"
 
+#define RUNMODE_SPLASH 0
+#define RUNMODE_EDITOR 1
+#define RUNMODE_GAME 2
+
 cleanUpAndExit() {
   if(state == STATE_SPLASH_SCREEN) {
 	hideSplashScreen();
@@ -21,16 +25,18 @@ void startGame() {
 /**
    Main event handling.
 */
-mainLoop(int showsplash) {
+mainLoop(int runmode) {
   SDL_Event event;
 
-  if(showsplash) {
-	showSplashScreen();
-  } else {
-	//		showMenu();
-	//		state = STATE_MENU;
-	state = STATE_MAIN_LOOP;
+  switch(runmode) {
+  case RUNMODE_EDITOR:
 	startEditor();
+	break;
+  case RUNMODE_GAME:
+	startGame();
+	break;
+  default:
+	showSplashScreen();
   }
 
   while(1) {
@@ -68,7 +74,7 @@ mainLoop(int showsplash) {
 }
 
 main(int argc, char *argv[]) {
-  int showsplash = 1;
+  int runmode = RUNMODE_SPLASH;
 
   if(SDL_Init(SDL_INIT_AUDIO|SDL_INIT_VIDEO) < 0) {
 	fprintf(stderr, "Unable to init SDL: %s\n", SDL_GetError());
@@ -80,12 +86,15 @@ main(int argc, char *argv[]) {
   for(i = 0; i < argc; i++) {
 	if(!strcmp(argv[i], "--fullscreen") || !strcmp(argv[i], "-f")) {
 	  flags |= SDL_FULLSCREEN;
-	} else if(!strcmp(argv[i], "--nosplash") || !strcmp(argv[i], "-n")) {
-	  showsplash = 0;
+	} else if(!strcmp(argv[i], "--editor") || !strcmp(argv[i], "-e")) {
+	  runmode = RUNMODE_EDITOR;
+	} else if(!strcmp(argv[i], "--game") || !strcmp(argv[i], "-g")) {
+	  runmode = RUNMODE_GAME;
 	} else if(!strcmp(argv[i], "--help") || !strcmp(argv[i], "-?")) {
 	  printf("Abe!! Happy Birthday, 2002\n\n");
 	  printf("-f --fullscreen   Run in fullscreen mode.\n");
-	  printf("-n --nosplash     Skip the splash screen.\n"); 
+	  printf("-e --editor       Skip the splash screen and run the editor.\n"); 
+	  printf("-g --game         Skip the splash screen and run the game.\n"); 
 	  printf("-? --help         Show this help message.\n");
 	  exit(0);
 	}
@@ -101,7 +110,7 @@ main(int argc, char *argv[]) {
 
   loadImages();
 
-  mainLoop(showsplash);
+  mainLoop(runmode);
   
   atexit(SDL_Quit);
 }

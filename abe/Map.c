@@ -448,7 +448,7 @@ void scrollMap(int dir) {
   }
 }
 
-int moveLeft(int checkCollision) {
+int moveLeft(int checkCollision, int scroll) {
   if(cursor.dontMove) {
 	finishDrawMap();
 	return 0;
@@ -468,7 +468,7 @@ int moveLeft(int checkCollision) {
 	  }
 	}
 	if(move && (!checkCollision || map.detectCollision(DIR_LEFT))) {
-	  scrollMap(DIR_LEFT);	
+	  if(scroll) scrollMap(DIR_LEFT);	
 	  if(map.accelerate) {
 		if(cursor.speed_x < TILE_W) {
 		  cursor.speed_x += SPEED_INC_X;
@@ -485,7 +485,7 @@ int moveLeft(int checkCollision) {
   return 0;
 }
 
-int moveRight(int checkCollision) {
+int moveRight(int checkCollision, int scroll) {
   if(cursor.dontMove) {
 	finishDrawMap();
 	return 0;
@@ -505,7 +505,7 @@ int moveRight(int checkCollision) {
 	  }
 	}
 	if(move && (!checkCollision || map.detectCollision(DIR_RIGHT))) {
-	  scrollMap(DIR_RIGHT);	
+	  if(scroll) scrollMap(DIR_RIGHT);	
 	  if(map.accelerate) {
 		if(cursor.speed_x < TILE_W) {
 		  cursor.speed_x += SPEED_INC_X;
@@ -606,15 +606,45 @@ void unlockMap() {
   }
 }
 
-int canStepUp(int pos_x, int pos_y) {
-  // are we off the map?
-  if(pos_x < 0) return 0;
-  // is there a shape that starts at this position?
-  int n = map.image_index[LEVEL_MAIN][pos_x + (pos_y * map.w)];
-  return(n > -1 ? 1 : 0);
-  // should also check that there's enough space here for tom
-  // to fit... although moveUp() does this and gravity will pull
-  // us back if we can fit anyway.
+/**
+   When moving left or right and hitting an obsticle, call this method
+   to check if we can step onto the object.
+   Returns 1 on success, 0 on failure.
+ */
+int canStepUp(int test_pos_x, int test_pos_y, int dir) {
+  // Take an unchecked step into the wall and don't scroll the screen.
+  // This is so after stepping up, gravity won't pull us back down.
+  // TILE_W b/c we always stop on pixel_x==0			
+  cursor.speed_x = TILE_W;
+  cursor.dir = dir;
+  if(dir == DIR_LEFT) {
+	moveLeft(0, 0);
+  } else {
+	moveRight(0, 0);
+  }
+  
+  // take a step up
+  cursor.dir = DIR_UP;
+  cursor.speed_y = (cursor.pixel_y == 0 ? TILE_H : cursor.pixel_y);
+  if(!moveUp(1)) {
+	// if can't step up, revert
+	cursor.speed_x = TILE_W;
+	cursor.dir = dir;
+	if(dir == DIR_LEFT) {
+	  moveRight(0, 0);
+	} else {
+	  moveLeft(0, 0);
+	}
+	cursor.speed_x = 0;
+	cursor.dir = DIR_NONE;
+	return 0;
+  } else {
+	// keep going right
+	cursor.dir = dir;
+	// scroll the screen
+	scrollMap(dir);
+	return 1;
+  }
 }
 
 /**
@@ -641,34 +671,28 @@ int moveMap(void *data) {
 	case DIR_QUIT:
 	  return 0;
 	case DIR_LEFT:
-	  if(!moveLeft(1)) {
-		// if the wall on the left is less then TILE_H height then step up
+	  if(!moveLeft(1, 1)) {
+		// try to step up onto the obsticle
+		/*
 		for(x = 1; x <= EXTRA_X; x++) {
 		  if(canStepUp(cursor.pos_x - x, 
-					   cursor.pos_y + (tom[0]->h / TILE_H) - 1 + (cursor.pixel_y > 0 ? 1 : 0))) {
-			cursor.speed_x = 4;
-			cursor.dir = DIR_LEFT;
-			cursor.speed_y = (cursor.pixel_y == 0 ? TILE_H : cursor.pixel_y);
-			if(!moveUp(1)) {
-			  cursor.speed_x = 0;
-			}
+					   cursor.pos_y + (tom[0]->h / TILE_H) - 1 + (cursor.pixel_y > 0 ? 1 : 0)), 
+			 DIR_LEFT) {
 			break;
 		  }
 		}
+		*/
+		canStepUp(cursor.pos_x - 1, 
+				  cursor.pos_y + (tom[0]->h / TILE_H) - 1 + (cursor.pixel_y > 0 ? 1 : 0), 
+				  DIR_LEFT);
 	  }
 	  break;	
 	case DIR_RIGHT:
-	  if(!moveRight(1)) {
-		// if the wall on the left is less then TILE_H height then step up
-		if(canStepUp(cursor.pos_x + (tom[0]->w / TILE_W), 
-					 cursor.pos_y + (tom[0]->h / TILE_H) - 1 + (cursor.pixel_y > 0 ? 1 : 0))) {
-		  cursor.speed_x = 4;
-		  cursor.dir = DIR_RIGHT;
-		  cursor.speed_y = (cursor.pixel_y == 0 ? TILE_H : cursor.pixel_y);
-		  if(!moveUp(1)) {
-			cursor.speed_x = 0;
-		  }
-		}
+	  if(!moveRight(1, 1)) {
+		// try to step up onto the obsticle
+		canStepUp(cursor.pos_x + (tom[0]->w / TILE_W), 
+				  cursor.pos_y + (tom[0]->h / TILE_H) - 1 + (cursor.pixel_y > 0 ? 1 : 0),
+				  DIR_RIGHT);
 	  }
 	  break;	
 	case DIR_UP:
