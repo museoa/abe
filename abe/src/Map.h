@@ -82,6 +82,7 @@ typedef struct _map {
   SDL_Surface *background;
   SDL_Surface *background_image;
   int moveBackground; // if 1 the background scroll artificially
+  int max_speed_boost; // for slow machines, add this to movement speed. (0-10 extra)
 } Map;
 
 extern Cursor cursor;

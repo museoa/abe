@@ -35,7 +35,7 @@ int stepMonsterLeft(LiveMonster *live, int float_ok) {
   int fail = 0;
   LiveMonster old;
   memcpy(&old, live, sizeof(LiveMonster));
-  live->pixel_x -= live->speed_x;
+  live->pixel_x -= live->speed_x + map.max_speed_boost;
   if(live->pixel_x < 0) {
 	live->pos_x--;
 	live->pixel_x = TILE_W + live->pixel_x;
@@ -60,7 +60,7 @@ int stepMonsterUp(LiveMonster *live) {
   int fail = 0;
   LiveMonster old;
   memcpy(&old, live, sizeof(LiveMonster));
-  live->pixel_y -= live->speed_y;
+  live->pixel_y -= live->speed_y + map.max_speed_boost;
   if(live->pixel_y < 0) {
 	live->pos_y--;
 	live->pixel_y = TILE_H + live->pixel_y;
@@ -85,7 +85,7 @@ int stepMonsterRight(LiveMonster *live, int float_ok) {
   int fail = 0;
   LiveMonster old;
   memcpy(&old, live, sizeof(LiveMonster));
-  live->pixel_x += live->speed_x;
+  live->pixel_x += live->speed_x + map.max_speed_boost;
   if(live->pixel_x >= TILE_W) {
 	live->pos_x++;
 	live->pixel_x = live->pixel_x - TILE_W;
@@ -112,7 +112,7 @@ int stepMonsterDown(LiveMonster *live) {
 
   memcpy(&old, live, sizeof(LiveMonster));
   
-  live->pixel_y += live->speed_y;
+  live->pixel_y += live->speed_y + map.max_speed_boost;
   if(live->pixel_y >= TILE_H) {
 	live->pos_y++;
 	live->pixel_y = live->pixel_y - TILE_H;

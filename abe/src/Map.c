@@ -496,9 +496,9 @@ int moveLeft(int checkCollision) {
 	if(move && (!checkCollision || map.detectCollision(DIR_LEFT))) {
 	  scrollMap(DIR_LEFT);	
 	  if(map.accelerate) {
-		if(cursor.speed_x <  SPEED_MAX_X) {
-		  cursor.speed_x += SPEED_INC_X;
-		  if(cursor.speed_x >= SPEED_MAX_X) cursor.speed_x = SPEED_MAX_X;
+		if(cursor.speed_x <  SPEED_MAX_X + map.max_speed_boost) {
+		  cursor.speed_x += SPEED_INC_X + (map.max_speed_boost ? SPEED_INC_X : 0);
+		  if(cursor.speed_x >= SPEED_MAX_X + map.max_speed_boost) cursor.speed_x = SPEED_MAX_X + map.max_speed_boost;
 		}
 	  }
 	  return 1;
@@ -507,7 +507,7 @@ int moveLeft(int checkCollision) {
 	cursor.pos_x = old_pos;	
 	if(!cursor.pixel_x) break;
 	//	cursor.speed_x = cursor.pixel_x;
-	cursor.speed_x -= SPEED_INC_X;
+	cursor.speed_x -= SPEED_INC_X + (map.max_speed_boost ? SPEED_INC_X : 0);
   }
   cursor.speed_x = old_speed;
   return 0;
@@ -533,9 +533,9 @@ int moveRight(int checkCollision) {
 	if(move && (!checkCollision || map.detectCollision(DIR_RIGHT))) {
 	  scrollMap(DIR_RIGHT);	
 	  if(map.accelerate) {
-		if(cursor.speed_x < SPEED_MAX_X) {
-		  cursor.speed_x += SPEED_INC_X;
-		  if(cursor.speed_x >= SPEED_MAX_X) cursor.speed_x = SPEED_MAX_X;
+		if(cursor.speed_x < SPEED_MAX_X + map.max_speed_boost) {
+		  cursor.speed_x += SPEED_INC_X + (map.max_speed_boost ? SPEED_INC_X : 0);
+		  if(cursor.speed_x >= SPEED_MAX_X + map.max_speed_boost) cursor.speed_x = SPEED_MAX_X + map.max_speed_boost;
 		}
 	  }
 	  return 1;
@@ -544,7 +544,7 @@ int moveRight(int checkCollision) {
 	cursor.pos_x = old_pos;
 	if(!cursor.pixel_x) break;
 	//cursor.speed_x = TILE_W - cursor.pixel_x;
-	cursor.speed_x -= SPEED_INC_X;
+	cursor.speed_x -= SPEED_INC_X + (map.max_speed_boost ? SPEED_INC_X : 0);
   }
   cursor.speed_x = old_speed;
   return 0;
@@ -571,16 +571,16 @@ int moveUp(int checkCollision, int platform) {
 				((platform || cursor.jump || map.detectLadder() || cursor.stepup) && map.detectCollision(DIR_UP)))) {
 	  scrollMap(DIR_UP);	
 	  if(map.accelerate) {
-		if(cursor.speed_y < SPEED_MAX_Y) {
-		  cursor.speed_y += SPEED_INC_Y;
-		  if(cursor.speed_y >= SPEED_MAX_Y) cursor.speed_y = SPEED_MAX_Y;
+		if(cursor.speed_y < SPEED_MAX_Y + map.max_speed_boost) {
+		  cursor.speed_y += SPEED_INC_Y + (map.max_speed_boost ? SPEED_INC_Y : 0);
+		  if(cursor.speed_y >= SPEED_MAX_Y + map.max_speed_boost) cursor.speed_y = SPEED_MAX_Y + map.max_speed_boost;
 		}
 	  }
 	  return 1;
 	}
 	cursor.pixel_y = old_pixel;
 	cursor.pos_y = old_pos;
-	cursor.speed_y -= SPEED_INC_Y;
+	cursor.speed_y -= SPEED_INC_Y + (map.max_speed_boost ? SPEED_INC_Y : 0);
   }
   cursor.speed_y = old_speed;
   return 0;
@@ -607,16 +607,16 @@ int moveDown(int checkCollision, int platform, int slide) {
 				((platform || cursor.gravity || map.detectLadder() || slide) && map.detectCollision(DIR_DOWN)))) {
 	  scrollMap(DIR_DOWN);	
 	  if(map.accelerate) {
-		if(cursor.speed_y < SPEED_MAX_Y) {
-		  cursor.speed_y += SPEED_INC_Y;
-		  if(cursor.speed_y >= SPEED_MAX_Y) cursor.speed_y = SPEED_MAX_Y;
+		if(cursor.speed_y < SPEED_MAX_Y + map.max_speed_boost) {
+		  cursor.speed_y += SPEED_INC_Y + (map.max_speed_boost ? SPEED_INC_Y : 0);
+		  if(cursor.speed_y >= SPEED_MAX_Y + map.max_speed_boost) cursor.speed_y = SPEED_MAX_Y + map.max_speed_boost;
 		}
 	  }
 	  return 1;
 	}
 	cursor.pixel_y = old_pixel;
 	cursor.pos_y = old_pos;
-	cursor.speed_y -= SPEED_INC_Y;
+	cursor.speed_y -= SPEED_INC_Y + (map.max_speed_boost ? SPEED_INC_Y : 0);
   }
   cursor.speed_y = old_speed;
   return 0;
@@ -676,7 +676,7 @@ int moveJump() {
 	cursor.jump--;
 
 	old_speed = cursor.speed_y;
-	cursor.speed_y = JUMP_SPEED;
+	cursor.speed_y = JUMP_SPEED + map.max_speed_boost;
 	moveUp(1, 0);
 	cursor.speed_y = old_speed;
 	ret = 1;
@@ -724,7 +724,7 @@ void moveGravity() {
   }
 	
   old_speed = cursor.speed_y;
-  cursor.speed_y = GRAVITY_SPEED;
+  cursor.speed_y = GRAVITY_SPEED + map.max_speed_boost;
   cursor.gravity = 1;
   cursor.gravity = moveDown(1, 0, 0);
   cursor.gravity = 0;
@@ -741,9 +741,9 @@ int moveWithPlatform() {
   // make sure we're on top of the platform
   py = cursor.platform->pos_y * TILE_H + cursor.platform->pixel_y;
   if(cursor.platform->dir == DIR_UP) {
-	py -= cursor.platform->speed_y;
+	py -= cursor.platform->speed_y + map.max_speed_boost;
   } else if(cursor.platform->dir == DIR_DOWN) {
-	py += cursor.platform->speed_y;
+	py += cursor.platform->speed_y + map.max_speed_boost;
   }
   for(i = 0; i < 2; i++) {
 	diff = py - (cursor.pos_y * TILE_H + tom[0]->h + cursor.pixel_y);
@@ -773,7 +773,7 @@ int moveWithPlatform() {
   // move sideways with the platform
   if(cursor.platform->monster->type == MONSTER_PLATFORM) {
 	old_speed = cursor.speed_x;
-	cursor.speed_x = cursor.platform->speed_x;
+	cursor.speed_x = cursor.platform->speed_x + map.max_speed_boost;
 	if(cursor.platform->dir == DIR_LEFT) moveLeft(1);
 	else moveRight(1);
 	cursor.speed_x = old_speed;
@@ -867,6 +867,14 @@ void moveMap() {
 	  // skip next frame if time passed already
 	  if(curr_time > next_time) 
 		next_time = curr_time + TICK_AMOUNT;
+
+	  // for slow machines: max speed adjustment
+	  if(map.fps_override) {
+		map.max_speed_boost = (map.delta - TICK_AMOUNT) / 3;
+		if(map.max_speed_boost > 10) map.max_speed_boost = 10;
+	  } else {
+		map.max_speed_boost = 0;
+	  }
 	}
 
 	//	SDL_Delay(20);

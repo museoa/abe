@@ -169,7 +169,7 @@ void gameBeforeDrawToScreen() {
 			(cursor.dir & DIR_LEFT ? "l" : " "),
 			(cursor.dir & DIR_RIGHT ? "r" : " "));
 	drawString(screen, 0, screen->h - 40, s);
-	sprintf(s, "d %d f %d t %d", map.delta, map.fps_override, (1000 / FPS_THROTTLE));
+	sprintf(s, "d %d f %d t %d b %d", map.delta, map.fps_override, (1000 / FPS_THROTTLE), map.max_speed_boost);
 	drawString(screen, 0, screen->h - 20, s);
 	/*	sprintf(s, "pos %d %d", cursor.pos_x, cursor.pos_y);
 	drawString(screen, 0, screen->h - 60, s);
