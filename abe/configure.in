@@ -10,6 +10,7 @@ AC_CANONICAL_TARGET
 
 dnl Setup for automake
 AM_INIT_AUTOMAKE(abe, $SDL_VERSION)
+AC_CHECK_LIB(SDL_mixer, Mix_OpenAudio,, AC_MSG_ERROR([*** SDL_mixer not found. Visit http://www.libsdl.org and get it]))
 
 dnl Check for tools
 

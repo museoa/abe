@@ -9,7 +9,7 @@ void saveGame() {
   char *err;
   SDL_RWops *rwop;
 
-  sprintf(path, "%s%ssave.dat", SAVEGAME_DIR, PATH_SEP);
+  sprintf(path, "%s%ssave%d.dat", SAVEGAME_DIR, PATH_SEP, (int)GAME_VERSION);
   
   if(!(fp = fopen(path, "wb"))) {
 	err = strerror(errno);
@@ -37,7 +37,7 @@ void saveGame() {
   SDL_RWclose(rwop);
 
   // save the map in savegame/savedmap.dat
-  sprintf(path, "%s%ssavedmap.dat", SAVEGAME_DIR, PATH_SEP);
+  sprintf(path, "%s%ssavedmap%d.dat", SAVEGAME_DIR, PATH_SEP, (int)GAME_VERSION);
   saveMapPath(path);  
 }
 
@@ -47,19 +47,34 @@ int loadGame() {
   FILE *fp;
   char *err;
   SDL_RWops *rwop;
+  int version;
 
   // load the map from savegame/savedmap.dat
-  sprintf(path, "%s%ssavedmap.dat", SAVEGAME_DIR, PATH_SEP);
-  if(!loadMapPath(path, 0)) return 0;
+  sprintf(path, "%s%ssavedmap%d.dat", SAVEGAME_DIR, PATH_SEP, (int)GAME_VERSION);
+  if(!loadMapPath(path, 0)) {
+	// if can't find saved map load static map
+	fprintf(stderr, "Can't find current saved map. Will try to use static map.\n");
+	if(!loadMap(0)) {
+	  fprintf(stderr, "Can't find map file: %s\n", map.name);
+	  fflush(stderr);
+	  return 0;
+	}
+  }
 
   // we have to do this _after_ loading the map
   // b/c it resets the cursor
-  sprintf(path, "%s%ssave.dat", SAVEGAME_DIR, PATH_SEP);  
+  sprintf(path, "%s%ssave%d.dat", SAVEGAME_DIR, PATH_SEP, (int)GAME_VERSION);  
   if(!(fp = fopen(path, "rb"))) {
-	err = strerror(errno);
-	fprintf(stderr, "Can't open file when saving game: %s\n", err);
-	fflush(stderr);
-	return 0;
+
+	// try to load old saved game
+	fprintf(stderr, "Can't find current version of saved game. Will try to use old one.\n");
+	sprintf(path, "%s%ssave.dat", SAVEGAME_DIR, PATH_SEP);  
+	if(!(fp = fopen(path, "rb"))) {
+	  err = strerror(errno);
+	  fprintf(stderr, "Can't open file when saving game: %s\n", err);
+	  fflush(stderr);
+	  return 0;
+	}
   }
   rwop = SDL_RWFromFP(fp, 1);
 
@@ -491,16 +506,10 @@ void runMap() {
   resetMap();
   resetMonsters();
 
-  // try to start where we left off
+  // try to start where we left off (or load static map if no saved game was found)
   running_savedgame = loadGame();
 
   if(!running_savedgame) {
-	// try to load the map and quit if you can't find it.
-	if(!loadMap(0)) {
-	  fprintf(stderr, "Can't find map file: %s\n", map.name);
-	  fflush(stderr);
-	  return;
-	}
 	// start outside
 	if(GOD_MODE) {
 	  game.player_start_x = 44;

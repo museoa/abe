@@ -20,6 +20,11 @@
 
 #define MAX_HEALTH 100
 
+// increment this to avoid saved-game conflict
+// abe0.1, 0.2, 0.3 = 1 (actually no version number is saved)
+// abe0.4 = 2
+#define GAME_VERSION 2
+
 typedef struct _game {
   int face;
   int dir;
