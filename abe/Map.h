@@ -90,4 +90,7 @@ int moveDown();
 void lockMap();
 void unlockMap();
 
+int *compressMap(size_t *new_size);
+void decompressMap();
+
 #endif

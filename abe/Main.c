@@ -73,7 +73,95 @@ mainLoop(int runmode) {
   }
 }
 
+void testWrite() {
+  int map_size = LEVEL_COUNT * 1000 * 1000;
+  int *buff[LEVEL_COUNT * 1000 * 1000];
+  FILE *fp;
+  int i;
+  int w, h;
+
+  // read map
+  loadMap(0);
+
+  // step1. map-compress it
+  int new_size;
+  printf("Compressing...\n");
+  int *compressed_map = compressMap(&new_size);
+  fprintf(stderr, "Compressed map. old_size=%ld new_size=%ld\n", map_size, new_size);
+  fflush(stderr);
+
+  // step2. further compress it into a file
+  if(!(fp = fopen("maps/compressed.map", "wb"))) {
+	printf("error writing.");
+	exit(0);
+  }
+  fwrite(&map.w, sizeof(int), 1, fp);
+  fwrite(&map.h, sizeof(int), 1, fp);
+  compress(compressed_map, new_size, fp);
+  fclose(fp);
+  free(compressed_map);
+}
+
+void testRead() {
+  int map_size = LEVEL_COUNT * 1000 * 1000;
+  int read_buff[LEVEL_COUNT * 1000 * 1000];
+  FILE *fp;
+  int i;
+  int w, h;
+
+  // read step1. read and decompress map file
+  if(!(fp = fopen("maps/compressed.map", "rb"))) {
+	printf("error reading.");
+	exit(0);
+  }
+  fread(&map.w, sizeof(int), 1, fp);
+  fread(&map.h, sizeof(int), 1, fp);
+  int count_read = decompress(read_buff, map_size, fp);
+  fprintf(stderr, "read %d ints\n", count_read);
+  fflush(stderr);
+  fclose(fp);
+
+  // read step2. mapDecompress it.
+  decompressMap(read_buff);
+
+  // write map read (for diff)
+  if(!(fp = fopen("maps/map.dif", "wb"))) {
+	printf("error writing.");
+	exit(0);
+  }
+  fwrite(&map.w, sizeof(int), 1, fp);
+  fwrite(&map.h, sizeof(int), 1, fp);
+  for(i = 0; i < LEVEL_COUNT; i++) {
+	fwrite(map.image_index[i], sizeof(int) * map.w * map.h, 1, fp);
+  }
+  fclose(fp);
+}
+
+void testCompression() {
+  if(SDL_Init(SDL_INIT_AUDIO|SDL_INIT_VIDEO) < 0) {
+	fprintf(stderr, "Unable to init SDL: %s\n", SDL_GetError());
+	exit(1);
+  }
+
+  screen = SDL_SetVideoMode(640, 480, 16, SDL_HWSURFACE | SDL_DOUBLEBUF);
+  if(screen == NULL) {
+	fprintf(stderr, "Unable to set 640x480 video: %s\n", SDL_GetError());
+	exit(1);
+  }
+
+  SDL_ShowCursor(0);
+
+  loadImages();
+
+  initMap("default", 1000, 1000);
+  testWrite();
+  testRead();
+  exit(0);
+}
+
 main(int argc, char *argv[]) {
+  testCompression();
+
   int runmode = RUNMODE_SPLASH;
 
   if(SDL_Init(SDL_INIT_AUDIO|SDL_INIT_VIDEO) < 0) {

@@ -974,7 +974,6 @@ void saveMap() {
   }
   fwrite(&(map.w), sizeof(map.w), 1, fp);
   fwrite(&(map.h), sizeof(map.h), 1, fp);
-  // FIXME: use runtime compression
   int i;
   for(i = 0; i < LEVEL_COUNT; i++) {
 	fwrite(map.image_index[i], sizeof(int) * map.w * map.h, 1, fp);
@@ -996,7 +995,6 @@ int loadMap(int draw_map) {
   }
   fread(&(map.w), sizeof(map.w), 1, fp);
   fread(&(map.h), sizeof(map.h), 1, fp);
-  // FIXME: use runtime compression
   int i;
   for(i = 0; i < LEVEL_COUNT; i++) {
 	fread(map.image_index[i], sizeof(int) * map.w * map.h, 1, fp);
@@ -1005,4 +1003,59 @@ int loadMap(int draw_map) {
   resetCursor();
   if(draw_map) drawMap();
   return 1;
+}
+
+// remove unnecesary -1s. For example a 4 tile wide stone becomes a 1 int number.
+// return new number of elements in new_size. (so num of bytes=new_size * sizeof(int)).
+// caller must free returned pointer.
+// call this method before calling Utils.compress(). This prepares the map
+// for better compression by understanding the its structure.
+int *compressMap(size_t *new_size) {
+  int *q;
+  if(!(q = malloc(sizeof(int) * map.w * map.h * LEVEL_COUNT))) {
+	fprintf(stderr, "Out of memory in compressMap.");
+	fflush(stderr);
+	exit(-1);
+  }
+  int level, i, x, y, n;
+  size_t t = 0;
+  for(level = 0; level < LEVEL_COUNT; level++) {
+	for(y = 0; y < map.h; y++) {
+	  for(x = 0; x < map.w;) {
+		i = x + (y * map.w);
+		n = map.image_index[level][i];
+		*(q + t) = n;
+		t++;
+		if(n > -1) {
+		  // skip ahead
+		  x += images[n]->image->w / TILE_W;
+		} else {
+		  x++;
+		}
+	  }
+	}
+  }
+  *new_size = t;
+  return q;
+}
+
+void decompressMap(int *p) {
+  int level, i, x, y, n, r, nn;
+  size_t t = 0;
+  for(level = 0; level < LEVEL_COUNT; level++) {
+	for(y = 0; y < map.h; y++) {
+	  for(x = 0; x < map.w;) {
+		n = *(p + t);
+		t++;
+		i = x + (y * map.w);
+		map.image_index[level][i] = n;
+		x++;
+		if(n > -1) {
+		  for(r = 1; r < images[n]->image->w / TILE_W && x < map.w; r++, x++) {
+			map.image_index[level][i + r] = -1;
+		  }
+		}
+	  }
+	}
+  }
 }
