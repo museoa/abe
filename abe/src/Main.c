@@ -137,6 +137,8 @@ int main(int argc, char *argv[]) {
 
   SDL_ShowCursor(0);
 
+  initAudio();
+
   initMonsters();
 
   loadImages();

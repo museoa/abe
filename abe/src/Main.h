@@ -1,6 +1,7 @@
 #ifndef MAIN_H 
 #define MAIN_H
 
+
 #include <stdlib.h>
 #include <string.h>
 #include "SDL.h"
@@ -10,6 +11,7 @@
 #include "Image.h"
 #include "Font.h"
 #include "Util.h"
+#include "Sound.h"
 #include "Splash.h"
 #include "Menu.h"
 #include "Map.h"

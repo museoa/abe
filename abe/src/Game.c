@@ -256,6 +256,7 @@ int detectCollision(int dir) {
 	  map.image_index[LEVEL_FORE][key.pos_x + (key.pos_y * map.w)] = img_door2;
 	  game.keys--;
 	  map.redraw = 1;
+	  playWav("door");
 	  // always return 0 (block) so we don't fall into a door and get stuck there... (was a nasty bug)
 	  return 0;
 	} else {
