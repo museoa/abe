@@ -229,6 +229,7 @@ void doLoadImage(char *filename, char *name) {
 	}
 	images[image_count]->monster_index = monster;
 
+	showLoadingProgress();
 	image_count++;
   }
 }

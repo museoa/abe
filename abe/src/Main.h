@@ -39,5 +39,6 @@ extern Main mainstruct;
 
 void startEditor();
 void startGame();
+void showLoadingProgress();
 
 #endif

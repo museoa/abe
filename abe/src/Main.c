@@ -5,6 +5,8 @@ int runmode;
 SDL_Surface *screen;
 int state;
 Main mainstruct;
+int loading_max = 108;
+int loading_progress = 0;
 
 void testModesInFormat(SDL_PixelFormat *format) {
   SDL_Rect **modes;
@@ -43,6 +45,27 @@ void testModes() {
   testModesInFormat(&format);
   format.BitsPerPixel=32;
   testModesInFormat(&format);
+}
+
+void showLoadingProgress() {
+  SDL_Rect rect;
+  int w = 200, h = 10;
+
+  rect.x = screen->w / 2 - w / 2;
+  rect.y = screen->h / 2 - h / 2;
+  rect.w = w;
+  rect.h = h;
+  SDL_FillRect(screen, &rect, SDL_MapRGBA(screen->format, 0x40, 0x40, 0x00, 0x00));
+
+  rect.x = screen->w / 2 - w / 2;
+  rect.y = screen->h / 2 - h / 2;
+  rect.w = (int)(((double)w / (double)loading_max) * (double)(loading_progress++));
+  rect.h = h;
+  SDL_FillRect(screen, &rect, SDL_MapRGBA(screen->format, 0x80, 0x80, 0x00, 0x00));
+
+  SDL_Flip(screen);
+  if(loading_progress >= loading_max) loading_max += 20;
+  //SDL_Delay(50);
 }
 
 int main(int argc, char *argv[]) {
@@ -158,16 +181,22 @@ int main(int argc, char *argv[]) {
   SDL_WM_SetCaption("Abe's Amazing Adventure!!", (const char *)NULL);
 
   SDL_ShowCursor(0);
+  showLoadingProgress();
 
   initAudio();
+  showLoadingProgress();
 
   initMonsters();
+  showLoadingProgress();
 
   loadImages();
+  showLoadingProgress();
 
   initEditor();
+  showLoadingProgress();
 
   initGame();
+  showLoadingProgress();
   
   if(intro) {
 	initMap("intro", 640 / TILE_W, 480 / TILE_H);

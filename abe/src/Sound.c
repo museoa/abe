@@ -64,24 +64,37 @@ void initAudio() {
   if(!intro_music) {
     printf("Mix_LoadMUS(\"intro\"): %s\n", Mix_GetError());
   }
+  showLoadingProgress();
 
   sprintf(path, "%s%sgame.ogg", SOUND_DIR, PATH_SEP);
   game_music = Mix_LoadMUS(path);
   if(!game_music) {
     printf("Mix_LoadMUS(\"game\"): %s\n", Mix_GetError());
   }  
+  showLoadingProgress();
 
   loadSound(DOOR_SOUND, "door");
+  showLoadingProgress();
   loadSound(OBJECT_SOUND, "object");
+  showLoadingProgress();
   loadSound(POP_SOUND, "pop");
+  showLoadingProgress();
   loadSound(CLOSED_SOUND, "closed");
+  showLoadingProgress();
   loadSound(COIL_SOUND, "spring");
+  showLoadingProgress();
   loadSound(BUBBLE_SOUND, "bubble");
+  showLoadingProgress();
   loadSound(MENU_SOUND, "menu");
+  showLoadingProgress();
   loadSound(DEATH_SOUND, "death");
+  showLoadingProgress();
   loadSound(PLATFORM_SOUND, "platform");
+  showLoadingProgress();
   loadSound(JUMP_SOUND, "jump");
+  showLoadingProgress();
   loadSound(GEM_SOUND, "gem");
+  showLoadingProgress();
 
   Mix_AllocateChannels(16);
   sound_loaded = 1;
