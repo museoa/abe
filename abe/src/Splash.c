@@ -8,6 +8,15 @@ int face = 0, face_mod = 4;
 char text[] = "abes amazing adventure!! code and graphics by gabor music by alex testing by christie inspiration by abe and tom special thanks to jay for lending his macos x powerbook and to michal tomaszkiewicz for compiling under the beos    2003 april 14 happy birthday abraham!!";
 int text_pos = -10000;
 
+void showAbout() {
+  SDL_Event event;
+  drawString(screen, screen->w / 2 - 100, screen->h - 30, "press any key");  
+  SDL_Flip(screen);  
+  while(SDL_WaitEvent(&event)) {
+	if(event.type == SDL_KEYDOWN) break;
+  }
+}
+
 void drawScrollText() {
   if((int)text_pos < -((int)strlen(text) * (int)FONT_WIDTH)) {
 	text_pos = screen->w;
@@ -157,6 +166,10 @@ void showIntro() {
 	} else if(menu_y == (GOD_MODE ? 2 : 1) * FONT_HEIGHT) {
 	  destroyMap();
 	  showSettings();
+	  initIntroMap();
+	} else if(menu_y == (GOD_MODE ? 3 : 2) * FONT_HEIGHT) {
+	  destroyMap();
+	  showAbout();
 	  initIntroMap();
 	} else if(menu_y == (GOD_MODE ? 4 : 3) * FONT_HEIGHT) {
 	  return;
