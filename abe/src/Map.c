@@ -1207,19 +1207,18 @@ int startJumpN(int n) {
 
 void getGameCollisionCheck(GameCollisionCheck *check, Position *p) {
   check->start_x = p->pos_x - EXTRA_X;
-  if(check->start_x < 0) check->start_x = 0;
+  if(p->pos_x < EXTRA_X) check->start_x = 0;
   check->start_y = p->pos_y - EXTRA_Y;
-  if(check->start_y < 0) check->start_y = 0;
+  if(p->pos_y < EXTRA_Y) check->start_y = 0;
+
   check->end_x = p->pos_x + p->w + (p->pixel_x > 0 ? 1 : 0);
   if(check->end_x >= map.w) check->end_x = map.w;
   check->end_y = p->pos_y + p->h + (p->pixel_y > 0 ? 1 : 0);
   if(check->end_y >= map.h) check->end_y = map.h;
+
   // tom's rect
-  // FIXME: known issue, doesn't work near map's edge.
-  check->rect.x = check->start_x + EXTRA_X;
-  check->rect.y = check->start_y + EXTRA_Y;
-  //  check->rect.w = tom[0]->w / TILE_W + (p->pixel_x > 0 ? 1 : 0);
-  //  check->rect.h = tom[0]->h / TILE_H + (p->pixel_y > 0 ? 1 : 0);
+  check->rect.x = p->pos_x;
+  check->rect.y = p->pos_y;
   check->rect.w = p->w + (p->pixel_x > 0 ? 1 : 0);
   check->rect.h = p->h + (p->pixel_y > 0 ? 1 : 0);
 }
@@ -1241,7 +1240,7 @@ int containsTypeInLevel(Position *p, Position *ret, int type, int level) {
   GameCollisionCheck check;
   SDL_Rect rect;
   int x, y, n;
-  
+ 
   getGameCollisionCheck(&check, p);
 
   for(y = check.start_y; y < check.end_y; y++) {

@@ -283,14 +283,14 @@ void drawFire(SDL_Rect *pos, LiveMonster *live, SDL_Surface *surface, SDL_Surfac
 
   p.x = pos->x;
   //  p.y = (pos->y / TILE_H) * TILE_H - TILE_H;
-  p.y = pos->y - TILE_H;
+  y = p.y = pos->y;
   p.w = pos->w;
   p.h = pos->h;
 
   position.pos_x = live->pos_x;
   position.pos_y = live->pos_y;
-  position.pixel_x = 0;
-  position.pixel_y = 0;
+  position.pixel_x = live->pixel_x;
+  position.pixel_y = live->pixel_y;
   position.w = p.w / TILE_W;
   position.h = p.h / TILE_H;
 
@@ -298,15 +298,16 @@ void drawFire(SDL_Rect *pos, LiveMonster *live, SDL_Surface *surface, SDL_Surfac
 		!containsType(&position, TYPE_WALL | TYPE_DOOR)) {
 	index = (int) ((double)(live->monster->image_count) * rand() / RAND_MAX);
 	SDL_BlitSurface(images[live->monster->image_index[index]]->image, NULL, surface, &p);
-	// HACK part 1: if p->y is reset to 0 the image was cropped.
-	y = p.y;
-	if(!y) break;
+	//	y = p.y;
+	//	if(!y) break;
 	p.x = pos->x;
-	p.y += TILE_H;
+	y += TILE_H;
+	p.y = y;
 	p.w = pos->w;
 	p.h = pos->h;
 	position.pos_y++;	
   }
+
   // draw the last one
   if(position.pos_y > live->pos_y && live->pixel_y) {
 	index = (int) ((double)(live->monster->image_count) * rand() / RAND_MAX);

@@ -67,6 +67,9 @@ void gameBeforeDrawToScreen() {
   drawString(screen, 100, 41, s);
   if(GOD_MODE) {
 	drawString(screen, 255, 41, (game.god_mode ? "t" : "f"));
+
+	sprintf(s, "pos %d %d pixel %d %d", cursor.pos_x, cursor.pos_y, cursor.pixel_x, cursor.pixel_y);
+	drawString(screen, 0, screen->h - 20, s);
   }
 
   // draw the balloon timer
@@ -360,8 +363,8 @@ void runMap() {
   }
   // start outside
   if(GOD_MODE) {
-	game.player_start_x = 159;
-	game.player_start_y = 89;
+	game.player_start_x = 211;
+	game.player_start_y = 159;
   } else {
 	game.player_start_x = 20;
 	game.player_start_y = 28;
