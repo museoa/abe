@@ -37,10 +37,10 @@ void showMenu() {
   // handle default runmode
   switch(runmode) {
   case RUNMODE_EDITOR:
-	editMap("default", 1000, 1000);
+	editMap();
 	break;
   case RUNMODE_GAME:
-	runMap("default", 1000, 1000);
+	runMap();
 	break;
   }
   
@@ -62,10 +62,10 @@ void showMenu() {
 	}
 	switch(e) {
 	case EVENT_GAME:
-	  runMap("default", 1000, 1000);
+	  runMap();
 	  break;
 	case EVENT_EDITOR:
-	  editMap("default", 1000, 1000);
+	  editMap();
 	  break;
 	case EVENT_QUIT:
 	  return;

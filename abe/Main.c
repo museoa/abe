@@ -44,8 +44,11 @@ int main(int argc, char *argv[]) {
   int i;
   int width, height, bpp, n;
   int hw_mem = 1;
+  int intro = 0;
+  char *mapname;
+  int mapwidth, mapheight;
 
-  runmode = RUNMODE_SPLASH;
+  runmode = RUNMODE_SPLASH;  
 
   width = 640;
   height = 480;
@@ -63,6 +66,9 @@ int main(int argc, char *argv[]) {
 	  hw_mem = 0;
 	} else if(!strcmp(argv[i], "--editor") || !strcmp(argv[i], "-e")) {
 	  runmode = RUNMODE_EDITOR;
+	} else if(!strcmp(argv[i], "--intro") || !strcmp(argv[i], "-i")) {
+	  runmode = RUNMODE_EDITOR;
+	  intro = 1;
 	} else if(!strcmp(argv[i], "--game") || !strcmp(argv[i], "-g")) {
 	  runmode = RUNMODE_GAME;
 	} else if((!strcmp(argv[i], "--width") || !strcmp(argv[i], "-w")) && i < argc - 1) {
@@ -82,17 +88,29 @@ int main(int argc, char *argv[]) {
 	  exit(0);
 	} else if(!strcmp(argv[i], "--help") || !strcmp(argv[i], "-?") || !strcmp(argv[i], "-h")) {
 	  printf("Abe!! Happy Birthday, 2002\n\n");
-	  printf("-f --fullscreen   Run in fullscreen mode.\n");
-	  printf("-e --editor       Skip the splash screen and run the editor.\n"); 
-	  printf("-g --game         Skip the splash screen and run the game.\n"); 
-	  printf("-t --test         Test video modes only.\n"); 
-	  printf("-s --system       Use system memory instead of video(default) memory.\n");
-	  printf("-w --width #      Use this width for the video mode.\n"); 
-	  printf("-h --height #     Use this height for the video mode.\n"); 
-	  printf("-b --bpp #        Use this bpp for the video mode.\n"); 
-	  printf("-? -h --help      Show this help message.\n");
+	  printf("-f --fullscreen    Run in fullscreen mode.\n");
+	  printf("-e --editor        Skip the splash screen and run the editor.\n"); 
+	  printf("-i --intro mapname Edit intro map.\n");
+	  printf("-g --game          Skip the splash screen and run the game.\n"); 
+	  printf("-t --test          Test video modes only.\n"); 
+	  printf("-s --system        Use system memory instead of video(default) memory.\n");
+	  printf("-w --width #       Use this width for the video mode.\n"); 
+	  printf("-h --height #      Use this height for the video mode.\n"); 
+	  printf("-b --bpp #         Use this bpp for the video mode.\n"); 
+	  printf("-? -h --help       Show this help message.\n");
 	  exit(0);
 	}
+  }
+
+  // the default map
+  if(runmode != RUNMODE_SPLASH && !intro) {
+	mapname = strdup("default");
+	mapwidth = 1000;
+	mapheight = 1000;
+  } else {
+	mapname = strdup("intro");
+	mapwidth = 640 / TILE_W;
+	mapheight = 480 / TILE_H;
   }
 
   if(hw_mem) {
@@ -125,12 +143,7 @@ int main(int argc, char *argv[]) {
 
   initGame();
 
-  if(!initMap("default", 1000, 1000)) {
-	SDL_Quit();
-  }
-
-  if(runmode == RUNMODE_SPLASH) showSplashScreen();  
-  else showMenu();
+  showIntro();
 
   atexit(SDL_Quit);
   

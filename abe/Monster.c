@@ -306,8 +306,8 @@ void initMonsters() {
   // crab monster
   strcpy(monsters[MONSTER_CRAB].name, "dungenous crab");
   monsters[MONSTER_CRAB].moveMonster = moveCrab;
-  monsters[MONSTER_CRAB].start_speed_x = 4;
-  monsters[MONSTER_CRAB].start_speed_y = 4;
+  monsters[MONSTER_CRAB].start_speed_x = 2;
+  monsters[MONSTER_CRAB].start_speed_y = 2;
   // animation 2x slower
   monsters[MONSTER_CRAB].face_mod = 2;
 

@@ -33,7 +33,7 @@ typedef struct _game {
 Game game;
 
 void initGame();
-void runMap(char *name, int w, int h);
+void runMap();
 void gameMainLoop(SDL_Event *event);
 
 #endif

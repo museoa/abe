@@ -16,7 +16,6 @@ void saveMap() {
 	err = strerror(errno);
 	fprintf(stderr, "Can't open file for writing: %s\n", err);
 	fflush(stderr);
-	free(err);
 	return;
   }
   // write the header
@@ -53,7 +52,6 @@ int loadMap(int draw_map) {
 	err = strerror(errno);
 	fprintf(stderr, "Can't open file for reading: %s\n", err);
 	fflush(stderr);
-	free(err);
 	return 0;
   }
   // read the header

@@ -17,7 +17,7 @@ EditPanel edit_panel;
 Cursor editor_cursor;
 
 void initEditor();
-void editMap(char *name, int w, int h);
+void editMap();
 void editorMainLoop(SDL_Event *event);
 void drawEditPanel();
 

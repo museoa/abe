@@ -278,13 +278,13 @@ int detectLadder() {
   return containsType(&pos, TYPE_LADDER);
 }
 
-void runMap(char *name, int w, int h) {
+void runMap() {
   resetMap();
   resetMonsters();
 
   // try to load the map and quit if you can't find it.
   if(!loadMap(0)) {
-	fprintf(stderr, "Can't find map file: %s\n", name);
+	fprintf(stderr, "Can't find map file: %s\n", map.name);
 	fflush(stderr);
 	return;
   }

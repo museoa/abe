@@ -4,5 +4,6 @@
 #include "Main.h"
 
 void showSplashScreen();
+void showIntro();
 
 #endif

@@ -280,7 +280,7 @@ void initEditor() {
   editor_cursor.pos_x = editor_cursor.pos_y = 0;
 }
 
-void editMap(char *name, int w, int h) {
+void editMap() {
   int level, i, x, y;
   int step_x, step_y;
   Image *img;

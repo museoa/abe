@@ -53,7 +53,7 @@ void doLoadImage(char *filename, char *name) {
 	tom[7] = image;
   } else {
 	// a primitive hashtable
-	if(!strcmp(name, "brick")) {
+	if(!strcmp(name, "brick2")) {
 	  img_brick = image_count;
 	} else if(!strcmp(name, "rock")) {
 	  img_rock = image_count;

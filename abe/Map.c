@@ -89,8 +89,8 @@ void drawMap() {
 	  SDL_FillRect(map.level[level], &pos, SDL_MapRGBA(screen->format, 0x0, 0x0, 0x0, 0x00));
 	}
 
-	for(y = params.start_y; y <= params.end_y && params.end_y < map.h; y++) {
-	  for(x = params.start_x; x <= params.end_x && params.end_x < map.w;) {
+	for(y = params.start_y; y < params.end_y; y++) {
+	  for(x = params.start_x; x < params.end_x;) {
 		n = map.image_index[level][x + (y * map.w)];
 		if(map.monsters) {
 		  m = isMonsterImage(n);
@@ -296,7 +296,7 @@ void drawMapRightEdge() {
 	for(y = params.start_y; y < params.end_y; y++) {
 	  // here we have to draw more than 1 column b/c images
 	  // extend from right_edge-EXTRA_X on. 
-	  for(x = params.end_x - EXTRA_X; x <= params.end_x;) {
+	  for(x = params.end_x - EXTRA_X; x <= params.end_x;) { // FIXME: this may be x < params.end_x
 		if(params.end_x >= map.w) break;
 		n = (map.image_index[level][x + (y * map.w)]);
 		if(map.monsters) {
@@ -363,7 +363,7 @@ void drawMapBottomEdge() {
   for(level = LEVEL_BACK; level < LEVEL_COUNT; level++) {
 	// here we have to draw more than 1 column b/c images
 	// extend from right_edge-EXTRA_X on. 
-	for(y = params.end_y - EXTRA_Y; y <= params.end_y; y++) {
+	for(y = params.end_y - EXTRA_Y; y <= params.end_y; y++) { // FIXME: this may be y < params.end_y
 	  if(params.end_y >= map.h) break;
 	  for(x = params.start_x; x < params.end_x;) {
 		n = (map.image_index[level][x + (y * map.w)]);
