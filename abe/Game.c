@@ -34,6 +34,8 @@ void gameBeforeDrawToScreen() {
   drawString(screen, 5, 5 + FONT_HEIGHT, s);
   sprintf(s, "spx%d spy%d", cursor.speed_x, cursor.speed_y);
   drawString(screen, 5, 5 + FONT_HEIGHT * 2, s);
+  sprintf(s, "dir%d", cursor.dir);
+  drawString(screen, 5, 5 + FONT_HEIGHT * 3, s);
 }
 
 /**
@@ -47,16 +49,24 @@ void gameMainLoop(SDL_Event *event) {
 	case SDLK_LEFT: 
 	  game.dir = GAME_DIR_LEFT;
 	  cursor.dir = DIR_LEFT;
+ 	  cursor.speed_x = START_SPEED_X;
+	  //	  cursor.wait = 1;
 	  break;
 	case SDLK_RIGHT: 
 	  game.dir = GAME_DIR_RIGHT;
 	  cursor.dir = DIR_RIGHT;
+ 	  cursor.speed_x = START_SPEED_X;
+	  //	  cursor.wait = 1;
 	  break;
 	case SDLK_UP: 
 	  cursor.dir = DIR_UP;
+	  cursor.speed_y = START_SPEED_Y;
+	  //	  cursor.wait = 1;
 	  break;
 	case SDLK_DOWN: 
 	  cursor.dir = DIR_DOWN; 
+	  cursor.speed_y = START_SPEED_Y;
+	  //	  cursor.wait = 1;
 	  break;
 	case SDLK_r: 
 	  drawMap();
@@ -109,25 +119,20 @@ GameCollisionCheck getGameCollisionCheck() {
   return check;
 }
 
-// return a 1 to proceed, 0 to stop
-int detectCollision(int dir) {
-  int x, y, n;
-  GameCollisionCheck check = getGameCollisionCheck();
-  int ret = 1;
+int containsType(GameCollisionCheck *check, int type) {
   SDL_Rect rect;
-  // are we in a wall?
-  for(y = check.start_y; y < check.end_y; y++) {
-	for(x = check.start_x; x < check.end_x;) {
+  int x, y, n;
+  for(y = check->start_y; y < check->end_y; y++) {
+	for(x = check->start_x; x < check->end_x;) {
 	  n = map.image_index[LEVEL_MAIN][x + (y * map.w)];
 	  if(n > -1) {
-		if(images[n]->type == TYPE_WALL) {
+		if(images[n]->type == type) {
 		  rect.x = x;
 		  rect.y = y;
 		  rect.w = images[n]->image->w / TILE_W;
 		  rect.h = images[n]->image->h / TILE_H;
-		  if(intersects(&rect, &check.rect)) {
-			ret = 0;
-			break;
+		  if(intersects(&rect, &check->rect)) {
+			return 1;
 		  }
 		}
 		x += images[n]->image->w / TILE_W;
@@ -135,9 +140,28 @@ int detectCollision(int dir) {
 		x++;
 	  }
 	}
-	if(!ret) break;
   }
+  return 0;
+}
+
+// return a 1 to proceed, 0 to stop
+int detectCollision(int dir) {
+  GameCollisionCheck check = getGameCollisionCheck();
+  int ret = 1;
+  // are we in a wall?
+  ret = !containsType(&check, TYPE_WALL);
   return ret;
+}
+
+int detectLadder() {
+  GameCollisionCheck check = getGameCollisionCheck();
+  // are we smack on top of a ladder?
+  if(cursor.pixel_y == 0) {
+	check.end_y++;
+	if(check.end_y >= map.h) check.end_y = map.h;
+	check.rect.h++;
+  }
+  return containsType(&check, TYPE_LADDER);
 }
 
 void runMap(char *name, int w, int h) {
@@ -148,8 +172,8 @@ void runMap(char *name, int w, int h) {
 	fflush(stderr);
 	exit(0);
   }
-  cursor.pos_x = 30;
-  cursor.pos_y = 16;
+  cursor.pos_x = 20;
+  cursor.pos_y = 28;
   cursor.speed_x = 8;
   cursor.speed_y = 8;
   drawMap();
@@ -157,6 +181,7 @@ void runMap(char *name, int w, int h) {
   map.beforeDrawToScreen = gameBeforeDrawToScreen;
   map.afterMainLevelDrawn = afterMainLevelDrawn;
   map.detectCollision = detectCollision;
+  map.detectLadder = detectLadder;
   // add our event handling
   map.handleMapEvent = gameMainLoop;
   // activate gravity and accelerated movement

@@ -55,6 +55,7 @@ typedef struct _map {
   void (*beforeDrawToScreen)();
   void (*afterMainLevelDrawn)();
   int (*detectCollision) (int);
+  int (*detectLadder) ();
   void (*handleMapEvent) (SDL_Event*);
   int accelerate; // 1 for accelerated movement, 0 otherwise
   int gravity; // 1 for gravity, 0 otherwise(default)
@@ -67,6 +68,8 @@ typedef struct _cursor {
   int dir;
   int wait;
   int jump;
+  int gravity;
+  int stepup;
 } Cursor;
 
 Cursor cursor;
