@@ -46,8 +46,8 @@ void getMapDrawParams(MapDrawParams *params) {
 
   params->start_x = cursor.pos_x - screen_center_x;
   params->start_y = cursor.pos_y - screen_center_y;
-  params->end_x = params->start_x + screen_w; 
-  params->end_y = params->start_y + screen_h;
+  params->end_x = params->start_x + screen_w + 1; 
+  params->end_y = params->start_y + screen_h + 1;
 
   params->offset_x = 0;
   params->offset_y = 0;

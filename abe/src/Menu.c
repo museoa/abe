@@ -198,12 +198,12 @@ void paintAboutScreen() {
 
 
   drawString(screen, 50, 10 + FONT_HEIGHT * 2, "long years have passed since his");
-  drawString(screen, 50, 10 + FONT_HEIGHT * 3, "mentor disappeared");
+  drawString(screen, 50, 10 + FONT_HEIGHT * 3, "friend disappeared");
 
   drawString(screen, 50, 10 + FONT_HEIGHT * 5, "now abe braves the deadly twisting");  
   drawString(screen, 50, 10 + FONT_HEIGHT * 6, "passages of the great pyramid!");  
 
-  drawString(screen, 50, 10 + FONT_HEIGHT * 8, "he seeks to free his mentor and");
+  drawString(screen, 50, 10 + FONT_HEIGHT * 8, "he seeks to free his friend and");
   drawString(screen, 50, 10 + FONT_HEIGHT * 9, "uncover the mystery of the depths");
 
   pos.x = screen->w / 2 - (tom[0]->w / 2);

@@ -496,8 +496,9 @@ void drawSmasher(SDL_Rect *pos, LiveMonster *live, SDL_Surface *surface, SDL_Sur
 	position.pos_y--;	
   }
   // draw the top one.
-  // HACK part 1: if y is 0 the image was cropped, don't draw
-  if(y && live->pixel_y) {
+  // HACK part 2: if y is 0 the image was cropped, don't draw
+  //  if(y && live->pixel_y) {
+  if(live->pixel_y) {
 	p.x = pos->x;
 	p.y += TILE_H;
 	p.y -= live->pixel_y;

@@ -217,7 +217,7 @@ void gameBeforeDrawToScreen() {
 
   if(game.end_game) {
 	drawString(screen, 50, 10 + FONT_HEIGHT * 6, "success!!!");
-	drawString(screen, 50, 10 + FONT_HEIGHT * 7, "abe rescued his mentor");
+	drawString(screen, 50, 10 + FONT_HEIGHT * 7, "abe rescued his friend");
 	drawString(screen, 50, 10 + FONT_HEIGHT * 8, "from the cavernous prison of");  
 	drawString(screen, 50, 10 + FONT_HEIGHT * 9, "the great pyramid!");  
 	drawString(screen, screen->w / 2 - 100, screen->h - 30, "press escape");  
